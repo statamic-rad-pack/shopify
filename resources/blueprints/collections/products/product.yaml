@@ -1,0 +1,87 @@
+title: Product
+sections:
+  main:
+    display: Main
+    fields:
+      -
+        handle: title
+        field:
+          type: text
+          required: true
+          validate:
+            - required
+      -
+        handle: content
+        field:
+          always_show_set_button: false
+          buttons:
+            - h2
+            - h3
+            - bold
+            - italic
+            - unorderedlist
+            - orderedlist
+            - removeformat
+            - quote
+            - anchor
+            - image
+            - table
+          save_html: true
+          toolbar_mode: fixed
+          link_noopener: false
+          link_noreferrer: false
+          target_blank: false
+          reading_time: false
+          fullscreen: true
+          allow_source: true
+          display: Content
+          type: bard
+          icon: bard
+          listable: hidden
+  sidebar:
+    display: Sidebar
+    fields:
+      -
+        handle: slug
+        field:
+          type: slug
+          required: true
+          localizable: true
+          validate:
+            - required
+      -
+        handle: published_at
+        field:
+          mode: single
+          time_enabled: true
+          time_required: true
+          earliest_date: '1900-01-01'
+          full_width: false
+          inline: false
+          columns: 1
+          rows: 1
+          display: 'Published At'
+          type: date
+          icon: date
+          listable: true
+          format: 'Y-m-d H:i:s'
+      -
+        handle: shopify_id
+        field:
+          display: 'Shopify ID'
+          type: hidden
+          icon: hidden
+          listable: hidden
+  media:
+    display: Media
+    fields:
+      -
+        handle: assets
+        field:
+          mode: grid
+          restrict: false
+          allow_uploads: true
+          display: Assets
+          type: assets
+          icon: assets
+          listable: hidden
