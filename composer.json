@@ -1,5 +1,5 @@
 {
-    "name": "jackabox/statamic-shopify",
+    "name": "jackabox/shopify",
     "description": "A Shopify Addon for Statamic",
     "autoload": {
         "psr-4": {
@@ -19,8 +19,8 @@
     },
     "extra": {
         "statamic": {
-            "name": "Shopify Integration",
-            "description": "Integrate Shopify easily into your Statamic site"
+            "name": "Shopify",
+            "description": "Shopify Addon for Statamic"
         },
         "laravel": {
             "providers": [

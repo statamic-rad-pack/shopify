@@ -19,6 +19,6 @@ class ShopifyScripts extends Tags
 
     public function scripts()
     {
-        return '<script src="' . public_path('/vendor/shopify/js/shopify.js'). '"></script>';
+        return '<script src="' . url('/vendor/shopify/js/statamic-shopify-front.js'). '"></script>';
     }
 }
