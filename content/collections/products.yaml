@@ -1,4 +1,8 @@
 title: Products
+taxonomies:
+  - vendor
+  - product_type
+  - product_tags
 revisions: false
 date_behavior:
   past: public

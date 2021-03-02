@@ -1,0 +1,6 @@
+title: Variants
+revisions: false
+sort_dir: asc
+date_behavior:
+  past: public
+  future: private
