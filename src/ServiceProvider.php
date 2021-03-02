@@ -16,7 +16,8 @@ class ServiceProvider extends AddonServiceProvider
     ];
 
     protected $fieldtypes = [
-        \Jackabox\Shopify\Fieldtypes\Variants::class
+        \Jackabox\Shopify\Fieldtypes\Variants::class,
+        \Jackabox\Shopify\Fieldtypes\DisabledText::class,
     ];
 
     protected $scripts = [

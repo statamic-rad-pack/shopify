@@ -105,3 +105,10 @@ sections:
           type: hidden
           icon: hidden
           listable: hidden
+      -
+        handle: product_id
+        field:
+          display: 'Product ID'
+          type: disabled_text
+          icon: disabled_text
+          listable: hidden

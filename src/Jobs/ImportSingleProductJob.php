@@ -53,7 +53,7 @@ class ImportSingleProductJob implements ShouldQueue
         }
 
         $data = [
-            'shopify_id' => $this->data['id'],
+            'product_id' => $this->data['id'],
             'title' => $this->data['title'],
             'content' => $this->data['body_html'],
             'vendor' => $this->data['vendor'],
