@@ -46,8 +46,6 @@ class ImportSingleProductJob implements ShouldQueue
             ->where('slug', $this->slug)
             ->first();
 
-        ray($this->data['tags'] ? explode(', ', $this->data['tags']) : null);
-
         $data = [
             'product_id' => $this->data['id'],
             'title' => $this->data['title'],
@@ -62,12 +60,17 @@ class ImportSingleProductJob implements ShouldQueue
                 ->collection('products')
                 ->slug($this->data['handle']);
 
-            $newEntryData = [
+            $additionalData = [
                 'content' => $this->data['body_html']
             ];
-
-            $data = array_merge($newEntryData, $data);
+        } else {
+            $additionalData = [
+                'content' => $entry->content
+            ];
         }
+
+        // Merge stuff together
+        $data = array_merge($additionalData, $data);
 
         // Import Variant
         $this->importVariants($this->data['variants'], $this->data['handle']);

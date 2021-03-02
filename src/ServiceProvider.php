@@ -45,7 +45,7 @@ class ServiceProvider extends AddonServiceProvider
             $this->publishes([
                 __DIR__.'/../dist/js/statamic-shopify-front.js' => public_path('vendor/shopify/js/statamic-shopify-front.js'),
             ], 'shopify-assets');
-            
+
             $this->publishes([
                 __DIR__.'/../content/assets' => base_path('content/assets'),
                 __DIR__.'/../content/collections' => base_path('content/collections'),
