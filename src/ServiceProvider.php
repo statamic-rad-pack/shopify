@@ -2,6 +2,7 @@
 
 namespace Jackabox\Shopify;
 
+use Statamic\Facades\Collection;
 use Statamic\Facades\CP\Nav;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
@@ -65,6 +66,19 @@ class ServiceProvider extends AddonServiceProvider
                 ->icon('drawer-file')
                 ->section('Shopify')
                 ->route('shopify.index');
+
+            // Hide the variants from the nav bar.
+            // TODO: Is there a way to hide this all together?
+            $nav->content('Collections')
+                ->children(function () {
+                    return Collection::all()->sortBy->title()->filter(function ($item) {
+                        return $item->handle() !== 'variants';
+                    })->map(function ($collection) {
+                        return Nav::item($collection->title())
+                            ->url($collection->showUrl())
+                            ->can('view', $collection);
+                    });
+                });
         });
     }
 
