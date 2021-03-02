@@ -32,8 +32,6 @@ class ImportSingleProductJob implements ShouldQueue
 
     public function handle()
     {
-        ray($this->data);
-
         $entry = Entry::query()
             ->where('collection', 'products')
             ->where('slug', $this->slug)
@@ -53,13 +51,55 @@ class ImportSingleProductJob implements ShouldQueue
             'published_at' => Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s')
         ])->save();
 
+        $this->importVariants($this->data['variants'], $this->data['handle']);
+
+        // TODO: Lets link this to the product
         $this->importImages($this->data['image']);
 
+        // TODO: Lets link this to the variant
         foreach ($this->data['images'] as $image) {
             $this->importImages($image);
         }
     }
 
+    /**
+     * @param array $variants
+     * @param string $product_slug
+     */
+    private function importVariants(array $variants, string $product_slug)
+    {
+        foreach ($variants as $variant) {
+            $entry = Entry::query()
+                ->where('collection', 'variants')
+                ->where('slug', $variant['id'])
+                ->first();
+
+            if (! $entry) {
+                $entry = Entry::make()
+                    ->collection('variants')
+                    ->slug($variant['id']);
+            }
+
+            $entry->data([
+                'variant_id' => $variant['id'],
+                'product_slug' => $product_slug,
+                'title' => $variant['title'],
+                'inventory_quantity' => $variant['inventory_quantity'],
+                'price' => $variant['price'],
+                'sku' => $variant['sku'],
+                'grams' => $variant['grams'],
+                'requires_shipping' => $variant['requires_shipping'],
+                'option1' => $variant['option1'],
+                'option2' => $variant['option2'],
+                'option3' => $variant['option3'],
+            ])->save();
+        }
+    }
+
+    /**
+     * @param array $image
+     * @return mixed
+     */
     private function importImages(array $image) {
         $url = $this->cleanImageURL($image['src']);
         $name = $this->getImageNameFromUrl($url);
