@@ -1,17 +1,29 @@
 <template>
     <div class="flex">
-        <section class="flex-grow">
-            <table class="data-table">
-                <tr v-for="(variant, index) in variants" :key="index">
-                    <td>
-                        <a href="">{{ variant.title }}</a>
-                        <dropdown-item
-                            :text="__('Edit')"
-                            @click="openEditVariantStack(variant)"
-                        ></dropdown-item>
-                    </td>
-                </tr>
+        <section class="flex-grow border rounded">
+            <table class="data-table" v-if="variants">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(variant, index) in variants" :key="index" class="cursor-pointer" @click="openEditVariantStack(variant)">
+                        <td class="text-base">
+                            {{ variant.title }}
+                        </td>
+                        <td class="text-sm">
+                            {{ currencyFormat(variant.price) }}
+                        </td>
+                        <td class="text-sm">
+                            {{ variant.inventory_quantity }}
+                        </td>
+                    </tr>
+                </tbody>
             </table>
+            <p v-else class="text-sm">To get started, add some variants to products in Shopify.</p>
         </section>
 
         <variant-form
@@ -65,6 +77,7 @@ export default {
             axios.get(this.variantIndexRoute)
                 .then(res => this.variants = res.data)
                 .catch(error => this.$toast.error(error))
+
         },
 
         openEditVariantStack(variant) {
@@ -78,6 +91,10 @@ export default {
             this.fetch()
             this.showVariantStack = false
         },
+
+        currencyFormat(price) {
+            return parseFloat(price).toFixed(2);
+        }
     }
 }
 </script>

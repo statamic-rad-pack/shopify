@@ -2202,6 +2202,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -2252,6 +2264,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         closeVariantStack: function closeVariantStack() {
             this.fetch();
             this.showVariantStack = false;
+        },
+        currencyFormat: function currencyFormat(price) {
+            return parseFloat(price).toFixed(2);
         }
     }
 });
@@ -2271,34 +2286,60 @@ var render = function() {
     "div",
     { staticClass: "flex" },
     [
-      _c("section", { staticClass: "flex-grow" }, [
-        _c(
-          "table",
-          { staticClass: "data-table" },
-          _vm._l(_vm.variants, function(variant, index) {
-            return _c("tr", { key: index }, [
+      _c("section", { staticClass: "flex-grow border rounded" }, [
+        _vm.variants
+          ? _c("table", { staticClass: "data-table" }, [
+              _vm._m(0),
+              _vm._v(" "),
               _c(
-                "td",
-                [
-                  _c("a", { attrs: { href: "" } }, [
-                    _vm._v(_vm._s(variant.title))
-                  ]),
-                  _vm._v(" "),
-                  _c("dropdown-item", {
-                    attrs: { text: _vm.__("Edit") },
-                    on: {
-                      click: function($event) {
-                        return _vm.openEditVariantStack(variant)
+                "tbody",
+                _vm._l(_vm.variants, function(variant, index) {
+                  return _c(
+                    "tr",
+                    {
+                      key: index,
+                      staticClass: "cursor-pointer",
+                      on: {
+                        click: function($event) {
+                          return _vm.openEditVariantStack(variant)
+                        }
                       }
-                    }
-                  })
-                ],
-                1
+                    },
+                    [
+                      _c("td", { staticClass: "text-base" }, [
+                        _vm._v(
+                          "\n                        " +
+                            _vm._s(variant.title) +
+                            "\n                    "
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-sm" }, [
+                        _vm._v(
+                          "\n                        " +
+                            _vm._s(_vm.currencyFormat(variant.price)) +
+                            "\n                    "
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-sm" }, [
+                        _vm._v(
+                          "\n                        " +
+                            _vm._s(variant.inventory_quantity) +
+                            "\n                    "
+                        )
+                      ])
+                    ]
+                  )
+                }),
+                0
               )
             ])
-          }),
-          0
-        )
+          : _c("p", { staticClass: "text-sm" }, [
+              _vm._v(
+                "To get started, add some variants to products in Shopify."
+              )
+            ])
       ]),
       _vm._v(" "),
       _vm.showVariantStack
@@ -2324,7 +2365,22 @@ var render = function() {
     1
   )
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th", [_vm._v("Title")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Price")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Stock")])
+      ])
+    ])
+  }
+]
 render._withStripped = true
 module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {
