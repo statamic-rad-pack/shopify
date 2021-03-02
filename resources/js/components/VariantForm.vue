@@ -38,6 +38,7 @@ export default {
         close() {
             this.$emit('closed', true)
         },
+
         saved() {
             this.$emit('saved', true)
         }

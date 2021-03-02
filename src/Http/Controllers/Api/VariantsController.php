@@ -20,12 +20,14 @@ class VariantsController extends CpController
             ->map(function ($variant) {
                 $values = [];
                 $values['id'] = $variant->id();
+                $values['slug'] = $variant->slug();
 
                 // Map all variant values to data to ensure we are getting everything.
                 foreach ($variant->data() as $key => $value) {
                     $values[$key] = $value;
                 }
 
+                ray($values);
                 return $values;
             });
     }
@@ -45,9 +47,13 @@ class VariantsController extends CpController
         $fields->validate();
         $values = $fields->process()->values()->toArray();
 
+        ray($values);
+
         // Find and update the entry
         $variant = Entry::find($request->id);
         $variant->data($values);
+
+        ray($variant);
         $variant->save();
     }
 }

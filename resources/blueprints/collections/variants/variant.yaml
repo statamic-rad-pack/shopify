@@ -1,4 +1,5 @@
-title: Variants
+hide: true
+title: Variant
 sections:
   main:
     display: Main
@@ -10,3 +11,84 @@ sections:
           required: true
           validate:
             - required
+      -
+        handle: product_slug
+        field:
+          input_type: text
+          antlers: false
+          display: 'Product Slug'
+          type: text
+          icon: text
+          listable: hidden
+      -
+        handle: requires_shipping
+        field:
+          display: 'Requires Shipping'
+          type: toggle
+          icon: toggle
+          listable: hidden
+      -
+        handle: price
+        field:
+          display: Price
+          type: float
+          icon: float
+          listable: hidden
+          validate:
+            - required
+      -
+        handle: inventory_quantity
+        field:
+          input_type: number
+          antlers: false
+          display: 'Inventory Quantity'
+          type: text
+          icon: text
+          listable: hidden
+          validate:
+            - nullable
+            - numeric
+      -
+        handle: variant_id
+        field:
+          input_type: text
+          antlers: false
+          display: 'Variant ID'
+          type: text
+          icon: text
+          listable: hidden
+          validate:
+            - required
+      -
+        handle: checkboxes
+        field:
+          inline: false
+          options:
+            test: null
+          display: Checkboxes
+          type: checkboxes
+          icon: checkboxes
+          listable: hidden
+  sidebar:
+    display: Sidebar
+    fields:
+      -
+        handle: slug
+        field:
+          type: slug
+          required: true
+          localizable: true
+          validate:
+            - required
+      -
+        handle: variant_image
+        field:
+          mode: grid
+          container: shopify
+          restrict: true
+          allow_uploads: true
+          max_files: 1
+          display: 'Variant Image'
+          type: assets
+          icon: assets
+          listable: hidden

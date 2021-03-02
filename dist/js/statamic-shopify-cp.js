@@ -2257,6 +2257,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         openEditVariantStack: function openEditVariantStack(variant) {
             this.stackValues = variant;
+            console.table(this.stackValues);
             this.stackAction = this.action + '/' + variant.id;
             this.stackMethod = 'patch';
             this.showVariantStack = true;

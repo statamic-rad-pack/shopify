@@ -24,12 +24,21 @@ class ImportSingleProductJob implements ShouldQueue
     /** @var array */
     public $data;
 
+    /**
+     * ImportSingleProductJob constructor.
+     *
+     * @param array $data
+     * @param string|null $handle
+     */
     public function __construct(array $data, string $handle = null)
     {
         $this->data = $data;
         $this->slug = $handle ? $handle : $data['handle'];
     }
 
+    /**
+     *
+     */
     public function handle()
     {
         $entry = Entry::query()
@@ -43,23 +52,28 @@ class ImportSingleProductJob implements ShouldQueue
                 ->slug($this->data['handle']);
         }
 
-        $entry->data([
+        $data = [
             'shopify_id' => $this->data['id'],
             'title' => $this->data['title'],
             'content' => $this->data['body_html'],
             'vendor' => $this->data['vendor'],
             'published_at' => Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s')
-        ])->save();
+        ];
 
+        // Import Variant
         $this->importVariants($this->data['variants'], $this->data['handle']);
 
-        // TODO: Lets link this to the product
-        $this->importImages($this->data['image']);
+        // Import Images
+        $asset = $this->importImages($this->data['image']);
+        $data['featured_image'] = $asset->path();
 
-        // TODO: Lets link this to the variant
+        // TODO: Wrap this in a conditional if they want it.
         foreach ($this->data['images'] as $image) {
-            $this->importImages($image);
+            $asset = $this->importImages($image);
+            $data['gallery'][] = $asset->path();
         }
+
+        $entry->data($data)->save();
     }
 
     /**
@@ -97,6 +111,28 @@ class ImportSingleProductJob implements ShouldQueue
     }
 
     /**
+     * TODO: Look into this one.
+     * Not implemented due to issues with stack and saving images.
+     * Currently images are all stored on the defalt product as a gallery.
+     *
+     * @param $variant
+     */
+    private function importImagesToVariant($variant)
+    {
+        $images = collect($this->data['images']);
+
+        $variant_image = $images->filter(function ($item) use ($variant) {
+            return in_array($variant['id'], $item['variant_ids']);
+        })->first();
+
+        if ($variant_image) {
+            $asset = $this->importImages($variant_image);
+        }
+    }
+
+    /**
+     * TODO: check the container is the one we want from the config
+     *
      * @param array $image
      * @return mixed
      */
@@ -105,6 +141,7 @@ class ImportSingleProductJob implements ShouldQueue
         $name = $this->getImageNameFromUrl($url);
         $file = $this->uploadFakeFileFromUrl($name, $url);
 
+        // Check if it exists first - no point double importing.
         $asset = Asset::query()
             ->where('container', 'shopify')
             ->where('path', 'Shopify/' . $name)
@@ -114,6 +151,7 @@ class ImportSingleProductJob implements ShouldQueue
             return $asset->hydrate();
         }
 
+        // If it doesn't exists, let's make it exist.
         $asset = Asset::make()
             ->container('shopify')
             ->path($this->getPath($file));
@@ -126,16 +164,35 @@ class ImportSingleProductJob implements ShouldQueue
         return $asset;
     }
 
+    /**
+     * Clean up any query params ont he end of the URL.
+     *
+     * @param string $url
+     * @return string
+     */
     private function cleanImageURL(string $url): string
     {
         return strtok($url, '?');
     }
 
+    /**
+     * Grab the image name from the file.
+     *
+     * @param string $url
+     * @return string
+     */
     private function getImageNameFromUrl(string $url): string
     {
         return substr($url, strrpos($url, '/') + 1);
     }
 
+    /**
+     * Make a fake file so Statamic can interpert the data we need.
+     *
+     * @param string $name
+     * @param string $url
+     * @return UploadedFile
+     */
     public function uploadFakeFileFromUrl(string $name, string $url): UploadedFile
     {
         Storage::disk('local')->put($name, file_get_contents($url));
@@ -143,11 +200,24 @@ class ImportSingleProductJob implements ShouldQueue
         return new UploadedFile(realpath(storage_path("app/$name")), $name);
     }
 
+    /**
+     * Remove the fake file as we don't need it lingering around.
+     *
+     * @param string $name
+     */
     private function cleanupFakeFile(string $name): void
     {
         Storage::disk('local')->delete($name);
     }
 
+    /**
+     * TODO: let's make asset container variable.
+     *
+     * Get the path to upload to based on name/params.
+     *
+     * @param UploadedFile $file
+     * @return String
+     */
     private function getPath(UploadedFile $file): String
     {
         return Path::assemble('Shopify/', $file->getClientOriginalName());

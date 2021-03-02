@@ -82,6 +82,7 @@ export default {
 
         openEditVariantStack(variant) {
             this.stackValues = variant
+            console.table(this.stackValues)
             this.stackAction = `${this.action}/${variant.id}`
             this.stackMethod = 'patch'
             this.showVariantStack = true
