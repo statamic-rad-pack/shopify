@@ -38,6 +38,24 @@ sections:
           type: bard
           icon: bard
           listable: hidden
+      -
+        handle: variants
+        field:
+          display: Variants
+          type: variants
+          icon: tags
+          listable: hidden
+      -
+        handle: gallery
+        field:
+          mode: grid
+          restrict: false
+          allow_uploads: true
+          display: Gallery
+          type: assets
+          icon: assets
+          listable: hidden
+          container: shopify
   sidebar:
     display: Sidebar
     fields:
@@ -49,6 +67,9 @@ sections:
           localizable: true
           validate:
             - required
+          display: Slug
+          listable: hidden
+          generate: true
       -
         handle: published_at
         field:
@@ -66,22 +87,21 @@ sections:
           listable: true
           format: 'Y-m-d H:i:s'
       -
+        handle: featured_image
+        field:
+          mode: grid
+          restrict: false
+          allow_uploads: true
+          display: 'Featured Image'
+          type: assets
+          icon: assets
+          listable: hidden
+          container: shopify
+          max_files: 1
+      -
         handle: shopify_id
         field:
           display: 'Shopify ID'
           type: hidden
           icon: hidden
-          listable: hidden
-  media:
-    display: Media
-    fields:
-      -
-        handle: assets
-        field:
-          mode: grid
-          restrict: false
-          allow_uploads: true
-          display: Assets
-          type: assets
-          icon: assets
           listable: hidden
