@@ -8,28 +8,13 @@ class VariantBlueprint extends Blueprint
 {
     public function __invoke()
     {
-        return StatamicBlueprint::make()->setContents([
-            'sections' => [
-                'main' => [
-                    'fields' => [
-                        [
-                            'handle' => 'variant_id',
-                            'field' => [
-                                'type' => 'hidden',
-                                'width' => 100
-                            ]
-                        ], [
-                            'handle' => 'name',
-                            'field'  => [
-                                'type'       => 'text',
-                                'width'      => 75,
-                                'display'    => 'Name',
-                                'validate'   => 'required',
-                            ],
-                        ],
-                    ]
-                ]
-            ]
-        ]);
+        $bp = StatamicBlueprint::find('collections/variants/variant');
+
+        if (! $bp) {
+            // TODO: THROW PROPER ERROR
+            return 'No variant data found';
+        }
+
+        return $bp;
     }
 }

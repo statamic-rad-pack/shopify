@@ -32,6 +32,8 @@ class ImportSingleProductJob implements ShouldQueue
 
     public function handle()
     {
+        ray($this->data);
+
         $entry = Entry::query()
             ->where('collection', 'products')
             ->where('slug', $this->slug)
