@@ -82,6 +82,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_shopify_buy___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_shopify_buy__);
 
 
+console.log(window.shopifyDomain);
+console.log(window.shopifyToken);
+
+var client = __WEBPACK_IMPORTED_MODULE_0_shopify_buy___default.a.buildClient({
+    domain: window.shopifyDomain,
+    storefrontAccessToken: window.shopifyToken
+});
+
+console.log(client);
+
 /***/ }),
 
 /***/ 36:
