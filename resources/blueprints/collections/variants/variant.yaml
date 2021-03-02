@@ -4,6 +4,14 @@ sections:
   main:
     display: Main
     fields:
+      - handle: slug
+        field:
+          type: slug
+          required: true
+          localizable: true
+          display: 'Variant ID'
+          validate:
+            - required
       -
         handle: title
         field:
@@ -48,47 +56,3 @@ sections:
           validate:
             - nullable
             - numeric
-      -
-        handle: variant_id
-        field:
-          input_type: text
-          antlers: false
-          display: 'Variant ID'
-          type: text
-          icon: text
-          listable: hidden
-          validate:
-            - required
-      -
-        handle: checkboxes
-        field:
-          inline: false
-          options:
-            test: null
-          display: Checkboxes
-          type: checkboxes
-          icon: checkboxes
-          listable: hidden
-  sidebar:
-    display: Sidebar
-    fields:
-      -
-        handle: slug
-        field:
-          type: slug
-          required: true
-          localizable: true
-          validate:
-            - required
-      -
-        handle: variant_image
-        field:
-          mode: grid
-          container: shopify
-          restrict: true
-          allow_uploads: true
-          max_files: 1
-          display: 'Variant Image'
-          type: assets
-          icon: assets
-          listable: hidden
