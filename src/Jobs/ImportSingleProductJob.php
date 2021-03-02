@@ -46,19 +46,28 @@ class ImportSingleProductJob implements ShouldQueue
             ->where('slug', $this->slug)
             ->first();
 
-        if (!$entry) {
-            $entry = Entry::make()
-                ->collection('products')
-                ->slug($this->data['handle']);
-        }
+        ray($this->data['tags'] ? explode(', ', $this->data['tags']) : null);
 
         $data = [
             'product_id' => $this->data['id'],
             'title' => $this->data['title'],
-            'content' => $this->data['body_html'],
             'vendor' => $this->data['vendor'],
+            'product_type' => $this->data['product_type'],
+            'product_tags' => $this->data['tags'] ? explode(', ', $this->data['tags']) : null,
             'published_at' => Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s')
         ];
+
+        if (!$entry) {
+            $entry = Entry::make()
+                ->collection('products')
+                ->slug($this->data['handle']);
+
+            $newEntryData = [
+                'content' => $this->data['body_html']
+            ];
+
+            $data = array_merge($newEntryData, $data);
+        }
 
         // Import Variant
         $this->importVariants($this->data['variants'], $this->data['handle']);
