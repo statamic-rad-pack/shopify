@@ -32,6 +32,11 @@ class ServiceProvider extends AddonServiceProvider
         \Jackabox\Shopify\Scopes\VariantByProduct::class
     ];
 
+    protected $commands = [
+        \Jackabox\Shopify\Commands\ShopifyImportProducts::class,
+        \Jackabox\Shopify\Commands\ShopifyImportSingleProduct::class,
+    ];
+
     public function boot()
     {
         parent::boot();
