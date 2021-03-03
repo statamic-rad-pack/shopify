@@ -3,7 +3,6 @@
 namespace Jackabox\Shopify\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
-use Jackabox\Shopify\Blueprints\VariantBlueprint;
 use Statamic\Facades\Entry;
 use Statamic\Http\Controllers\CP\CpController;
 
