@@ -28,6 +28,10 @@ class ServiceProvider extends AddonServiceProvider
         \Jackabox\Shopify\Tags\ShopifyScripts::class
     ];
 
+    protected $scopes = [
+        \Jackabox\Shopify\Scopes\VariantByProduct::class
+    ];
+
     public function boot()
     {
         parent::boot();

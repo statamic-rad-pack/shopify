@@ -3,11 +3,11 @@
 Route::get('/shopify', 'DashboardController@index')
     ->name('shopify.index');
 
-Route::get('/shopify/api/variants/{product}', 'Api\VariantsController@fetch')
+Route::get('/shopify/variants/{product}', 'CP\VariantsController@fetch')
     ->name('shopify.variants.index');
 
-Route::post('/shopify/api/variants', 'Api\VariantsController@store')
+Route::post('/shopify/variants', 'CP\VariantsController@store')
     ->name('shopify.variants.store');
 
-Route::patch('/shopify/api/variants/{id}', 'Api\VariantsController@update')
+Route::patch('/shopify/variants/{id}', 'CP\VariantsController@update')
     ->name('shopify.variants.edit');
