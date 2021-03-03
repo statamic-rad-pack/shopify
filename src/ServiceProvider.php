@@ -70,7 +70,7 @@ class ServiceProvider extends AddonServiceProvider
     {
         Nav::extend(function ($nav) {
             $nav->create('Settings')
-                ->icon('drawer-file')
+                ->icon('settings-slider')
                 ->section('Shopify')
                 ->route('shopify.index');
 
