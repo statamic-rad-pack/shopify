@@ -106,10 +106,18 @@ if (!shopifyCheckout) {
     });
 }
 
-client.product.fetch(6131515818134).then(function (product) {
-    // Do something with the product
-    console.log(product);
-});
+/**
+ * Fetch the cart and then dispatch the cart count.
+ */
+var fetchCart = function fetchCart() {
+    var checkoutId = localStorage.getItem('statamic.shopify.cart.id');
+
+    client.checkout.fetch(checkoutId).then(function (checkout) {
+        // Do something with the checkout
+        setCartCount(checkout.lineItems);
+    });
+};
+fetchCart();
 
 // Add Product To Cart
 
@@ -140,10 +148,6 @@ var SSAddProductToCart = function () {
             var quantity = this.productForm.querySelector('#ss-product-qty');
             var variantId = this.productForm.querySelector('#ss-product-variant');
 
-            console.log('================Line Items To Add==============');
-            console.log(quantity.value);
-            console.log(variantId.value);
-
             if (variantId == null) {
                 return;
             }
@@ -154,8 +158,11 @@ var SSAddProductToCart = function () {
             }];
 
             client.checkout.addLineItems(localStorage.getItem('statamic.shopify.cart.id'), lineItemsToAdd).then(function (checkout) {
-                console.log('================Basket Update==============');
-                console.log(checkout.lineItems); // Array with one additional line item
+                var elements = htmlToElements('<p>Product added to the basket. <a href="/cart">Go to cart</a></p>');
+
+                bannerMessage(elements, true);
+
+                setCartCount(checkout.lineItems);
             });
         }
     }]);
@@ -164,6 +171,211 @@ var SSAddProductToCart = function () {
 }();
 
 new SSAddProductToCart();
+
+// Fetch Cart Items
+
+var SSCartContents = function () {
+    function SSCartContents() {
+        _classCallCheck(this, SSCartContents);
+
+        this.checkoutId = localStorage.getItem('statamic.shopify.cart.id');
+        this.cartLoading = document.getElementById('ss-cart-loading');
+        this.noItemsMessage = document.getElementById('ss-cart-no-items');
+        this.cartView = document.getElementById('ss-cart-view');
+        this.cartHolder = document.getElementById('ss-cart');
+
+        if (this.cartHolder != null && this.cartView != null) {
+            this.initCart();
+        }
+    }
+
+    _createClass(SSCartContents, [{
+        key: 'initCart',
+        value: function initCart() {
+            var _this2 = this;
+
+            client.checkout.fetch(this.checkoutId).then(function (checkout) {
+                var lineItems = checkout.lineItems,
+                    subtotalPriceV2 = checkout.subtotalPriceV2,
+                    webUrl = checkout.webUrl;
+
+
+                _this2.cartLoading.classList.add('hidden');
+
+                if (lineItems.length === 0) {
+                    _this2.hideCart();
+                    return;
+                }
+
+                // Show Elements
+                _this2.showCart(lineItems, subtotalPriceV2, webUrl);
+            });
+        }
+    }, {
+        key: 'hideCart',
+        value: function hideCart() {
+            this.noItemsMessage.classList.remove('hidden');
+        }
+    }, {
+        key: 'showCart',
+        value: function showCart(lineItems, price, checkoutLink) {
+            var _this3 = this;
+
+            this.cartView.classList.remove('hidden');
+
+            // Table
+            var tableBody = document.querySelector('#ss-cart-view table tbody');
+
+            lineItems.forEach(function (item) {
+                console.log(item);
+
+                var elements = htmlToElements('<tr data-ss-variant-id="' + item.id + '">\n<td class="p-2"><img src="' + item.variant.image.src + '" class="w-20"/></td>\n<td class="p-2"><span class="block font-semibold">' + item.title + '</span><span>' + item.variant.title + '</span></td>\n<td class="p-2">' + _this3.formatCurrency(item.variant.price) + '</td>\n<td class="p-2">' + item.quantity + '</td>\n<td class="p-2">' + _this3.formatCurrency(item.quantity * item.variant.price) + '</td>\n<td class="p-2"><a href="#" data-ss-delete class="text-sm text-red-600 uppercase">Delete</a></td>\n</tr>');
+                elements.forEach(function (el) {
+                    tableBody.appendChild(el);
+                });
+            });
+
+            this.initDeleteButtons();
+
+            // Set subtotal value
+            var subtotalEl = document.querySelector('[data-ss-subtotal]');
+            subtotalEl.innerHTML = this.formatCurrency(price.amount);
+
+            // Checkout Link
+            var checkoutTag = document.getElementById('ss-checkout-link');
+            checkoutTag.setAttribute('href', checkoutLink);
+        }
+    }, {
+        key: 'createCellRow',
+        value: function createCellRow(value) {
+            var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'string';
+
+            var cell = document.createElement('td');
+            var cellInner = void 0;
+
+            cell.classList.add('p-2', 'border-b');
+
+            if (type === 'image') {
+                cellInner = document.createElement('img');
+                cellInner.setAttribute('src', value);
+                cellInner.classList.add('w-40');
+            } else {
+                cellInner = document.createTextNode(value);
+            }
+
+            cell.appendChild(cellInner);
+            return cell;
+        }
+    }, {
+        key: 'formatCurrency',
+        value: function formatCurrency(price) {
+            return parseFloat(price).toFixed(2);
+        }
+    }, {
+        key: 'initDeleteButtons',
+        value: function initDeleteButtons() {
+            var _this4 = this;
+
+            var tableRows = document.querySelectorAll("#ss-cart-view table tbody tr");
+            var tableRowsArray = Array.from(tableRows);
+
+            console.log(tableRows);
+
+            tableRowsArray.forEach(function (row) {
+                var btn = row.querySelector("[data-ss-delete]");
+
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    var id = row.getAttribute('data-ss-variant-id');
+                    _this4.deleteRowFromStorefront(id, row);
+                });
+            });
+        }
+    }, {
+        key: 'deleteRowFromStorefront',
+        value: function deleteRowFromStorefront(id, row) {
+            var _this5 = this;
+
+            var items = [];
+            items.push(id);
+
+            console.log({ checkoutId: this.checkoutId, rowId: id });
+            client.checkout.removeLineItems(this.checkoutId, items).then(function (checkout) {
+                var lineItems = checkout.lineItems;
+
+                // Do something with the updated checkout
+
+                setCartCount(lineItems);
+                bannerMessage(htmlToElements('<p>Item removed successfully</p>'));
+
+                if (lineItems.length === 0) {
+                    _this5.noItemsMessage.classList.remove('hidden');
+                    _this5.cartView.classList.add('hidden');
+                }
+
+                row.remove();
+            });
+        }
+    }]);
+
+    return SSCartContents;
+}();
+
+new SSCartContents();
+
+/**
+ * HTML to elements
+ *
+ * @param html
+ * @returns {NodeListOf<ChildNode>}
+ */
+var htmlToElements = function htmlToElements(html) {
+    var template = document.createElement('template');
+    template.innerHTML = html;
+    return template.content.childNodes;
+};
+
+/**
+ * Set the banner message
+ *
+ * @param elements
+ * @param type
+ */
+var bannerMessage = function bannerMessage(elements) {
+    var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'success';
+
+    var banner = document.getElementById('ss-banner-message');
+    banner.innerHTML = ''; // remove if there is already content.
+    banner.classList.remove('hidden');
+
+    if (type === 'error') {
+        banner.classList.add('bg-red-300');
+    } else {
+        banner.classList.add('bg-green-300');
+    }
+
+    elements.forEach(function (el) {
+        banner.appendChild(el);
+    });
+
+    setTimeout(function () {
+        banner.innerHTML = '';
+        banner.classList.remove('bg-red-300', 'bg-green-300');
+        banner.classList.add('hidden');
+    }, 6000);
+};
+
+var setCartCount = function setCartCount(lineItems) {
+    var count = 0;
+    var countTarget = document.querySelector('[data-ss-cart-count]');
+
+    lineItems.forEach(function (item) {
+        count = count + item.quantity;
+    });
+
+    countTarget.innerHTML = count;
+};
 
 /***/ }),
 
