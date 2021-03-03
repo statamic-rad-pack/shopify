@@ -92,9 +92,9 @@ class ServiceProvider extends AddonServiceProvider
     private function setShopifyApiConfig(): void
     {
         $config = [
-            'ShopUrl' => config('shopify.auth.url'),
-            'ApiKey' => config('shopify.auth.key'),
-            'Password' => config('shopify.auth.password'),
+            'ShopUrl' => config('shopify.url'),
+            'ApiKey' => config('shopify.auth_key'),
+            'Password' => config('shopify.auth_password'),
         ];
 
         ShopifySDK::config($config);

@@ -17,15 +17,15 @@ class ShopifyScripts extends Tags
     {
     }
 
-    public function scripts()
+    public function tokens()
     {
-        $html = "<script>
-window.shopifyDomain = '" . config('shopify.app_url') . "';
+        return "<script>
+window.shopifyDomain = '" . config('shopify.url') . "';
 window.shopifyToken = '" . config('shopify.storefront_token') . "';
 </script>";
+    }
 
-        $html .= '<script src="' . url('/vendor/shopify/js/statamic-shopify-front.js'). '" async></script>';
-
-        return $html;
+    public function scripts() {
+        return '<script src="' . url('/vendor/shopify/js/statamic-shopify-front.js'). '" async></script>';
     }
 }

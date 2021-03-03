@@ -47,31 +47,23 @@ class ImportSingleProductJob implements ShouldQueue
             ->where('slug', $this->slug)
             ->first();
 
+        $formatTags = $this->data['tags'] ? explode(', ', $this->data['tags']) : null;
+
         $data = [
             'product_id' => $this->data['id'],
-            'title' => $this->data['title'],
-            'vendor' => $this->data['vendor'],
-            'product_type' => $this->data['product_type'],
-            'product_tags' => $this->data['tags'] ? explode(', ', $this->data['tags']) : null,
-            'published_at' => Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s')
+            'published_at' => Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s'),
+            'title' => (!$entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
+            'content' => (!$entry || config('shopify.overwrite.content')) ? $this->data['body_html'] : $entry->content,
+            'vendor' => (!$entry || config('shopify.overwrite.vendor')) ? $this->data['vendor'] : $entry->vendor,
+            'product_type' => (!$entry || config('shopify.overwrite.type')) ? $this->data['product_type'] : $entry->product_type,
+            'product_tags' => (!$entry || config('shopify.overwrite.tags')) ? $formatTags : $entry->product_tags,
         ];
 
         if (!$entry) {
             $entry = Entry::make()
                 ->collection('products')
                 ->slug($this->data['handle']);
-
-            $additionalData = [
-                'content' => $this->data['body_html']
-            ];
-        } else {
-            $additionalData = [
-                'content' => $entry->content
-            ];
         }
-
-        // Merge stuff together
-        $data = array_merge($additionalData, $data);
 
         // Import Variant
         $this->importVariants($this->data['variants'], $this->data['handle']);
