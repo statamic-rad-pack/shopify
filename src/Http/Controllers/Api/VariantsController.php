@@ -9,51 +9,27 @@ use Statamic\Http\Controllers\CP\CpController;
 
 class VariantsController extends CpController
 {
-    public function fetch($product)
+    public function fetch(Request $request, $product)
     {
-        return Entry::query()
-            ->where('collection', 'variants')
-            ->get()
-            ->filter(function ($item) use ($product) {
-                return $item->product_slug == $product;
-            })
-            ->map(function ($variant) {
-                $values = [];
-                $values['id'] = $variant->id();
-                $values['slug'] = $variant->slug();
-
-                // Map all variant values to data to ensure we are getting everything.
-                foreach ($variant->data() as $key => $value) {
-                    $values[$key] = $value;
-                }
-
-                ray($values);
-                return $values;
-            });
-    }
-
-    public function store() {}
-
-    public function update(Request $request)
-    {
-        if (! $request->id) {
-            // TODO: Throw error
-            return;
+        if (! $request->get('option1')) {
+            return response()->json('No options set');
         }
 
-        // Match the values to the blueprint, validate.
-        $blueprint = new VariantBlueprint();
-        $fields = $blueprint()->fields()->addValues($request->all());
-        $fields->validate();
-        $values = $fields->process()->values()->toArray();
+        if (! $product) {
+            return response()->json('No product');
+        }
 
-        ray($values);
-
-        // Find and update the entry
-        $variant = Entry::find($request->id);
-        $variant->data($values);
-
-        ray($variant);
-        $variant->save();
+        return Entry::query()
+            ->where('collection', 'variants')
+            ->where('option1', $request->get('option1'))
+            ->where('option2', $request->get('option2'))
+            ->where('option3', $request->get('option3'))
+            ->get()
+            ->map(function ($variant) {
+                $values['title'] = $variant->title;
+                $values['storefront_id'] = $variant->storefront_id;
+                return $values;
+            })
+            ->first();
     }
 }
