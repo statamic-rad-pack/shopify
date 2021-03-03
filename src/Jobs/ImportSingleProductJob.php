@@ -10,6 +10,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
+use PHPShopify\ShopifySDK;
 use Statamic\Facades\Asset;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Path;
@@ -118,6 +119,7 @@ class ImportSingleProductJob implements ShouldQueue
                 'option1' => $variant['option1'],
                 'option2' => $variant['option2'],
                 'option3' => $variant['option3'],
+                'storefront_id' => base64_encode($variant['admin_graphql_api_id']),
             ])->save();
         }
     }
