@@ -60,26 +60,30 @@
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 34);
+/******/ 	return __webpack_require__(__webpack_require__.s = 40);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 34:
+/***/ 40:
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(35);
+module.exports = __webpack_require__(41);
 
 
 /***/ }),
 
-/***/ 35:
+/***/ 41:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_shopify_buy__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_shopify_buy__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_shopify_buy___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_shopify_buy__);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 
 
 console.log(window.shopifyDomain);
@@ -92,9 +96,78 @@ var client = __WEBPACK_IMPORTED_MODULE_0_shopify_buy___default.a.buildClient({
 
 console.log(client);
 
+// Create a checkout
+var shopifyCheckout = localStorage.getItem('statamic.shopify.cart.id');
+
+if (!shopifyCheckout) {
+    client.checkout.create().then(function (checkout) {
+        localStorage.setItem('statamic.shopify.cart.id', checkout.id);
+        shopifyCheckout = checkout.id;
+    });
+}
+
+client.product.fetch(6131515818134).then(function (product) {
+    // Do something with the product
+    console.log(product);
+});
+
+// Add Product To Cart
+
+var SSAddProductToCart = function () {
+    function SSAddProductToCart() {
+        _classCallCheck(this, SSAddProductToCart);
+
+        this.productForm = document.getElementById('ss-product-add-form');
+
+        if (this.productForm != null) {
+            this.initForm();
+        }
+    }
+
+    _createClass(SSAddProductToCart, [{
+        key: 'initForm',
+        value: function initForm() {
+            var _this = this;
+
+            this.productForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                _this.submitForm();
+            });
+        }
+    }, {
+        key: 'submitForm',
+        value: function submitForm() {
+            var quantity = this.productForm.querySelector('#ss-product-qty');
+            var variantId = this.productForm.querySelector('#ss-product-variant');
+
+            console.log('================Line Items To Add==============');
+            console.log(quantity.value);
+            console.log(variantId.value);
+
+            if (variantId == null) {
+                return;
+            }
+
+            var lineItemsToAdd = [{
+                variantId: variantId.value,
+                quantity: quantity != null ? parseInt(quantity.value) : 1
+            }];
+
+            client.checkout.addLineItems(localStorage.getItem('statamic.shopify.cart.id'), lineItemsToAdd).then(function (checkout) {
+                console.log('================Basket Update==============');
+                console.log(checkout.lineItems); // Array with one additional line item
+            });
+        }
+    }]);
+
+    return SSAddProductToCart;
+}();
+
+new SSAddProductToCart();
+
 /***/ }),
 
-/***/ 36:
+/***/ 42:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
