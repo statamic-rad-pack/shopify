@@ -28,6 +28,8 @@ class VariantsController extends CpController
             ->map(function ($variant) {
                 $values['title'] = $variant->title;
                 $values['storefront_id'] = $variant->storefront_id;
+                $values['price'] = $variant->price;
+                $values['inventory_quantity'] = $variant->inventory_quantity;
                 return $values;
             })
             ->first();
