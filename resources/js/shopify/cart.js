@@ -13,6 +13,10 @@ const cartHolder = document.getElementById('ss-cart')
 const setCartCount = () => {
   const countTarget = document.querySelector('[data-ss-cart-count]')
 
+  if (countTarget == null) {
+    return
+  }
+
   client.checkout
     .fetch(checkoutId)
     .then(({ lineItems }) => {
@@ -82,7 +86,10 @@ const showCartOverview = (lineItems, price, checkoutLink) => {
  */
 const setCartSubtotal = amount => {
   const subtotalEl = document.querySelector('[data-ss-subtotal]')
-  subtotalEl.innerHTML = formatCurrency(amount)
+
+  if (subtotalEl != null) {
+    subtotalEl.innerHTML = formatCurrency(amount)
+  }
 }
 
 /**
