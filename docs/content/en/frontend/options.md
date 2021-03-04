@@ -16,15 +16,9 @@ This works best if you have a small amount of products and are looking to get of
 
 Buy buttons can be setup per product in the Shopify admin and then you can add this to each individual product in your CMS. This will implement all the logic you need for checking variations, product quantity, and handling the cart.
 
-## JS Buy SDK (in Progress)
+## JS Buy SDK
 
-To provide more customisation to the front-end we'll want to integrate the [JS Buy SDK](https://shopify.github.io/js-buy-sdk/). 
-
-<alert type="warning">
-
-Please not this is still a work in progress and all code is a rough prototype. If you feel you have an improvement for the front-end please open a pull request on the [repository](https://github.com/jackabox/statamic-shopify).
-
-</alert>
+To provide more customisation to the front-end we'll want to integrate the [JS Buy SDK](https://shopify.github.io/js-buy-sdk/). You can view more about this on the [JS SDK](/frontend/js-sdk) page. If you want to see the basic theme set up in the addon you can publish the 
 
 ### Example Templates
 
@@ -34,12 +28,17 @@ There are example templates for the `cart`, `product` and `products` page in the
 php artisan vendor:publish --tag="shopify-theme"
 ```
 
-To work these highly rely on a sample JavaScript file which was written to work in combo. You can publis this as so:
+You can also include the precompiled scripts with the following.
 
 ```bash
-php artisan vendor:publish --tag="shopify-modular-scripts"
+php artisan vendor:publish --tag="shopify-include-scripts"
 ```
 
-You can then manually include this or you can use the `{{ shopify:script }}` tag in your layout header.
+If you update your layour with the tags it should pull everything together.
 
-If you want to see the source files, and edit it, you can find the source file at `/resources/js/front.js`.
+```twig
+{{ shopify_tokens }}
+{{ shopify_scripts }}
+```
+
+You will need to setup the pages in your CP, update your config, and pull down your products before everything will click together.
