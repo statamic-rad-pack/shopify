@@ -14,7 +14,7 @@ Allows you to output your Site URL and Storefront Token to the front end and bin
 #### Usage
 
 ```twig
-{{ shopify:tokens }}
+{{ shopify_tokens }}
 ```
 
 #### Output
@@ -33,11 +33,49 @@ Outputs a script link to the demo frontend JavaScript once published.
 #### Usage
 
 ```twig
-{{ shopify:scripts }}
+{{ shopify_scripts }}
 ```
 
 #### Output
 
 ```html
-<script src="https://SITEURL/vendor/shopify/js/statamic-shopify-front.js" async></script>
+<script src="https://SITEURL/js/vendor/statamic-shopify-front.js"></script>
 ```
+
+## Product Variants
+
+If you want a simple way to include the variants a tag has been made to load them in. If you need to customise things, I advise using the [query_scope]()
+
+#### Usage
+
+```twig
+{{ product_variants :product="slug" currency="£" }}
+```
+
+- Product is required
+- Currency is optional.
+
+#### Output
+
+<code-group>
+  <code-block label="Singular" active>
+
+  ```html
+  <input type="hidden" name="ss-product-variant" id="ss-product-variant" value="STOREFRONT_ID" />
+  ```
+
+  </code-block>
+  <code-block label="Multiple">
+
+  ```html
+  <select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select">
+    ...
+    <option value="STOREFRONT_ID">TITLE - PRICE</option>
+    <option value="STOREFRONT_ID">TITLE - PRICE</option>
+    ...
+  </select>
+  ```
+
+  </code-block>
+</code-group>
+

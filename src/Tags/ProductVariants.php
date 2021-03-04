@@ -12,6 +12,10 @@ class ProductVariants extends Tags
      */
     public function index()
     {
+        if (!$this->params->get('product')) {
+            return;
+        }
+
         $variants = Entry::query()
             ->where('collection', 'variants')
             ->where('product_slug', $this->params->get('product'))
@@ -38,7 +42,7 @@ class ProductVariants extends Tags
             $html .= $this->parseOptions($variants, $this->params->get('currency'));
             $html .= $this->endSelect();
         } else {
-            $html = '<input type="hidden" name="ss-product-variant" id="ss-product-variant" value="' . $variants[0]['storefront_id'] .'">';
+            $html = '<input type="hidden" name="ss-product-variant" id="ss-product-variant" value="' . $variants[0]['storefront_id'] . '">';
         }
 
         return $html;
@@ -68,7 +72,7 @@ class ProductVariants extends Tags
                 $title .= ' - ' . $currency . $variant['price'];
             }
 
-            $html .= '<option value="' . $variant['storefront_id'] .'">' . $title . '</option>';
+            $html .= '<option value="' . $variant['storefront_id'] . '">' . $title . '</option>';
         }
 
         return $html;
