@@ -2,9 +2,6 @@
 
 namespace Jackabox\Shopify\Http\Controllers\Webhooks;
 
-use Illuminate\Http\Request;
-use Jackabox\Shopify\Jobs\ImportSingleProductJob;
-use PHPShopify\ShopifySDK;
 use Statamic\Http\Controllers\CP\CpController;
 
 class WebhooksController extends CpController

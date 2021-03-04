@@ -4,6 +4,7 @@ namespace Jackabox\Shopify;
 
 use Statamic\Facades\Collection;
 use Statamic\Facades\CP\Nav;
+use Statamic\Facades\Permission;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
 use PHPShopify\ShopifySDK;
@@ -49,7 +50,10 @@ class ServiceProvider extends AddonServiceProvider
 
         Statamic::booted(function() {
             $this->setShopifyApiConfig();
+            $this->publishAssets();
+            $this->bootPermissions();
         });
+
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
@@ -78,6 +82,7 @@ class ServiceProvider extends AddonServiceProvider
             $nav->create('Settings')
                 ->icon('settings-slider')
                 ->section('Shopify')
+                ->can(auth()->user()->can('access shopify'))
                 ->route('shopify.index');
 
             // Hide the variants from the nav bar.
@@ -112,6 +117,13 @@ class ServiceProvider extends AddonServiceProvider
             Artisan::call('vendor:publish --tag=shopify-config');
             Artisan::call('vendor:publish --tag=shopify-blueprints');
             Artisan::call('vendor:publish --tag=shopify-collections');
+        });
+    }
+
+    private function bootPermissions()
+    {
+        $this->app->booted(function () {
+            Permission::register('access shopify')->label('Manage Shopify Imports');
         });
     }
 }

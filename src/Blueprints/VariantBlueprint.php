@@ -2,14 +2,13 @@
 
 namespace Jackabox\Shopify\Blueprints;
 
-use Statamic\Facades\Blueprint as StatamicBlueprint;
+use Statamic\Facades\Blueprint;
 
 class VariantBlueprint extends Blueprint
 {
     public function __invoke()
     {
-        $bp = StatamicBlueprint::find('collections/variants/variant');
-        ray($bp);
+        $bp = Blueprint::find('collections/variants/variant');
 
         if (! $bp) {
             // TODO: THROW PROPER ERROR

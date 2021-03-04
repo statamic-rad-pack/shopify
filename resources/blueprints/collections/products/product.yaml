@@ -1,4 +1,5 @@
-title: Product
+hide: true
+title: Variant
 sections:
   main:
     display: Main
@@ -11,104 +12,91 @@ sections:
           validate:
             - required
       -
-        handle: content
-        field:
-          always_show_set_button: false
-          buttons:
-            - h2
-            - h3
-            - bold
-            - italic
-            - unorderedlist
-            - orderedlist
-            - removeformat
-            - quote
-            - anchor
-            - image
-            - table
-          save_html: true
-          toolbar_mode: fixed
-          link_noopener: false
-          link_noreferrer: false
-          target_blank: false
-          reading_time: false
-          fullscreen: true
-          allow_source: true
-          display: Content
-          type: bard
-          icon: bard
-          listable: hidden
-      -
-        handle: variants
-        field:
-          display: Variants
-          type: variants
-          icon: tags
-          listable: hidden
-      -
-        handle: gallery
-        field:
-          mode: grid
-          restrict: false
-          allow_uploads: true
-          display: Gallery
-          type: assets
-          icon: assets
-          listable: hidden
-          container: shopify
-  sidebar:
-    display: Sidebar
-    fields:
-      -
         handle: slug
         field:
-          type: slug
+          type: disabled_text
           required: true
           localizable: true
+          icon: disabled_text
+          display: 'Variant ID'
           validate:
             - required
-          display: Slug
+          width: 50
+      -
+        handle: sku
+        field:
+          display: SKU
+          type: disabled_text
+          icon: lock
+          width: 50
           listable: hidden
-          generate: true
       -
-        handle: published_at
+        handle: product_slug
         field:
-          mode: single
-          time_enabled: true
-          time_required: true
-          earliest_date: '1900-01-01'
-          full_width: false
-          inline: false
-          columns: 1
-          rows: 1
-          display: 'Published At'
-          type: date
-          icon: date
-          listable: true
-          format: 'Y-m-d H:i:s'
-      -
-        handle: featured_image
-        field:
-          mode: grid
-          restrict: false
-          allow_uploads: true
-          display: 'Featured Image'
-          type: assets
-          icon: assets
-          listable: hidden
-          container: shopify
-          max_files: 1
-      -
-        handle: shopify_id
-        field:
-          display: 'Shopify ID'
           type: hidden
-          icon: hidden
           listable: hidden
+          antlers: false
+          display: 'Product Slug'
       -
-        handle: product_id
+        handle: price
         field:
-          display: 'Product ID'
+          display: Price
           type: disabled_text
           icon: disabled_text
+          listable: hidden
+          validate:
+            - required
+          width: 33
+      -
+        handle: inventory_quantity
+        field:
+          type: disabled_text
+          icon: disabled_text
+          antlers: false
+          display: Stock
+          listable: hidden
+          validate:
+            - nullable
+            - numeric
+          width: 33
+      -
+        handle: grams
+        field:
+          display: 'Weight (Grams)'
+          type: disabled_text
+          icon: disabled_text
+          width: 33
+          listable: hidden
+      -
+        handle: option1
+        field:
+          antlers: false
+          display: 'Option 1'
+          type: disabled_text
+          icon: disabled_text
+          width: 33
+          listable: hidden
+      -
+        handle: option2
+        field:
+          antlers: false
+          display: 'Option 2'
+          type: disabled_text
+          icon: disabled_text
+          width: 33
+          listable: hidden
+      -
+        handle: option3
+        field:
+          display: 'Option 3'
+          type: disabled_text
+          icon: disabled_text
+          width: 33
+          listable: hidden
+      -
+        handle: requires_shipping
+        field:
+          display: 'Requires Shipping'
+          type: toggle
+          icon: toggle
           listable: hidden
