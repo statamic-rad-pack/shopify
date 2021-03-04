@@ -22,7 +22,7 @@ To provide more customisation to the front-end we'll want to integrate the [JS B
 
 <alert type="warning">
 
-Please not this is still a work in progress. If you feel you have an improvement for the front-end please open a pull request on the [repository](https://github.com/jackabox/statamic-shopify).
+Please not this is still a work in progress and all code is a rough prototype. If you feel you have an improvement for the front-end please open a pull request on the [repository](https://github.com/jackabox/statamic-shopify).
 
 </alert>
 
