@@ -1,3 +1,9 @@
+# 0.2.2
+
+### Fixes 
+
+- Fixed admin CP resource not being published
+
 # 0.2.1
 
 ### Fixes 

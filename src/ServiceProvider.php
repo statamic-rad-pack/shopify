@@ -61,10 +61,6 @@ class ServiceProvider extends AddonServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../dist/js/statamic-shopify-front.js' => base_path('public/js/vendor/statamic-shopify-front.js'),
-            ], 'shopify-include-scripts');
-
-            $this->publishes([
                 __DIR__ . '/../resources/js/shopify' => resource_path('js/vendor/shopify/shopify'),
                 __DIR__ . '/../resources/js/front.js' => resource_path('js/vendor/shopify/front.js'),
             ], 'shopify-modular-scripts');
@@ -82,6 +78,10 @@ class ServiceProvider extends AddonServiceProvider
             $this->publishes([
                 __DIR__ . '/../config/shopify.php' => config_path('shopify.php'),
             ], 'shopify-config');
+
+            $this->publishes([
+                __DIR__ . '/../dist/js' => public_path('vendor/shopify/js'),
+            ], 'shopify-resources');
 
             $this->publishes([
                 __DIR__ . '/../resources/views/cart.antlers.html' => base_path('resources/views/shopify/cart.antlers.html'),
@@ -132,6 +132,7 @@ class ServiceProvider extends AddonServiceProvider
             Artisan::call('vendor:publish --tag=shopify-config');
             Artisan::call('vendor:publish --tag=shopify-blueprints');
             Artisan::call('vendor:publish --tag=shopify-content');
+            Artisan::call('vendor:publish --tag=shopify-resources --force');
         });
     }
 
