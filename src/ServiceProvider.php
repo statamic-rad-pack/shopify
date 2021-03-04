@@ -54,10 +54,10 @@ class ServiceProvider extends AddonServiceProvider
             $this->bootPermissions();
         });
 
-
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../dist/js/statamic-shopify-front.js' => public_path('vendor/shopify/js/statamic-shopify-front.js'),
+                __DIR__.'/../resources/js/shopify' => resource_path('js/vendor/shopify/shopify'),
+                __DIR__.'/../resources/js/front.js' => resource_path('js/vendor/shopify/front.js'),
             ], 'shopify-scripts');
 
             $this->publishes([
