@@ -57,7 +57,7 @@ There are several assets the plugin provides you with
 
 ### Quick Setup
 
-Then copy across the assets, config, and JS with:
+To copy the blueprints, configs, javascript(s), and theme files you can publish everything. I'd advise using the granular approach to set only the things you need up.
 
 ```bash
 php artisan vendor:publish --provider="Jackabox\Shopify\ServiceProvider"
@@ -83,4 +83,28 @@ php artisan vendor:publish --tag="shopify-content"
 
 ```bash
 php artisan vendor:publish --tag="shopify-config" 
+```
+
+#### Modular Scripts
+
+Best if you are going to customise everything.
+
+```bash
+php artisan vendor:publish --tag="shopify-modular-scripts" 
+```
+
+#### Theme Files
+
+You can publish the starter theme files if you want to get started quickly or see how the JavaScript integrates.
+
+```bash
+php artisan vendor:publish --tag="shopify-theme" 
+```
+
+#### Compiled Scripts
+
+If you want a quick set up, use the compiled scripts.
+
+```bash
+php artisan vendor:publish --tag="shopify-include-scripts" 
 ```

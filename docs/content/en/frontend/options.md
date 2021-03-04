@@ -37,7 +37,7 @@ php artisan vendor:publish --tag="shopify-theme"
 To work these highly rely on a sample JavaScript file which was written to work in combo. You can publis this as so:
 
 ```bash
-php artisan vendor:publish --tag="shopify-scripts"
+php artisan vendor:publish --tag="shopify-modular-scripts"
 ```
 
 You can then manually include this or you can use the `{{ shopify:script }}` tag in your layout header.
