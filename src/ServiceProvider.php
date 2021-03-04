@@ -58,7 +58,7 @@ class ServiceProvider extends AddonServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../dist/js/statamic-shopify-front.js' => public_path('vendor/shopify/js/statamic-shopify-front.js'),
-            ], 'shopify-assets');
+            ], 'shopify-scripts');
 
             $this->publishes([
                 __DIR__.'/../content/assets' => base_path('content/assets'),

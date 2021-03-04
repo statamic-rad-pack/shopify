@@ -13,14 +13,15 @@ class ImportAllProductsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct() { }
+    public $data = [];
+
+    public function __construct($data) {
+        $this->data = $data;
+    }
 
     public function handle()
     {
-        $shopify = new ShopifySDK;
-        $products = $shopify->Product->get();
-
-        foreach ($products as $product) {
+        foreach ($this->data as $product) {
             ImportSingleProductJob::dispatch($product);
         }
     }

@@ -1,5 +1,5 @@
 {
-    "name": "jackabox/statamic-shopify",
+    "name": "jackabox/shopify",
     "description": "A Shopify Addon for Statamic",
     "autoload": {
         "psr-4": {

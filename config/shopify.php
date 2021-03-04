@@ -35,5 +35,10 @@ return [
         'vendor' => true,
         'type' => true,
         'tags' => true
-    ]
+    ],
+
+    /**
+     * Admin API Limit - Lower this if you bump into issues.
+     */
+    'api_limit' => 30
 ];
