@@ -1,6 +1,6 @@
-import client from "./client";
-import { checkoutId } from "./checkout";
-import { htmlToElements, formatCurrency, bannerMessage } from "./helpers";
+import client from './client'
+import { checkoutId } from './checkout'
+import { htmlToElements, formatCurrency, bannerMessage } from './helpers'
 
 const cartLoading = document.getElementById('ss-cart-loading')
 const noItemsMessage = document.getElementById('ss-cart-no-items')
@@ -11,18 +11,18 @@ const cartHolder = document.getElementById('ss-cart')
  * Set the cart count for the item
  */
 const setCartCount = () => {
-    const countTarget = document.querySelector('[data-ss-cart-count]')
+  const countTarget = document.querySelector('[data-ss-cart-count]')
 
-    client.checkout
-        .fetch(checkoutId)
-        .then(({ lineItems }) => {
-            let count = 0;
-            lineItems.forEach(item => count = count + item.quantity)
-            countTarget.innerHTML = count
-        })
-        .catch(err => {
-            // Handle Errors here.
-        })
+  client.checkout
+    .fetch(checkoutId)
+    .then(({ lineItems }) => {
+      let count = 0
+      lineItems.forEach(item => (count = count + item.quantity))
+      countTarget.innerHTML = count
+    })
+    .catch(err => {
+      // Handle Errors here.
+    })
 }
 
 /**
@@ -30,8 +30,8 @@ const setCartCount = () => {
  * Shows the message that nothing is in the basket.
  */
 const hideCartOverview = () => {
-    noItemsMessage.classList.remove('hidden')
-    cartView.classList.add('hidden')
+  noItemsMessage.classList.remove('hidden')
+  cartView.classList.add('hidden')
 }
 
 /**
@@ -39,17 +39,17 @@ const hideCartOverview = () => {
  * Hides the message that nothing is in the basket.
  */
 const showCartOverview = (lineItems, price, checkoutLink) => {
-    cartView.classList.remove('hidden')
-    noItemsMessage.classList.add('hidden')
+  cartView.classList.remove('hidden')
+  noItemsMessage.classList.add('hidden')
 
-    // Table
-    const tableBody = document.querySelector('#ss-cart-view table tbody');
+  // Table
+  const tableBody = document.querySelector('#ss-cart-view table tbody')
 
-    // Append line item elements
-    lineItems.forEach(({ id, variant, title, quantity }) => {
-        const price = formatCurrency(variant.price)
-        const subtotal = formatCurrency(quantity * variant.price)
-        const elements = htmlToElements(`<tr data-ss-variant-id="${id}">
+  // Append line item elements
+  lineItems.forEach(({ id, variant, title, quantity }) => {
+    const price = formatCurrency(variant.price)
+    const subtotal = formatCurrency(quantity * variant.price)
+    const elements = htmlToElements(`<tr data-ss-variant-id="${id}">
 <td class="p-2"><img src="${variant.image.src}" class="w-20"/></td>
 <td class="p-2"><span class="block font-semibold">${title}</span><span>${variant.title}</span></td>
 <td class="p-2">${price}</td>
@@ -58,20 +58,20 @@ const showCartOverview = (lineItems, price, checkoutLink) => {
 <td class="p-2"><a href="#" data-ss-delete class="text-sm text-red-600 uppercase">Delete</a></td>
 </tr>`)
 
-        elements.forEach(el => {
-            tableBody.appendChild(el)
-        })
+    elements.forEach(el => {
+      tableBody.appendChild(el)
     })
+  })
 
-    // Init delete/qty inputs we just appended
-    initCartActions()
+  // Init delete/qty inputs we just appended
+  initCartActions()
 
-    // Set subtotal value
-    setCartSubtotal(price.amount)
+  // Set subtotal value
+  setCartSubtotal(price.amount)
 
-    // Checkout Link
-    const checkoutTag = document.getElementById('ss-checkout-link')
-    checkoutTag.setAttribute('href', checkoutLink)
+  // Checkout Link
+  const checkoutTag = document.getElementById('ss-checkout-link')
+  checkoutTag.setAttribute('href', checkoutLink)
 }
 
 /**
@@ -80,9 +80,9 @@ const showCartOverview = (lineItems, price, checkoutLink) => {
  *
  * @param amount
  */
-const setCartSubtotal = (amount) => {
-    const subtotalEl = document.querySelector('[data-ss-subtotal]')
-    subtotalEl.innerHTML = formatCurrency(amount)
+const setCartSubtotal = amount => {
+  const subtotalEl = document.querySelector('[data-ss-subtotal]')
+  subtotalEl.innerHTML = formatCurrency(amount)
 }
 
 /**
@@ -91,22 +91,22 @@ const setCartSubtotal = (amount) => {
  * These are reloaded on any item change
  */
 const initCartActions = () => {
-    const tableRows = document.querySelectorAll("#ss-cart-view table tbody tr")
+  const tableRows = document.querySelectorAll('#ss-cart-view table tbody tr')
 
-    tableRows.forEach(row => {
-        const btnEls = row.querySelector("[data-ss-delete]")
-        const qtyEls = row.querySelector("input[name=qty]")
+  tableRows.forEach(row => {
+    const btnEls = row.querySelector('[data-ss-delete]')
+    const qtyEls = row.querySelector('input[name=qty]')
 
-        btnEls.addEventListener('click', e => {
-            e.preventDefault();
-            deleteRowFromStorefront(row)
-        })
-
-        qtyEls.addEventListener('change', e => {
-            e.preventDefault()
-            updateQtyInStorefront(row, e.target.value)
-        })
+    btnEls.addEventListener('click', e => {
+      e.preventDefault()
+      deleteRowFromStorefront(row)
     })
+
+    qtyEls.addEventListener('change', e => {
+      e.preventDefault()
+      updateQtyInStorefront(row, e.target.value)
+    })
+  })
 }
 
 /**
@@ -115,25 +115,25 @@ const initCartActions = () => {
  *
  * @param row
  */
-const deleteRowFromStorefront = (row) => {
-    const id = row.getAttribute('data-ss-variant-id');
-    const items = [];
-    items.push(id)
+const deleteRowFromStorefront = row => {
+  const id = row.getAttribute('data-ss-variant-id')
+  const items = []
+  items.push(id)
 
-    client.checkout
-        .removeLineItems(checkoutId, items)
-        .then(({ lineItems, subtotalPriceV2 }) => {
-            setCartCount(lineItems)
-            setCartSubtotal(subtotalPriceV2.amount)
-            bannerMessage(htmlToElements('<p>Item removed successfully</p>'))
+  client.checkout
+    .removeLineItems(checkoutId, items)
+    .then(({ lineItems, subtotalPriceV2 }) => {
+      setCartCount(lineItems)
+      setCartSubtotal(subtotalPriceV2.amount)
+      bannerMessage(htmlToElements('<p>Item removed successfully</p>'))
 
-            if (lineItems.length === 0) {
-                noItemsMessage.classList.remove('hidden')
-                cartView.classList.add('hidden')
-            }
+      if (lineItems.length === 0) {
+        noItemsMessage.classList.remove('hidden')
+        cartView.classList.add('hidden')
+      }
 
-            row.remove()
-        })
+      row.remove()
+    })
 }
 
 /**
@@ -143,22 +143,24 @@ const deleteRowFromStorefront = (row) => {
  * @param qty
  */
 const updateQtyInStorefront = (row, qty) => {
-    const id = row.getAttribute('data-ss-variant-id');
+  const id = row.getAttribute('data-ss-variant-id')
 
-    const items = [{
-        id: id,
-        quantity: parseInt(qty)
-    }]
+  const items = [
+    {
+      id: id,
+      quantity: parseInt(qty)
+    }
+  ]
 
-    client.checkout
-        .updateLineItems(checkoutId, items)
-        .then(({ lineItems, subtotalPriceV2 }) => {
-            setCartCount(lineItems)
-            setCartSubtotal(subtotalPriceV2.amount)
-        })
-        .catch(err => {
-            console.log(err)
-        })
+  client.checkout
+    .updateLineItems(checkoutId, items)
+    .then(({ lineItems, subtotalPriceV2 }) => {
+      setCartCount(lineItems)
+      setCartSubtotal(subtotalPriceV2.amount)
+    })
+    .catch(err => {
+      console.log(err)
+    })
 }
 
 /**
@@ -166,40 +168,40 @@ const updateQtyInStorefront = (row, qty) => {
  * functions above.
  */
 const cart = () => {
-    if (cartHolder == null && cartView == null) {
-        console.log('Something went wrong finding the form')
-        return;
-    }
+  if (cartHolder == null && cartView == null) {
+    console.log('Something went wrong finding the form')
+    return
+  }
 
-    console.log(checkoutId);
+  console.log(checkoutId)
 
-    // Fetch the cart
-    client.checkout
-        .fetch(checkoutId)
-        .then(checkout => {
-            const { lineItems, subtotalPriceV2, webUrl } = checkout
+  // Fetch the cart
+  client.checkout
+    .fetch(checkoutId)
+    .then(checkout => {
+      const { lineItems, subtotalPriceV2, webUrl } = checkout
 
-            cartLoading.classList.add('hidden')
+      cartLoading.classList.add('hidden')
 
-            if (lineItems.length === 0) {
-                hideCartOverview()
-                return
-            }
+      if (lineItems.length === 0) {
+        hideCartOverview()
+        return
+      }
 
-            // Show Elements
-            showCartOverview(lineItems, subtotalPriceV2, webUrl)
-        })
-        .catch(err => {
-            console.log(err)
-        })
+      // Show Elements
+      showCartOverview(lineItems, subtotalPriceV2, webUrl)
+    })
+    .catch(err => {
+      console.log(err)
+    })
 }
 
 export {
-    showCartOverview,
-    hideCartOverview,
-    initCartActions,
-    setCartSubtotal,
-    setCartCount
+  showCartOverview,
+  hideCartOverview,
+  initCartActions,
+  setCartSubtotal,
+  setCartCount
 }
 
 export default cart
