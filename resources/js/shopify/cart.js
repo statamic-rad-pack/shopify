@@ -165,9 +165,7 @@ const updateQtyInStorefront = (row, qty) => {
       setCartCount(lineItems)
       setCartSubtotal(subtotalPriceV2.amount)
     })
-    .catch(err => {
-      console.log(err)
-    })
+    .catch(err => {})
 }
 
 /**
@@ -179,8 +177,6 @@ const cart = () => {
     console.log('Something went wrong finding the form')
     return
   }
-
-  console.log(checkoutId)
 
   // Fetch the cart
   client.checkout
@@ -198,9 +194,7 @@ const cart = () => {
       // Show Elements
       showCartOverview(lineItems, subtotalPriceV2, webUrl)
     })
-    .catch(err => {
-      console.log(err)
-    })
+    .catch(err => {})
 }
 
 export {

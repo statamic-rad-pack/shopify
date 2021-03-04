@@ -1,6 +1,7 @@
 import client from './client'
 import { htmlToElements, bannerMessage } from './helpers'
 import { setCartCount } from './cart'
+import { checkoutId } from './checkout'
 
 /**
  * Initialise the Product form which handles the
@@ -42,10 +43,7 @@ const handleProductFormSubmit = form => {
   ]
 
   client.checkout
-    .addLineItems(
-      localStorage.getItem('statamic.shopify.cart.id'),
-      lineItemsToAdd
-    )
+    .addLineItems(checkoutId, lineItemsToAdd)
     .then(checkout => {
       const elements = htmlToElements(
         '<p><span class="mr-2">Product added to the basket.</span><a href="/cart">Go to cart</a></p>'
