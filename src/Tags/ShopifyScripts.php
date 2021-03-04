@@ -2,6 +2,7 @@
 
 namespace Jackabox\Shopify\Tags;
 
+use Statamic\Facades\Entry;
 use Statamic\Tags\Tags;
 
 class ShopifyScripts extends Tags
@@ -9,23 +10,32 @@ class ShopifyScripts extends Tags
     protected static $handle = "shopify";
 
     /**
-     * The {{ shopify:scripts }} tag.
-     *
      * @return string|array
      */
     public function index()
     {
     }
 
-    public function tokens()
+    /**
+     * Return the shopify config tokens
+     *
+     * @return string
+     */
+    public function tokens(): string
     {
         return "<script>
-window.shopifyDomain = '" . config('shopify.url') . "';
+window.shopifyUrl = '" . config('shopify.url') . "';
 window.shopifyToken = '" . config('shopify.storefront_token') . "';
 </script>";
     }
 
-    public function scripts() {
+    /**
+     * Dumps out the demo JS
+     *
+     * @return string
+     */
+    public function scripts(): string
+    {
         return '<script src="' . url('/vendor/shopify/js/statamic-shopify-front.js'). '" async></script>';
     }
 }
