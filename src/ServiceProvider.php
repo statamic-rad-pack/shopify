@@ -11,6 +11,8 @@ use PHPShopify\ShopifySDK;
 
 class ServiceProvider extends AddonServiceProvider
 {
+    protected $publishAfterInstall = false;
+
     protected $routes = [
         'cp' => __DIR__.'/../routes/cp.php',
         'web' => __DIR__.'/../routes/web.php',
@@ -27,7 +29,9 @@ class ServiceProvider extends AddonServiceProvider
     ];
 
     protected $tags = [
-        \Jackabox\Shopify\Tags\ShopifyTokens::class
+        \Jackabox\Shopify\Tags\ShopifyTokens::class,
+        \Jackabox\Shopify\Tags\ShopifyScripts::class,
+        \Jackabox\Shopify\Tags\ProductVariants::class
     ];
 
     protected $scopes = [
@@ -56,9 +60,13 @@ class ServiceProvider extends AddonServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
+                __DIR__.'/../dist/js/statamic-shopify-front.js' => base_path('public/js/vendor/statamic-shopify-front.js'),
+            ], 'shopify-include-scripts');
+
+            $this->publishes([
                 __DIR__.'/../resources/js/shopify' => resource_path('js/vendor/shopify/shopify'),
                 __DIR__.'/../resources/js/front.js' => resource_path('js/vendor/shopify/front.js'),
-            ], 'shopify-scripts');
+            ], 'shopify-modular-scripts');
 
             $this->publishes([
                 __DIR__.'/../content/assets' => base_path('content/assets'),
@@ -122,7 +130,7 @@ class ServiceProvider extends AddonServiceProvider
         Statamic::afterInstalled(function () {
             Artisan::call('vendor:publish --tag=shopify-config');
             Artisan::call('vendor:publish --tag=shopify-blueprints');
-            Artisan::call('vendor:publish --tag=shopify-collections');
+            Artisan::call('vendor:publish --tag=shopify-content');
         });
     }
 

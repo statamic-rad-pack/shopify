@@ -8,51 +8,15 @@
             <img src="{{ url }}" alt="{{ alt }}">
             {{ /featured_image }}
         </div>
+
         <div class="grid-cell">
             <h1 class="text-2xl mb-4 font-bold">{{ title }}</h1>
-
             <div class="rte mb-4">{{ content }}</div>
-
-            <p class="mb-1">
-                <b>Vendor:</b>
-
-                {{ vendor }}
-                {{ title }}
-                {{ /vendor }}
-            </p>
-
-            <p class="mb-1">
-                <b>Tags:</b>
-
-                {{ product_tags }}
-                {{ title }}
-                {{ /product_tags }}
-            </p>
-
-            <p class="mb-3">
-                <b>Type:</b>
-
-                {{ product_type }}
-                {{ title }}
-                {{ /product_type }}
-            </p>
 
             <form action="" name="" id="ss-product-add-form">
                 <input type="hidden" name="product_id" id="ss-product-id" value="{{ product_id }}" />
 
-                {{ collection:variants query_scope="variant_by_product" :product="slug" as="variants" }}
-                    {{ if total_results > 1 }}
-                    <select name="ss-product-variant" id="ss-product-variant" class="mb-2 p-2 border">
-                        {{ variants }}
-                        <option value="{{ storefront_id }}">{{ title }} - £{{ price }}</option>
-                        {{ /variants}}
-                    </select><br>
-                    {{ else }}
-                        {{ variants }}
-                        <input type="hidden" name="ss-product-variant" id="ss-product-variant" value="{{ storefront_id }}">
-                        {{ /variants}}
-                    {{ /if }}
-                {{ /collection:variants }}
+                {{ product_variants :product="slug" currency="£" }}
 
                 <input type="number" min="1" value="1" id="ss-product-qty" class="p-2 w-20 border" />
                 <button type="submit" class="bg-green-500 py-2 px-4 text-white rounded">Add to Cart</button>
