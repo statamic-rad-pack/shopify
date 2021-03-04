@@ -1,3 +1,9 @@
+# 0.2.1
+
+### Fixes 
+
+- Fixed missing declaration of Artisan
+
 # 0.2.0
 
 ### New

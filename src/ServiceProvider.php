@@ -8,15 +8,16 @@ use Statamic\Facades\Permission;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
 use PHPShopify\ShopifySDK;
+use Illuminate\Support\Facades\Artisan;
 
 class ServiceProvider extends AddonServiceProvider
 {
     protected $publishAfterInstall = false;
 
     protected $routes = [
-        'cp' => __DIR__.'/../routes/cp.php',
-        'web' => __DIR__.'/../routes/web.php',
-        'actions' => __DIR__.'/../routes/actions.php',
+        'cp' => __DIR__ . '/../routes/cp.php',
+        'web' => __DIR__ . '/../routes/web.php',
+        'actions' => __DIR__ . '/../routes/actions.php',
     ];
 
     protected $fieldtypes = [
@@ -25,7 +26,7 @@ class ServiceProvider extends AddonServiceProvider
     ];
 
     protected $scripts = [
-        __DIR__.'/../dist/js/statamic-shopify-cp.js',
+        __DIR__ . '/../dist/js/statamic-shopify-cp.js',
     ];
 
     protected $tags = [
@@ -52,7 +53,7 @@ class ServiceProvider extends AddonServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../resources/views/', 'shopify');
         $this->mergeConfigFrom(__DIR__ . '/../config/shopify.php', 'shopify');
 
-        Statamic::booted(function() {
+        Statamic::booted(function () {
             $this->setShopifyApiConfig();
             $this->publishAssets();
             $this->bootPermissions();
@@ -60,32 +61,32 @@ class ServiceProvider extends AddonServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../dist/js/statamic-shopify-front.js' => base_path('public/js/vendor/statamic-shopify-front.js'),
+                __DIR__ . '/../dist/js/statamic-shopify-front.js' => base_path('public/js/vendor/statamic-shopify-front.js'),
             ], 'shopify-include-scripts');
 
             $this->publishes([
-                __DIR__.'/../resources/js/shopify' => resource_path('js/vendor/shopify/shopify'),
-                __DIR__.'/../resources/js/front.js' => resource_path('js/vendor/shopify/front.js'),
+                __DIR__ . '/../resources/js/shopify' => resource_path('js/vendor/shopify/shopify'),
+                __DIR__ . '/../resources/js/front.js' => resource_path('js/vendor/shopify/front.js'),
             ], 'shopify-modular-scripts');
 
             $this->publishes([
-                __DIR__.'/../content/assets' => base_path('content/assets'),
-                __DIR__.'/../content/collections' => base_path('content/collections'),
-                __DIR__.'/../content/taxonomies' => base_path('content/taxonomies'),
+                __DIR__ . '/../content/assets' => base_path('content/assets'),
+                __DIR__ . '/../content/collections' => base_path('content/collections'),
+                __DIR__ . '/../content/taxonomies' => base_path('content/taxonomies'),
             ], 'shopify-content');
 
             $this->publishes([
-                __DIR__.'/../resources/blueprints' => resource_path('blueprints'),
+                __DIR__ . '/../resources/blueprints' => resource_path('blueprints'),
             ], 'shopify-blueprints');
 
             $this->publishes([
-                __DIR__.'/../config/shopify.php' => config_path('shopify.php'),
+                __DIR__ . '/../config/shopify.php' => config_path('shopify.php'),
             ], 'shopify-config');
 
             $this->publishes([
-                __DIR__.'/../resources/views/cart.antlers.html' => base_path('resources/views/shopify/cart.antlers.html'),
-                __DIR__.'/../resources/views/product.antlers.html' => base_path('resources/views/shopify/product.antlers.html'),
-                __DIR__.'/../resources/views/products.antlers.html' => base_path('resources/views/shopify/products.antlers.html'),
+                __DIR__ . '/../resources/views/cart.antlers.html' => base_path('resources/views/shopify/cart.antlers.html'),
+                __DIR__ . '/../resources/views/product.antlers.html' => base_path('resources/views/shopify/product.antlers.html'),
+                __DIR__ . '/../resources/views/products.antlers.html' => base_path('resources/views/shopify/products.antlers.html'),
             ], 'shopify-theme');
         }
     }
