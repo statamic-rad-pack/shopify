@@ -86,15 +86,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 
 
-console.log(window.shopifyDomain);
-console.log(window.shopifyToken);
-
 var client = __WEBPACK_IMPORTED_MODULE_0_shopify_buy___default.a.buildClient({
-    domain: window.shopifyDomain,
+    domain: window.shopifyUrl,
     storefrontAccessToken: window.shopifyToken
 });
 
-console.log(client);
+window.shopifyClient = client;
 
 // Create a checkout
 var shopifyCheckout = localStorage.getItem('statamic.shopify.cart.id');
@@ -113,10 +110,10 @@ var fetchCart = function fetchCart() {
     var checkoutId = localStorage.getItem('statamic.shopify.cart.id');
 
     client.checkout.fetch(checkoutId).then(function (checkout) {
-        // Do something with the checkout
         setCartCount(checkout.lineItems);
     });
 };
+
 fetchCart();
 
 // Add Product To Cart

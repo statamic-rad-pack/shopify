@@ -1,14 +1,11 @@
 import Client from 'shopify-buy';
 
-console.log(window.shopifyDomain)
-console.log(window.shopifyToken)
-
 const client = Client.buildClient({
-    domain: window.shopifyDomain,
+    domain: window.shopifyUrl,
     storefrontAccessToken: window.shopifyToken
 });
 
-console.log(client);
+window.shopifyClient = client;
 
 // Create a checkout
 let shopifyCheckout = localStorage.getItem('statamic.shopify.cart.id');
@@ -27,10 +24,10 @@ const fetchCart = () => {
     const checkoutId = localStorage.getItem('statamic.shopify.cart.id')
 
     client.checkout.fetch(checkoutId).then((checkout) => {
-        // Do something with the checkout
         setCartCount(checkout.lineItems);
     })
 }
+
 fetchCart()
 
 // Add Product To Cart
