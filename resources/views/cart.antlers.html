@@ -1,0 +1,33 @@
+<!-- Shopify Statamic Cart Page -->
+<div class="container max-w-4xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">{{ title }}</h1>
+
+    <div id="ss-cart">
+        <p id="ss-cart-loading">Loading...</p>
+
+        <p id="ss-cart-no-items" class="hidden">Sorry, nothing is in your cart. Add some stuff!</p>
+
+        <div id="ss-cart-view" class="hidden">
+            <table class="w-full bg-white">
+                <thead>
+                <tr>
+                    <th class="text-left p-2 border-b">Image</th>
+                    <th class="text-left p-2 border-b">Name</th>
+                    <th class="text-left p-2 border-b">Price</th>
+                    <th class="text-left p-2 border-b">Quantity</th>
+                    <th class="text-left p-2 border-b">Subtotal</th>
+                    <th class=" p-2 border-b"></th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+
+            <div class="my-8">
+                <p>Subtotal: <span data-ss-subtotal></span></p>
+            </div>
+
+            <a href="" id="ss-checkout-link" class="bg-green-500 py-2 px-4 text-white rounded">Continue To Checkout</a>
+        </div>
+    </div>
+</div>

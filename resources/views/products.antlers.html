@@ -1,0 +1,30 @@
+<div class="container max-w-4xl mx-auto">
+    <h1 class="mb-4 text-2xl font-bold">Products</h1>
+
+    {{ collection:products as="products" limit="9" paginate="true" }}
+    <div class="grid grid-cols-3 gap-5">
+        {{ products }}
+            <div class="grid-cell mb-4">
+                {{ featured_image }}
+                    <img src="{{ url }}" alt="{{ alt }}" class="border-4 mb-2">
+                {{ /featured_image }}
+
+                <h2 class="text-lg">{{ title }}</h2>
+                <a href="/products/{{ slug }}" class="text-green-500">View Product</a>
+            </div>
+        {{ /products }}
+    </div>
+
+    {{ paginate }}
+    <div class="flex justify-between border-t pt-4 mt-10">
+        <a href="{{ prev_page }}">⬅ Previous</a>
+
+        <span>{{ current_page }} of {{ total_pages }} pages
+                (There are {{ total_items }} posts)</span>
+
+        <a href="{{ next_page }}">Next ➡</a>
+    </div>
+    {{ /paginate }}
+
+    {{ /collection:products }}
+</div>

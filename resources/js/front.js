@@ -5,7 +5,6 @@ const client = Client.buildClient({
     storefrontAccessToken: window.shopifyToken
 });
 
-window.shopifyClient = client;
 
 // Create a checkout
 let shopifyCheckout = localStorage.getItem('statamic.shopify.cart.id');

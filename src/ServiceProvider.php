@@ -73,6 +73,12 @@ class ServiceProvider extends AddonServiceProvider
             $this->publishes([
                 __DIR__.'/../config/shopify.php' => config_path('shopify.php'),
             ], 'shopify-config');
+
+            $this->publishes([
+                __DIR__.'/../resources/views/cart.antlers.html' => base_path('resources/views/shopify/cart.antlers.html'),
+                __DIR__.'/../resources/views/product.antlers.html' => base_path('resources/views/shopify/product.antlers.html'),
+                __DIR__.'/../resources/views/products.antlers.html' => base_path('resources/views/shopify/products.antlers.html'),
+            ], 'shopify-theme');
         }
     }
 
