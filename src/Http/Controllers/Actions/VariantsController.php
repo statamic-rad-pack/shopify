@@ -23,6 +23,7 @@ class VariantsController extends CpController
             ->where('option1', $request->get('option1'))
             ->where('option2', $request->get('option2'))
             ->where('option3', $request->get('option3'))
+            ->where('product_slug', $product)
             ->get()
             ->map(function ($variant) {
                 $values['title'] = $variant->title;
