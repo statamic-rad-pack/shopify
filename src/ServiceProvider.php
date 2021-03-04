@@ -27,7 +27,7 @@ class ServiceProvider extends AddonServiceProvider
     ];
 
     protected $tags = [
-        \Jackabox\Shopify\Tags\ShopifyScripts::class
+        \Jackabox\Shopify\Tags\ShopifyTokens::class
     ];
 
     protected $scopes = [
