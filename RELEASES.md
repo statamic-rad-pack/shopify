@@ -1,3 +1,9 @@
+# 0.2.4
+
+### Fixes 
+
+- Fixing product blueprint being replaced for variant
+
 # 0.2.2
 
 ### Fixes 
