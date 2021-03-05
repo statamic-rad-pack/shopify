@@ -16,8 +16,6 @@ class Variants extends Fieldtype
         $variantBlueprint = new VariantBlueprint();
         $variantFields = $variantBlueprint()->fields()->addValues([])->preProcess();
 
-        ray('variant fields', $variantFields, $variantFields->meta());
-
         return [
             'action'             => cp_route('shopify.variants.store'),
             'variantIndexRoute'  => cp_route('shopify.variants.index', $product->slug()),

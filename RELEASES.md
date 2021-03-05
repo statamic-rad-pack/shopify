@@ -1,21 +1,3 @@
-# 0.2.4
-
-### Fixes 
-
-- Fixing product blueprint being replaced for variant
-
-# 0.2.2
-
-### Fixes 
-
-- Fixed admin CP resource not being published
-
-# 0.2.1
-
-### Fixes 
-
-- Fixed missing declaration of Artisan
-
 # 0.2.0
 
 ### New
