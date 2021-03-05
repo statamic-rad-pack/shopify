@@ -61,9 +61,9 @@ class ServiceProvider extends AddonServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../resources/js/shopify' => resource_path('js/vendor/shopify/shopify'),
-                __DIR__ . '/../resources/js/front.js' => resource_path('js/vendor/shopify/front.js'),
-            ], 'shopify-modular-scripts');
+                __DIR__ . '/../resources/js/shopify' => resource_path('js/vendor/shopify'),
+                __DIR__ . '/../resources/js/front.js' => resource_path('js/vendor/shopify.js'),
+            ], 'shopify-scripts');
 
             $this->publishes([
                 __DIR__ . '/../content/assets' => base_path('content/assets'),

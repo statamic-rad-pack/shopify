@@ -19,30 +19,22 @@ composer require jackabox/statamic-shopify
 
 ## Creating A Shopify App
 
-Before we can add the `.env` variables, we need to ensure we have a private app setup in our Shopify Admin. 
+Before we can get anything working, we need to ensure we have a private app setup in our Shopify Admin. 
 
 1. Visit the "Apps" section in your Shopify admin, the URL should be similar to https://MY-SITE.myshopify.com/admin/apps.
 2. Scroll down and click "Manage private apps"
-3. Click "Create new private app"
+3. Click **"Create new private app"**
 4. Set a nice name to remember as well as your email.
-5. Toggle "Show inactive admin api permissions"
-6. Set read access to "Orders", "Product listings", and "Products"
-7. If you plan to use the JS SDK check "allow this app to access your storefront data using the Storefront API" with the default settings.
+5. Toggle **"Show inactive admin api permissions"**
+6. Set read access to **"Orders", "Product listings", and "Products"**.
+7. Grant access to the Storefront API by checking **"allow this app to access your storefront data using the Storefront API"**.
 8. Save.
 
 Once saved you'll be presented with the details of your private app. We'll use these to populate our `.env` file and get everything setup correctly.
 
 ## Environment Variables
 
-Ensure you've set the following variables. Some may mitigated if you only require CMS integration.
-
-| Env Value                 | Shopify App Value        | Required For  |
-| ------------------------- | ------------------------ | ------------- |
-| SHOPIFY_APP_URL           | your-site.myshopify.com  | Frontend, CMS |
-| SHOPIFY_AUTH_KEY          | Admin API Key            | CMS |
-| SHOPIFY_AUTH_PASSWORD     | Admin API Password       | CMS |
-| SHOPIFY_STOREFRONT_TOKEN  | Storefront access token  | Frontend |
-
+Ensure you've set the necessary environemnt variables as defined in the ["Env Values"](/env) section.
 
 ## Publishable Assets
 
@@ -53,11 +45,11 @@ There are several assets the plugin provides you with
 - Blueprints for Variants
 - Blueprints for Tags, Vendors, and Type Taxomonies
 - Asset container for Shopify assets
-- Front-end JS SDK setup script
+- Front-end JavaScript to integrate Shopify Storefront API
 
 ### Quick Setup
 
-To copy the blueprints, configs, javascript(s), and theme files you can publish everything. I'd advise using the granular approach to set only the things you need up.
+When installing the app for the first time it will copy across all of the necessary assets. If you want to manually do this you can run the following command.
 
 ```bash
 php artisan vendor:publish --provider="Jackabox\Shopify\ServiceProvider"
@@ -85,12 +77,12 @@ php artisan vendor:publish --tag="shopify-content"
 php artisan vendor:publish --tag="shopify-config" 
 ```
 
-#### Modular Scripts
+#### JavaScript
 
-Best if you are going to customise everything.
+Copy across the JavaScript files which have been written to speed up your integration with the Storefront API.
 
 ```bash
-php artisan vendor:publish --tag="shopify-modular-scripts" 
+php artisan vendor:publish --tag="shopify-scripts" 
 ```
 
 #### Theme Files
@@ -99,12 +91,4 @@ You can publish the starter theme files if you want to get started quickly or se
 
 ```bash
 php artisan vendor:publish --tag="shopify-theme" 
-```
-
-#### Compiled Scripts
-
-If you want a quick set up, use the compiled scripts.
-
-```bash
-php artisan vendor:publish --tag="shopify-include-scripts" 
 ```

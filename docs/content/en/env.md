@@ -1,7 +1,7 @@
 ---
 title: Env Values
-category: CMS
-position: 7
+category: Guide
+position: 3
 ---
 
 ## Required For Admin
