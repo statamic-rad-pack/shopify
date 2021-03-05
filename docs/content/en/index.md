@@ -4,17 +4,22 @@ description: ''
 position: 1
 category: ''
 features:
-  - Import Products + Variants into your CMS
-  - Brings through all your images
-  - Can be used with the flatfile CMS or with a database.
-  - Keep stock up to date with the order webhook.
-  - Examples of integrating the front-end.
+  - No more liqud
+  - Import Products, Variants, and Images into Statamic
+  - Can be used either flatfile (yay!) or with a database.
+  - Keeps stock up to date by enabling the Order Webhook.
+  - Keeps products in sync by enabling the Product Delete webhook.
+  - ES6 JavaScript written integration to the Storefront API saving you hours.
 ---
 
-<!-- <img src="/preview.png" class="light-img" width="1280" height="640" alt=""/> -->
-<!-- <img src="/preview-dark.png" class="dark-img" width="1280" height="640" alt=""/> -->
 
 A [Statamic 3](https://statamic.com) addon that allows you to integrate [Shopify](https://shopify.com). World-class ecommerce mixed with the brilliance of Statamic.
+
+## Purpose
+
+Shopify is world-class for ecommerce and it provides one of the best systems for handling orders, products, and users. However, the templating engine is frankly _shit_. This plugin aims to marry the wonderful CMS of Statamic with the ecommerce tools of Shopify.
+
+It utilises the Admin API to fetch products and listen to webhooks, and then allows for customisation on the front using either the Storefront API or the Buy Buttons.
 
 ## Features
 
