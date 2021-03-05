@@ -4,7 +4,7 @@ category: CMS
 position: 3
 ---
 
-The import jobs have been written to pull in your products and sort out all the data. It's highly advisable that you use a queue system such as Redis. You can either pull all products, or a single product.
+The import jobs have been written to pull in your products and sort out all the data. It's advisable that you use a queue system such as Redis. You can either pull all products or a single product.
 
 ## Via the Admin
 

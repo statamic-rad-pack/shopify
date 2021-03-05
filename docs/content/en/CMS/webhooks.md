@@ -9,7 +9,7 @@ There is a built method to listen for webhooks sent by Shopify back to your appl
 ## Setting Up Webhooks
 
 1. Head to your Shopify admin
-2. Click **Settings > Notifcations**
+2. Click **Settings > Notifications**
 3. Scroll down to **Webhooks** and click "Create Webhook"
 4. Enter the URL as shown in the sections below.
 

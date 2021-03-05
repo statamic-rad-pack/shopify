@@ -12,7 +12,7 @@ The addon currently brings in the following content:
 
 ## Product Content
 
-The addon pulls the following information for products. Although you can remove any of this from the editor there are a few fields which are required for the addon to work.
+The addon pulls the following information for products. Although you can remove any of this from the editor there are a few fields that are required for the addon to work.
 
 | Value              | Key                 | Description   | Required  |
 | -------------------| ------------------- | ------------- | --------- |
@@ -35,7 +35,7 @@ By default, we overwrite any content pulled from Shopify over the stored values 
 
 </alert>
 
-You can change this by editing the `overwrite` option in the config file. The following are currently able to be switched between overwrite or not.
+You can change this by editing the `overwrite` option in the config file. The following are currently able to be switched between overwriting or not.
 
 ```php
 /**

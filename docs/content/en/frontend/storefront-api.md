@@ -5,13 +5,13 @@ category: Frontend
 position: 12
 ---
 
-The addon includes three theme files which can help you quickly spin up an example integration. These are rather simple usecases that give us enough to integrate the JavaScript and control adding products to our basket, updating it, and handing off to Shopify for checkout.
+The add-on includes three theme files that can help you quickly spin up an example integration. These are rather simple use cases that give us enough to integrate the JavaScript and control adding products to our basket, updating it, and handing it off to Shopify for checkout.
 
-The following breaks down the JavaScript inclued and the steps needed to get everything working.
+The following breaks down the JavaScript included and the steps needed to get everything working.
 
 ## Publishing Assets
 
-Before we can talk about what anything does, we need to publish the boilerplate assets. Run the following command to get the uncompiled JavaScript into your resources directory.
+Before we can talk about what anything achieves, we need to publish the boilerplate assets. Run the following command to get the uncompiled JavaScript into your resources directory.
 
 ```bash
 php artisan vendor:publish --tag="shopify-scripts"
@@ -49,15 +49,11 @@ The `client.js` uses the tokens output by `{{ shopify_tokens }}`. If you have in
 
 ## Client.js
 
-Our `client.js` is a rather simple file, it uses the window attributes to create a connection to the Storefront API. You'll need to use this whenever you want to interact with the API, so we have seperated it into it's own JS file so you can import it where needed.
+Our `client.js` is a rather simple file, it uses the window attributes to create a connection to the Storefront API. You'll need to use this whenever you want to interact with the API, so we have separated it into it's own JS file so you can import it where needed.
 
 ```js
 import Client from 'shopify-buy'
 
-/**
- * Set up a new version of the Shopify Buy this uses the
- * token values set by {{ shopify:tokens }} in your template.
- */
 const client = Client.buildClient({
   domain: window.shopifyUrl,
   storefrontAccessToken: window.shopifyToken
@@ -95,7 +91,7 @@ export { checkoutId }
 export default checkout
 ```
 
-Everytime we call the `checkout()` method, we will check to see if the checkout exists. If not, we will create a new checkout for them.
+Every time we call the `checkout()` method, we will check to see if the checkout exists. If not, we will create a new checkout for them.
 
 We have also exported the `checkoutId` directly as this is all you will need to interact with the checkout in future calls.
 
@@ -105,7 +101,7 @@ We want products in our basket, so this script handles adding the variant and qu
 
 ### productForm
 
-Firstly, we setup the product form and grab the ID of the page and then call the `handleProductFormSubmit` function.
+Firstly, we set up the product form and grab the ID of the page and then call the `handleProductFormSubmit` function.
 
 ```js
 const productForm = () => {
@@ -126,7 +122,7 @@ export default productForm
 
 ### handleProductFormSubmit
 
-To actually process the form, we look for the `#ss-product-qty` and `#ss-product-variant` fields in the form and then parse these so they can be passed to the Storefront API.
+To process the form, we look for the `#ss-product-qty` and `#ss-product-variant` fields in the form and then parse these so they can be passed to the Storefront API.
 
 ```js
 const handleProductFormSubmit = form => {
@@ -207,7 +203,7 @@ const hideCartOverview = () => {
 
 ### setCartSubtotal
 
-Updates the subtotal count with the `amount` passed to it. In our case we pass the subTotal of the whole checkout.
+Updates the subtotal count with the `amount` passed to it. In our case, we pass the subTotal of the whole checkout.
 
 ```js
 const setCartSubtotal = amount => {
@@ -246,7 +242,7 @@ const initCartActions = () => {
 
 ### showCartOverview
 
-This function handles looping around the lineItems, appending the data from each item to a table, passing the price to the `setCartSubtotal()` function and setting the unique checkout URL so the user can be forwarded to Shopiy.
+This function handles looping around the lineItems, appending the data from each item to a table, passing the price to the `setCartSubtotal()` function and setting the unique checkout URL so the user can be forwarded to Shopify.
 
 ```js
 const showCartOverview = (lineItems, price, checkoutLink) => {
@@ -286,7 +282,7 @@ const showCartOverview = (lineItems, price, checkoutLink) => {
 }
 ```
 
-We also pass the prices to `formatCurrency` which is another helper we've made and should be updated to match your stores currency.
+We also pass the prices to `formatCurrency` which is another helper we've made and should be updated to match your store's currency.
 
 ### updateQtyInStorefront
 
@@ -388,7 +384,7 @@ export const htmlToElements = html => {
 
 ### bannerMessage
 
-Display a banner message to the end user. This is useful for declaring succesful actions or errors.
+Display a banner message to the end-user. This is useful for declaring successful actions or errors.
 
 <code-group>
   <code-block label="JS" active>

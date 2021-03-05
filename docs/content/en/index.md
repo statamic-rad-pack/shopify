@@ -4,9 +4,9 @@ description: ''
 position: 1
 category: ''
 features:
-  - No more liqud
+  - No more liquid
   - Import Products, Variants, and Images into Statamic
-  - Can be used either flatfile (yay!) or with a database.
+  - Can be used either flat-file (yay!) or with a database.
   - Keeps stock up to date by enabling the Order Webhook.
   - Keeps products in sync by enabling the Product Delete webhook.
   - ES6 JavaScript written integration to the Storefront API saving you hours.
