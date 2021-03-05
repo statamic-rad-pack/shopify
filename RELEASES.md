@@ -1,9 +1,15 @@
-# 0.3.0
+# 0.3.1
+
+### New
+
+- Added `product_price` tag to show the price on the product overview page.
+- Added trait to extend to check if has product variants.
 
 ### Update
 
 - You can now pass `class` to the `product_variant` tag to style the select
-
+- `product_variant` tag now accepts `show_price="true"` rather than `currency=""`
+- Config now has option for `currency` - defualts to £.
 
 # 0.3.0
 

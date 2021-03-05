@@ -2,11 +2,13 @@
 
 namespace Jackabox\Shopify\Tags;
 
-use Statamic\Facades\Entry;
+use Jackabox\Shopify\Traits\HasProductVariants;
 use Statamic\Tags\Tags;
 
 class ProductVariants extends Tags
 {
+    use HasProductVariants;
+
     /**
      * @return string|array
      */
@@ -16,22 +18,7 @@ class ProductVariants extends Tags
             return;
         }
 
-        $variants = Entry::query()
-            ->where('collection', 'variants')
-            ->where('product_slug', $this->params->get('product'))
-            ->get()
-            ->map(function ($variant) {
-                $values = [];
-                $values['id'] = $variant->id();
-                $values['slug'] = $variant->slug();
-
-                // Map all variant values to data to ensure we are getting everything.
-                foreach ($variant->data() as $key => $value) {
-                    $values[$key] = $value;
-                }
-
-                return $values;
-            });
+        $variants = $this->fetchProductVariants($this->params->get('product'));
 
         if ($variants->count() === 0) {
             return;
@@ -39,7 +26,7 @@ class ProductVariants extends Tags
 
         if ($variants->count() > 1) {
             $html = $this->startSelect();
-            $html .= $this->parseOptions($variants, $this->params->get('currency'));
+            $html .= $this->parseOptions($variants);
             $html .= $this->endSelect();
         } else {
             $html = '<input type="hidden" name="ss-product-variant" id="ss-product-variant" value="' . $variants[0]['storefront_id'] . '">';
@@ -61,15 +48,15 @@ class ProductVariants extends Tags
      * @param null $currency
      * @return string
      */
-    public function parseOptions($variants, $currency = null): string
+    public function parseOptions($variants): string
     {
         $html = '';
 
         foreach ($variants as $variant) {
             $title = $variant['title'];
 
-            if ($currency) {
-                $title .= ' - ' . $currency . $variant['price'];
+            if ($this->params->get('show_price')) {
+                $title .= ' - ' . config('shopify.currency') . $variant['price'];
             }
 
             $html .= '<option value="' . $variant['storefront_id'] . '">' . $title . '</option>';

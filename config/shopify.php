@@ -40,5 +40,10 @@ return [
     /**
      * Admin API Limit - Lower this if you bump into issues.
      */
-    'api_limit' => 30
+    'api_limit' => 30,
+
+    /**
+     * Shop Currency
+     */
+    'currency' => '£'
 ];
