@@ -1,3 +1,13 @@
+# 0.3.0
+
+### Update
+
+- Docs have been updated with more relevant information that hopefully clears a few things up.
+
+### Removed
+
+- Removed the compile scripts as it didn't make sense.
+
 # 0.2.0
 
 ### New
