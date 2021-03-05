@@ -1,13 +1,29 @@
 ---
-title: JS SDK
+title: Storefront API
 description: ''
 category: Frontend
 position: 12
 ---
 
-The addon includes three theme files which can help you quickly spin up an example integration. These are rather simple usecases that give us enough to integrate the JavaScript and control adding products to our basket, updating it, and proceeding to checkout.
+The addon includes three theme files which can help you quickly spin up an example integration. These are rather simple usecases that give us enough to integrate the JavaScript and control adding products to our basket, updating it, and handing off to Shopify for checkout.
 
-## Intro
+The following breaks down the JavaScript inclued and the steps needed to get everything working.
+
+## Publishing Assets
+
+Before we can talk about what anything does, we need to publish the boilerplate assets. Run the following command to get the uncompiled JavaScript into your resources directory.
+
+```bash
+php artisan vendor:publish --tag="shopify-scripts"
+```
+
+For the theme files you can also run:
+
+```bash
+php artisan vendor:publish --tag="shopify-theme"
+```
+
+## Initiating
 
 The first thing you need is to setup the client. 
 
@@ -149,7 +165,7 @@ We use two functions `bannerMessage()` and `setCartCount()` which we will addres
 
 </alert>
 
-## Cart
+## Cart.js
 
 This is the big one. We handle pulling the cart details into our site, as well as updating quantity, managing deletion of products and handing off to Shopify.
 
@@ -354,7 +370,7 @@ const cart = () => {
 }
 ```
 
-## Helpers
+## Helpers.js
 
 There are a few helpers in the JavaScript that handle repeated functionality between the JS elements. These can be used anywhere.
 

@@ -26,23 +26,7 @@ Allows you to output your Site URL and Storefront Token to the front end and bin
 </script>
 ```
 
-## Scripts
-
-Outputs a script link to the demo frontend JavaScript once published.
-
-#### Usage
-
-```twig
-{{ shopify_scripts }}
-```
-
-#### Output
-
-```html
-<script src="https://SITEURL/js/vendor/statamic-shopify-front.js"></script>
-```
-
-## Product Variants
+## Product Variants
 
 If you want a simple way to include the variants a tag has been made to load them in. If you need to customise things, I advise using the [query_scope]()
 
