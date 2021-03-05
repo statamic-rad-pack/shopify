@@ -53,7 +53,7 @@ class ProductVariants extends Tags
      */
     public function startSelect(): string
     {
-        return '<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select ' . $this->params->get('class') . '"';
+        return '<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select ' . $this->params->get('class') . '">';
     }
 
     /**
