@@ -2,6 +2,13 @@
 
 ### Update
 
+- You can now pass `class` to the `product_variant` tag to style the select
+
+
+# 0.3.0
+
+### Update
+
 - Docs have been updated with more relevant information that hopefully clears a few things up.
 
 ### Removed
