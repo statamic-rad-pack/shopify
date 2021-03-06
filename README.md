@@ -7,7 +7,7 @@
 
 Integrate Shopify into your Statamic Site.
 
-[demo](https://demo.shopify.jackwhiting.co.uk)
+[demo](https://shopify.demo.jackwhiting.co.uk)
 </div>
 
 Hey, this is a very WIP plugin at the moment and the testing ground for my integration. It involves pulling in the products to collections and some handy prewritten snippets to scaffold the frontend.
