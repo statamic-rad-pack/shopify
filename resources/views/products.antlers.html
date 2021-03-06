@@ -7,14 +7,18 @@
         {{ products }}
             <div class="mb-4 grid-cell">
                 <div class="overflow-hidden bg-white shadow-lg sm:rounded-lg">
-                    {{ featured_image }}
-                        <picture class="relative block aspect-w-3 aspect-h-2">
-                            <img src="{{ url }}" alt="{{ alt }}" class="absolute object-cover">
-                        </picture>
-                    {{ /featured_image }}
+                    {{ if featured_image }}
+                        <a href="/products/{{ slug }}">
+                            {{ featured_image }}
+                                <picture class="relative block aspect-w-3 aspect-h-2">
+                                    <img src="{{ url }}" alt="{{ alt }}" class="absolute object-cover">
+                                </picture>
+                            {{ /featured_image }}
+                        </a>
+                    {{ /if}}
 
                     <div class="px-4 py-5 lg:px-6">
-                        <h2 class="mb-2 text-xl font-semibold">{{ title }}</h2>
+                        <h2 class="mb-2 text-xl font-semibold"><a href="/products/{{ slug }}">{{ title }}</a></h2>
 
                         <p class="mb-4">{{ product_price :product="slug" show_from="true" }}</p>
 
