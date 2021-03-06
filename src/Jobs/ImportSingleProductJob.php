@@ -55,8 +55,8 @@ class ImportSingleProductJob implements ShouldQueue
             'title' => (!$entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
             'content' => (!$entry || config('shopify.overwrite.content')) ? $this->data['body_html'] : $entry->content,
             'vendor' => (!$entry || config('shopify.overwrite.vendor')) ? $this->data['vendor'] : $entry->vendor,
-            'product_type' => (!$entry || config('shopify.overwrite.type')) ? $this->data['product_type'] : $entry->product_type,
-            'product_tags' => (!$entry || config('shopify.overwrite.tags')) ? $formatTags : $entry->product_tags,
+            'type' => (!$entry || config('shopify.overwrite.type')) ? $this->data['product_type'] : $entry->type,
+            'tags' => (!$entry || config('shopify.overwrite.tags')) ? $formatTags : $entry->tags,
         ];
 
         if (!$entry) {
@@ -93,7 +93,7 @@ class ImportSingleProductJob implements ShouldQueue
                 ->where('slug', $variant['id'])
                 ->first();
 
-            if (! $entry) {
+            if (!$entry) {
                 $entry = Entry::make()
                     ->collection('variants')
                     ->slug($variant['id']);
@@ -142,7 +142,8 @@ class ImportSingleProductJob implements ShouldQueue
      * @param array $image
      * @return mixed
      */
-    private function importImages(array $image) {
+    private function importImages(array $image)
+    {
         $url = $this->cleanImageURL($image['src']);
         $name = $this->getImageNameFromUrl($url);
         $file = $this->uploadFakeFileFromUrl($name, $url);

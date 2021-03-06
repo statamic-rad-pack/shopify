@@ -1,9 +1,13 @@
 title: Products
+template: product
+layout: layout
 taxonomies:
+  - type
+  - tags
   - vendor
-  - product_type
-  - product_tags
 revisions: false
+route: '/products/{slug}'
+sort_dir: asc
 date_behavior:
   past: public
   future: private
