@@ -193,7 +193,6 @@ const updateQtyInStorefront = (row, qty) => {
  */
 const cart = () => {
   if (cartHolder == null && cartView == null) {
-    console.log('Something went wrong finding the form')
     return
   }
 
