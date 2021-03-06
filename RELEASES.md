@@ -1,4 +1,6 @@
-# 1.0.0 Beta 1
+# 1.0.0
+
+Public Release!
 
 ### Key Changes
 
@@ -13,7 +15,6 @@
 - [New] Added trait to extend to check if has product variants.
 - [New] You can now pass `class` to the `product_variant` tag to style the select
 - [New] Config now has option for `currency` - defualts to £.
-
 
 # 0.3.0
 
