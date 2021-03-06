@@ -47,15 +47,19 @@ class ImportSingleProductJob implements ShouldQueue
             ->where('slug', $this->slug)
             ->first();
 
-        $formatTags = $this->data['tags'] ? explode(', ', $this->data['tags']) : null;
+        $formatTags = [];
+        $tags = $this->data['tags'] ? explode(', ', $this->data['tags']) : null;
+        foreach ($tags as $tag) {
+            $formatTags = $this->formatStrings($tag);
+        }
 
         $data = [
             'product_id' => $this->data['id'],
             'published_at' => Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s'),
             'title' => (!$entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
             'content' => (!$entry || config('shopify.overwrite.content')) ? $this->data['body_html'] : $entry->content,
-            'vendor' => (!$entry || config('shopify.overwrite.vendor')) ? $this->data['vendor'] : $entry->vendor,
-            'type' => (!$entry || config('shopify.overwrite.type')) ? $this->data['product_type'] : $entry->type,
+            'vendor' => (!$entry || config('shopify.overwrite.vendor')) ? $this->formatStrings($this->data['vendor']) : $entry->vendor,
+            'type' => (!$entry || config('shopify.overwrite.type')) ? $this->formatStrings($this->data['product_type']) : $entry->type,
             'tags' => (!$entry || config('shopify.overwrite.tags')) ? $formatTags : $entry->tags,
         ];
 
@@ -228,5 +232,13 @@ class ImportSingleProductJob implements ShouldQueue
     private function getPath(UploadedFile $file): String
     {
         return Path::assemble('Shopify/', $file->getClientOriginalName());
+    }
+
+    /**
+     * String formatter
+     */
+    private function formatStrings($string): string
+    {
+        return ucwords(str_replace('-', ' ', $string));
     }
 }
