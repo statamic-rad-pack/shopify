@@ -5,6 +5,7 @@
 - Product Types renamed to Types
 - Product Tags renamed to tags
 - `product_variant` tag now accepts `show_price="true"` rather than `currency=""`
+- Massively cleaned up the default theme files. 
 
 ### Other
 
