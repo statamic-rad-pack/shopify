@@ -2,8 +2,8 @@
 
     <h1 class="mb-10 text-5xl font-bold leading-tight tracking-tighter">{{ title }}</h1>
 
-    {{ collection:products as="products" limit="9" paginate="true" }}
-    <div class="grid grid-cols-3 gap-5">
+    {{ collection:products as="products" limit="12" paginate="true" }}
+        <div class="grid grid-cols-2 gap-5 lg:grid-cols-3">
         {{ products }}
             <div class="mb-4 grid-cell">
                 <div class="overflow-hidden bg-white shadow-lg sm:rounded-lg">
