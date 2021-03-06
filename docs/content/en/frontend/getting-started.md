@@ -12,6 +12,10 @@ As we are pulling all our products into Statamic, we'll want a way to access eve
 
 This addon only takes into account the Storefront API as we want more control over what happens on our frontend.
 
+## Demo
+
+To see the front-end in action, you can view a demo at [https://shopify.demo.jackwhiting.co.uk](https://shopify.demo.jackwhiting.co.uk).
+
 ## Storefront API
 
 The [Storefront API](https://shopify.github.io/js-buy-sdk/) has a lot of data you can retrieve, however we are only focusing on three elements. 
