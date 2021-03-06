@@ -1,33 +1,53 @@
-<!-- Shopify Statamic Cart Page -->
 <div class="container max-w-4xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">{{ title }}</h1>
+
+    <h1 class="mb-10 text-5xl font-bold leading-tight tracking-tighter">{{ title }}</h1>
 
     <div id="ss-cart">
         <p id="ss-cart-loading">Loading...</p>
 
-        <p id="ss-cart-no-items" class="hidden">Sorry, nothing is in your cart. Add some stuff!</p>
+        <p id="ss-cart-no-items" class="hidden">Looks like there isn't anything in your basket. <br><br>
+            <a href="/products" id="ss-checkout-link" class="inline-block px-4 py-2 text-base font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700">Continue Shopping</a>
+        </p>
 
         <div id="ss-cart-view" class="hidden">
-            <table class="w-full bg-white">
-                <thead>
-                <tr>
-                    <th class="text-left p-2 border-b">Image</th>
-                    <th class="text-left p-2 border-b">Name</th>
-                    <th class="text-left p-2 border-b">Price</th>
-                    <th class="text-left p-2 border-b">Quantity</th>
-                    <th class="text-left p-2 border-b">Subtotal</th>
-                    <th class=" p-2 border-b"></th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-
-            <div class="my-8">
-                <p>Subtotal: <span data-ss-subtotal></span></p>
+            <div class="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-white">
+                        <tr>
+                            <th scope="col" colspan="2" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                Product
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                Price
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                Quantity
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                Subtotal
+                            </th>
+                            <th scope="col" class="relative px-6 py-3">
+                                <span class="sr-only">Edit</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                    </tbody>
+                </table>
             </div>
 
-            <a href="" id="ss-checkout-link" class="bg-green-500 py-2 px-4 text-white rounded">Continue To Checkout</a>
+            <div class="my-8">
+                <p class="text-2xl font-light text-right">
+                    <span class="font-medium">
+                        Subtotal -
+                    </span>
+                    <span data-ss-subtotal></span>
+                </p>
+            </div>
+
+            <p class="text-right">
+                <a href="" id="ss-checkout-link" class="px-4 py-2 text-base font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700">Continue To Checkout</a>
+            </p>
         </div>
     </div>
 </div>

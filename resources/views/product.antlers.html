@@ -1,25 +1,59 @@
 
 <div class="container max-w-4xl mx-auto">
-    <a href="/" class="mb-3 block text-sm">Back to all products</a>
+    <a href="/products" class="flex mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 mr-2">
+            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+        </svg>
 
-    <div class="grid grid-cols-2 gap-5">
+        Back to all products
+    </a>
+
+    <h1 class="mb-10 text-5xl font-bold leading-tight tracking-tighter">{{ title }}</h1>
+
+    <div class="grid grid-cols-2 gap-10">
         <div class="grid-cell">
-            {{ featured_image }}
-            <img src="{{ url }}" alt="{{ alt }}">
-            {{ /featured_image }}
+            <picture class="relative block overflow-hidden shadow-lg aspect-w-1 aspect-h-1 rounded-3xl">
+                {{ featured_image }}
+                    <img class="absolute object-cover w-full h-full" src="{{ url }}" alt="{{ alt }}">
+                {{ /featured_image }}
+            </picture>
         </div>
 
         <div class="grid-cell">
-            <h1 class="text-2xl mb-4 font-bold">{{ title }}</h1>
-            <div class="rte mb-4">{{ content }}</div>
+            <div class="mb-8 prose">{{ content }}</div>
 
-            <form action="" name="" id="ss-product-add-form">
+            {{ if types }}
+                <div class="flex py-3 text-sm border-t border-b">
+                    <span class="mr-3 font-medium">Types</span>
+                    <span>
+                    {{ types }}
+                        <a href="{{ url }}" class="hover:text-indigo-700">{{ title | ucfirst }}</a>
+                    {{ /types }}
+                    </span>
+                </div>
+            {{ /if }}
+
+            {{ if vendor }}
+            <div class="flex py-3 -mt-px text-sm border-t border-b">
+                    <span class="mr-3 font-medium">Vendor</span>
+                    <span>
+                    {{ vendor }}
+                        <a href="{{ url }}" class="hover:text-indigo-700">{{ title | ucfirst }}</a>
+                    {{ /vendor }}
+                    </span>
+                </div>
+            {{ /if }}
+
+            <form action="" name="" id="ss-product-add-form" class="mt-5">
                 <input type="hidden" name="product_id" id="ss-product-id" value="{{ product_id }}" />
 
-                {{ product_variants :product="slug" currency="£" }}
+                <div class="flex mb-3">
+                    {{ product_variants :product="slug" show_price="true" class="block w-1/2 px-2 py-3 border" }}
 
-                <input type="number" min="1" value="1" id="ss-product-qty" class="p-2 w-20 border" />
-                <button type="submit" class="bg-green-500 py-2 px-4 text-white rounded">Add to Cart</button>
+                    <input type="number" min="1" value="1" id="ss-product-qty" class="w-20 p-2 ml-4 border" />
+                </div>
+
+                <button type="submit" class="px-4 py-2 text-base font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700">Add to Cart</button>
             </form>
         </div>
     </div>

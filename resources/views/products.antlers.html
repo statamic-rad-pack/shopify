@@ -1,28 +1,58 @@
 <div class="container max-w-4xl mx-auto">
-    <h1 class="mb-4 text-2xl font-bold">Products</h1>
+
+    <h1 class="mb-10 text-5xl font-bold leading-tight tracking-tighter">{{ title }}</h1>
 
     {{ collection:products as="products" limit="9" paginate="true" }}
     <div class="grid grid-cols-3 gap-5">
         {{ products }}
-            <div class="grid-cell mb-4">
-                {{ featured_image }}
-                    <img src="{{ url }}" alt="{{ alt }}" class="border-4 mb-2">
-                {{ /featured_image }}
+            <div class="mb-4 grid-cell">
+                <div class="overflow-hidden bg-white shadow-lg sm:rounded-lg">
+                    {{ featured_image }}
+                        <picture class="relative block aspect-w-3 aspect-h-2">
+                            <img src="{{ url }}" alt="{{ alt }}" class="absolute object-cover">
+                        </picture>
+                    {{ /featured_image }}
 
-                <h2 class="text-lg">{{ title }}</h2>
-                <a href="/products/{{ slug }}" class="text-green-500">View Product</a>
+                    <div class="px-4 py-5 lg:px-6">
+                        <h2 class="mb-2 text-xl font-semibold">{{ title }}</h2>
+
+                        <p class="mb-4">{{ product_price :product="slug" show_from="true" }}</p>
+
+                        <p class="mt-auto">
+                            <a href="/products/{{ slug }}" class="inline-block text-base font-medium text-indigo-600 hover:text-indigo-700">View Product</a>
+                        </p>
+                    </div>
+                </div>
             </div>
         {{ /products }}
     </div>
 
     {{ paginate }}
-    <div class="flex justify-between border-t pt-4 mt-10">
-        <a href="{{ prev_page }}">⬅ Previous</a>
+    <div class="flex items-center justify-between pt-4 pb-10 mt-6">
+        {{ if prev_page }}
+        <a href="{{ prev_page }}" class="inline-flex items-center font-medium text-indigo-600 hover:text-indigo-700">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+              </svg>
 
-        <span>{{ current_page }} of {{ total_pages }} pages
-                (There are {{ total_items }} posts)</span>
+            <span class="ml-2">Previous</span>
+        </a>
+        {{ else }}
+            <span></span>
+        {{ /if }}
 
-        <a href="{{ next_page }}">Next ➡</a>
+        <span class="text-xs">{{ current_page }} of {{ total_pages }} pages (There are {{ total_items }} products)</span>
+
+        {{ if next_page }}
+            <a href="{{ next_page }}" class="inline-flex items-center font-medium text-indigo-600 hover:text-indigo-700">
+                <span class="mr-2">Next</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </a>
+        {{ else }}
+            <span></span>
+        {{ /if }}
     </div>
     {{ /paginate }}
 

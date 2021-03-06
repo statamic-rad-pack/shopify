@@ -54,12 +54,31 @@ const showCartOverview = (lineItems, price, checkoutLink) => {
     const price = formatCurrency(variant.price)
     const subtotal = formatCurrency(quantity * variant.price)
     const elements = htmlToElements(`<tr data-ss-variant-id="${id}">
-<td class="p-2"><img src="${variant.image.src}" class="w-20"/></td>
-<td class="p-2"><span class="block font-semibold">${title}</span><span>${variant.title}</span></td>
-<td class="p-2">${price}</td>
-<td class="p-2"><input type="number" name="qty" min="1" value="${quantity}"/></td>
-<td class="p-2">${subtotal}</td>
-<td class="p-2"><a href="#" data-ss-delete class="text-sm text-red-600 uppercase">Delete</a></td>
+<td class="px-6 py-4 whitespace-nowrap" colspan="2">
+    <div class="flex items-center">
+        <div class="mr-3">
+            <picture class="aspect-w-1 aspect-h-1 overflow-hidden block relative w-20 h-20">
+                <img src="${variant.image.src}" class="pin-0 absolute object-cover" />
+            </picture>
+        </div>
+        <div>
+            <span class="block font-semibold">${title}</span>
+            <span>${variant.title}</span>
+        </div>
+    </div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+    ${price}
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+    <input type="number" name="qty" min="1" class="border w-20 p-1" value="${quantity}"/>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+    ${subtotal}
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+    <a href="#" data-ss-delete class="text-red-600"><svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></a>
+</td>
 </tr>`)
 
     elements.forEach(el => {
