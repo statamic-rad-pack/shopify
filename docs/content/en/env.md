@@ -1,6 +1,6 @@
 ---
 title: Env Values
-category: Guide
+category: Installation
 position: 3
 ---
 

@@ -26,6 +26,25 @@ Allows you to output your Site URL and Storefront Token to the front end and bin
 </script>
 ```
 
+## Product Price
+
+#### Usage
+
+```twig
+{{ product_price :product="slug" show_from="true" }}
+```
+
+- `product` slug is required
+- `show_from` will display a "From " prefix to the price if there are multiple variants.
+
+#### Output
+
+Returns the lowest price of a product.
+
+```html
+From £50.00 // or £4.99
+```
+
 ## Product Variants
 
 If you want a simple way to include the variants a tag has been made to load them in. If you need to customise things, I advise using the [query_scope]()
@@ -33,11 +52,12 @@ If you want a simple way to include the variants a tag has been made to load the
 #### Usage
 
 ```twig
-{{ product_variants :product="slug" currency="£" }}
+{{ product_variants :product="slug" show_price="true" class="border" }}
 ```
 
-- Product is required
-- Currency is optional.
+- `product` slug is required.
+- `show_price` is optional - will use the currency from the config file.
+- `class` allows you to pass classes down to the select.
 
 #### Output
 

@@ -2,7 +2,7 @@
 title: Setup
 description: ''
 position: 2
-category: Guide
+category: Installation
 ---
 
 You need to be running:
