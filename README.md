@@ -10,13 +10,14 @@
 [![License](https://poser.pugx.org/jackabox/statamic-shopify/license)](//packagist.org/packages/jackabox/statamic-shopify)
 
 </p>
+</div>
 
 A Statamic 3 addon that allows you to integrate Shopify. World-class ecommerce mixed with the brilliance of Statamic.
 
 [Live Demo](https://shopify.demo.jackwhiting.co.uk) - 
 [Docs](https://statamic-shopify.jackwhiting.co.uk)
 
-</div>
+
 
 
 ### Purpose
