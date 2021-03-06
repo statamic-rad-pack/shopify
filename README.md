@@ -3,11 +3,38 @@
         <h1>Statamic Shopify</h1>
     </a>
 
-<!-- [![Netlify Status](https://api.netlify.com/api/v1/badges/568aa65d-c4d7-4e42-a52d-dbb627f248b0/deploy-status)](https://app.netlify.com/sites/trusting-almeida-eda9e3/deploys) -->
+<p>
+    
+[![Latest Stable Version](https://poser.pugx.org/jackabox/statamic-shopify/v)](//packagist.org/packages/jackabox/statamic-shopify)
+[![Total Downloads](https://poser.pugx.org/jackabox/statamic-shopify/downloads)](//packagist.org/packages/jackabox/statamic-shopify)
+[![License](https://poser.pugx.org/jackabox/statamic-shopify/license)](//packagist.org/packages/jackabox/statamic-shopify)
 
-Integrate Shopify into your Statamic Site.
+</p>
 
-[demo](https://shopify.demo.jackwhiting.co.uk)
+A Statamic 3 addon that allows you to integrate Shopify. World-class ecommerce mixed with the brilliance of Statamic.
+
+[Live Demo](https://shopify.demo.jackwhiting.co.uk) - 
+[Docs](https://statamic-shopify.jackwhiting.co.uk)
+
 </div>
 
-Hey, this is a very WIP plugin at the moment and the testing ground for my integration. It involves pulling in the products to collections and some handy prewritten snippets to scaffold the frontend.
+
+### Purpose
+Shopify is world-class for ecommerce and it provides one of the best systems for handling orders, products, and users. However, the templating engine is frankly shit. This plugin aims to marry the wonderful CMS of Statamic with the ecommerce tools of Shopify.
+
+It utilises the Admin API to fetch products and listen to webhooks, and then allows for customisation on the front using either the Storefront API or the Buy Buttons.
+
+### Features
+
+- No more liquid
+- Import Products, Variants, and Images into Statamic
+- Can be used either flat-file (yay!) or with a database.
+- Keeps stock up to date by enabling the Order Webhook.
+- Keeps products in sync by enabling the Product Delete webhook.
+- ES6 JavaScript written integration to the Storefront API saving you hours.
+
+### Issues
+
+Please open an issue on [GitHub](https://github.com/jackabox/statamic-shopify/issues) if you encounter a problem. 
+
+If you'd like to propose a new feature then you can also start a [discussion](https://github.com/jackabox/statamic-shopify/discussions).
