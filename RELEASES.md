@@ -1,3 +1,9 @@
+# 1.0.1
+
+### Updated
+
+- Added a debounce handler and implemented around the cart quantity JS.
+
 # 1.0.0
 
 Public Release!
