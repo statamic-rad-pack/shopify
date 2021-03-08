@@ -25,9 +25,9 @@ export const bannerMessage = (elements, type = 'success', timeout = 6000) => {
 
   // Set type
   if (type === 'error') {
-    banner.classList.add('bg-red-300')
+    banner.classList.add('bg-red-400')
   } else {
-    banner.classList.add('bg-green-300')
+    banner.classList.add('bg-green-400')
   }
 
   // Append elements
@@ -52,4 +52,20 @@ export const bannerMessage = (elements, type = 'success', timeout = 6000) => {
  */
 export const formatCurrency = price => {
   return '£' + parseFloat(price).toFixed(2)
+}
+
+/**
+ * Debounce used to stop quantity update of cart
+ * being triggered multiple times in quick succession
+ * @param {*} func
+ * @param {*} wait
+ * @param {*} immediate
+ */
+export const debounce = (callback, wait) => {
+    let timeout;
+    return (...args) => {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => callback.apply(context, args), wait);
+    };
 }

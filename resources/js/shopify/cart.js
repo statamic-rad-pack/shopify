@@ -1,6 +1,6 @@
 import client from './client'
 import { checkoutId } from './checkout'
-import { htmlToElements, formatCurrency, bannerMessage } from './helpers'
+import { htmlToElements, formatCurrency, bannerMessage, debounce } from './helpers'
 
 const cartLoading = document.getElementById('ss-cart-loading')
 const noItemsMessage = document.getElementById('ss-cart-no-items')
@@ -168,7 +168,7 @@ const deleteRowFromStorefront = row => {
  * @param row
  * @param qty
  */
-const updateQtyInStorefront = (row, qty) => {
+const updateQtyInStorefront = debounce((row, qty) => {
   const id = row.getAttribute('data-ss-variant-id')
 
   const items = [
@@ -185,7 +185,7 @@ const updateQtyInStorefront = (row, qty) => {
       setCartSubtotal(subtotalPriceV2.amount)
     })
     .catch(err => {})
-}
+}, 500)
 
 /**
  * Cart initialisation script which groups all the
@@ -193,6 +193,7 @@ const updateQtyInStorefront = (row, qty) => {
  */
 const cart = () => {
   if (cartHolder == null && cartView == null) {
+    console.log('Something went wrong finding the form')
     return
   }
 
