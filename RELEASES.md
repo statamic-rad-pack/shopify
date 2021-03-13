@@ -1,3 +1,8 @@
+# 1.0.2
+
+- [Fix] Fixing tag foreach on null
+- [Fix] Fixing quick start link in placeholder
+
 # 1.0.1
 
 ### Updated

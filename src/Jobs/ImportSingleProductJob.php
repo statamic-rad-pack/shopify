@@ -49,8 +49,11 @@ class ImportSingleProductJob implements ShouldQueue
 
         $formatTags = [];
         $tags = $this->data['tags'] ? explode(', ', $this->data['tags']) : null;
-        foreach ($tags as $tag) {
-            $formatTags = $this->formatStrings($tag);
+
+        if ($tags) {
+            foreach ($tags as $tag) {
+                $formatTags = $this->formatStrings($tag);
+            }
         }
 
         $data = [
