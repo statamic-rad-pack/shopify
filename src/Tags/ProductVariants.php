@@ -54,12 +54,23 @@ class ProductVariants extends Tags
 
         foreach ($variants as $variant) {
             $title = $variant['title'];
+            $out_of_stock = false;
+
+            if (isset($variant['inventory_policy'])) {
+                if ($variant['inventory_policy'] === 'deny' && $variant['inventory_quantity'] === 0) {
+                    $out_of_stock = true;
+                }
+            }
 
             if ($this->params->get('show_price')) {
                 $title .= ' - ' . config('shopify.currency') . $variant['price'];
             }
 
-            $html .= '<option value="' . $variant['storefront_id'] . '">' . $title . '</option>';
+            if ($this->params->get('show_out_of_stock') && $out_of_stock) {
+                $title .= ' (' . config('shopify.lang.out_of_stock') . ')';
+            }
+
+            $html .= '<option value="' . $variant['storefront_id'] . '" data-in-stock="' . $out_of_stock . '">' . $title . '</option>';
         }
 
         return $html;
