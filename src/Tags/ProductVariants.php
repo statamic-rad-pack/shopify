@@ -20,7 +20,7 @@ class ProductVariants extends Tags
 
         $variants = $this->fetchProductVariants($this->params->get('product'));
 
-        if ($variants->count() === 0) {
+        if (!$variants) {
             return;
         }
 

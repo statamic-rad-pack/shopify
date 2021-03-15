@@ -26,18 +26,12 @@ class ProductPrice extends Tags
 
         $html = '';
 
-        $stock = 0;
-        $deny = false;
-
-        foreach ($variants as $variant) {
-            $stock += $variant['inventory_quantity'];
-            $deny = $variant['inventory_policy'] === 'deny';
-        }
-
-        if ($stock === 0 and $deny) {
+        // Out of Stock
+        if (!$this->isInStock($variants)) {
             return 'Out of Stock';
         }
 
+        // Lowest Price
         $pricePluck = $variants->pluck('price');
 
         if ($pricePluck->count() > 1 && $this->params->get('show_from') === true) {

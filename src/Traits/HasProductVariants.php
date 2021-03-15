@@ -30,4 +30,21 @@ trait HasProductVariants
             return $values;
         });
     }
+
+    protected function isInStock($variants): bool
+    {
+        $stock = 0;
+        $deny = false;
+
+        foreach ($variants as $variant) {
+            $stock += $variant['inventory_quantity'];
+            $deny = $variant['inventory_policy'] === 'deny';
+        }
+
+        if ($stock === 0 and $deny) {
+            return false;
+        }
+
+        return true;
+    }
 }
