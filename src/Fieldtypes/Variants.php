@@ -13,6 +13,9 @@ class Variants extends Fieldtype
     public function preload()
     {
         $product = $this->field()->parent();
+
+        if (!$product->initialPath()) return;
+
         $variantBlueprint = new VariantBlueprint();
         $variantFields = $variantBlueprint()->fields()->addValues([])->preProcess();
 
