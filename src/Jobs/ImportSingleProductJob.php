@@ -111,6 +111,7 @@ class ImportSingleProductJob implements ShouldQueue
                 'product_slug' => $product_slug,
                 'title' => $variant['title'],
                 'inventory_quantity' => $variant['inventory_quantity'],
+                'inventory_policy' => $variant['inventory_policy'],
                 'price' => $variant['price'],
                 'sku' => $variant['sku'],
                 'grams' => $variant['grams'],

@@ -20,19 +20,25 @@ class ProductPrice extends Tags
 
         $variants = $this->fetchProductVariants($this->params->get('product'));
 
-        if ($variants->count() === 0) {
-            return;
+        if (!$variants) {
+            return null;
         }
 
         $html = '';
 
-        $variants = $variants->pluck('price');
+        // Out of Stock
+        if (!$this->isInStock($variants)) {
+            return 'Out of Stock';
+        }
 
-        if ($variants->count() > 1 && $this->params->get('show_from') === true) {
+        // Lowest Price
+        $pricePluck = $variants->pluck('price');
+
+        if ($pricePluck->count() > 1 && $this->params->get('show_from') === true) {
             $html .= 'From ';
         }
 
-        $html .= config('shopify.currency') . $variants->sort()->splice(0, 1)[0];
+        $html .= config('shopify.currency') . $pricePluck->sort()->splice(0, 1)[0];
 
         return $html;
     }
