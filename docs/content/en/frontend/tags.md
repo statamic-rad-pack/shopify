@@ -39,10 +39,20 @@ Allows you to output your Site URL and Storefront Token to the front end and bin
 
 #### Output
 
-Returns the lowest price of a product.
+If the product is out of stock returns `out of stock`. 
+
+If not, returns the lowest price of a product. 
 
 ```html
-From £50.00 // or £4.99
+Out of Stock
+
+// or
+
+From £50.00 
+
+// or 
+
+£4.99
 ```
 
 ## Product Variants
@@ -83,3 +93,25 @@ If you want a simple way to include the variants a tag has been made to load the
   </code-block>
 </code-group>
 
+## In Stock
+
+Check if a product is in stock or not.
+
+#### Usage
+
+```twig
+{{ in_stock :product="slug" }}
+```
+
+```twig
+{{ if {in_stock :product="slug"} }}
+{{ /if }}
+```
+
+- `product` slug is required.
+
+#### Output
+
+```json
+true // or false
+```

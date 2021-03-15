@@ -8,7 +8,7 @@ The import jobs have been written to pull in your products and sort out all the 
 
 ## Via the Admin
 
-These methods can be accessed through the CMS by finding the **Settings** section under the **Shopify** heading.
+These methods can be accessed through the CMS by finding the **Shopify** section under the **Tools** heading.
 
 <alert type="info">
 
