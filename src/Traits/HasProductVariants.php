@@ -38,7 +38,10 @@ trait HasProductVariants
 
         foreach ($variants as $variant) {
             $stock += $variant['inventory_quantity'];
-            $deny = $variant['inventory_policy'] === 'deny';
+
+            if (isset($variant['inventory_policy'])) {
+                $deny = $variant['inventory_policy'] === 'deny';
+            }
         }
 
         if ($stock === 0 and $deny) {
