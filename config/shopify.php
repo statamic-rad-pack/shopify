@@ -45,5 +45,13 @@ return [
     /**
      * Shop Currency
      */
-    'currency' => '£'
+    'currency' => '£',
+
+    /**
+     * Change some of the language variables used in the tags
+     */
+    'lang' => [
+        'out_of_stock' => 'Out of Stock',
+        'from' => 'From'
+    ]
 ];

@@ -1,3 +1,9 @@
+# 1.1.1
+
+- [New] Added lang array to config to overwrite some of the default text used in tags.
+- [New] Added option to `product_variants` tag to show out of stock in the select. 
+- [New] Appends `data-in-stock` to each option in the variant loop to show if in/out of stock.
+
 # 1.1.0
 
 - [New] Added `{{ in_stock :product="slug" }}` tag to check if a product is in stock.

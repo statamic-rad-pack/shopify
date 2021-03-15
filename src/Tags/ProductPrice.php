@@ -28,14 +28,14 @@ class ProductPrice extends Tags
 
         // Out of Stock
         if (!$this->isInStock($variants)) {
-            return 'Out of Stock';
+            return config('shopify.lang.out_of_stock', 'Out of Stock');
         }
 
         // Lowest Price
         $pricePluck = $variants->pluck('price');
 
         if ($pricePluck->count() > 1 && $this->params->get('show_from') === true) {
-            $html .= 'From ';
+            $html .= config('shopify.lang.from', 'From') . ' ';
         }
 
         $html .= config('shopify.currency') . $pricePluck->sort()->splice(0, 1)[0];
