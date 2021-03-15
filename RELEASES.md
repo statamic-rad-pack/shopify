@@ -1,3 +1,9 @@
+# 1.0.4
+
+- [Update] Moved the Shopify Settings into Tools and branded it with the Shopify Bag icon.
+
+- [Fix] Product Price tag had been accidently removed.
+
 # 1.0.3
 
 - [Fix] Fixing create new product in Statamic throwing error.

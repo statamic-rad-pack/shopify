@@ -32,11 +32,12 @@ class ServiceProvider extends AddonServiceProvider
     protected $tags = [
         \Jackabox\Shopify\Tags\ShopifyTokens::class,
         \Jackabox\Shopify\Tags\ShopifyScripts::class,
+        \Jackabox\Shopify\Tags\ProductPrice::class,
         \Jackabox\Shopify\Tags\ProductVariants::class
     ];
 
     protected $scopes = [
-        \Jackabox\Shopify\Scopes\VariantByProduct::class
+        \Jackabox\Shopify\Scopes\VariantByProduct::class,
     ];
 
     protected $commands = [
