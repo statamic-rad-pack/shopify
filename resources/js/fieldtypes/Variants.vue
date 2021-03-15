@@ -23,7 +23,7 @@
                     </tr>
                 </tbody>
             </table>
-            <p v-else class="text-sm">To get started, add some variants to products in Shopify.</p>
+            <p v-else class="p-1 text-sm">To get started, add some variants to products in Shopify.</p>
         </section>
 
         <variant-form
