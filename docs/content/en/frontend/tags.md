@@ -62,12 +62,13 @@ If you want a simple way to include the variants a tag has been made to load the
 #### Usage
 
 ```twig
-{{ product_variants :product="slug" show_price="true" class="border" }}
+{{ product_variants :product="slug" show_price="true" show_out_of_stock="true" class="border" }}
 ```
 
-- `product` slug is required.
-- `show_price` is optional - will use the currency from the config file.
-- `class` allows you to pass classes down to the select.
+- `product`: slug is required.
+- `show_price`: optional, will use the currency from the config file.
+- `show_out_of_stock`: optional, will use the "Out of Stock" lang from the config file.
+- `class`: optional, allows you to pass classes down to the select.
 
 #### Output
 

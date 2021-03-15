@@ -1,7 +1,7 @@
 ---
 title: Starter Kit
 category: Installation
-position: 3
+position: 5
 ---
 
 The [starter kit](https://github.com/jackabox/statamic-shopify-starter-kit) is thw recommended way to install Statamic Shopify.
