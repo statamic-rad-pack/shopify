@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackabox\Shopify\Http\Controllers\Api;
+namespace Jackabox\Shopify\Http\Controllers\Actions;
 
 use Illuminate\Http\Request;
 use Statamic\Facades\Entry;
@@ -10,11 +10,11 @@ class VariantsController extends CpController
 {
     public function fetch(Request $request, $product)
     {
-        if (! $request->get('option1')) {
+        if (!$request->get('option1')) {
             return response()->json('No options set');
         }
 
-        if (! $product) {
+        if (!$product) {
             return response()->json('No product');
         }
 

@@ -2,6 +2,7 @@
 
 - [Fix] Fixing create new product in Statamic throwing error.
 - [Fix] Styling on no variants found for products.
+- [Fix] Invalid namespace on Variant Action
 
 # 1.0.2
 
