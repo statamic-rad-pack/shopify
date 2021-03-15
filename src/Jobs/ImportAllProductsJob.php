@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Artisan;
 use PHPShopify\ShopifySDK;
 
 class ImportAllProductsJob implements ShouldQueue
@@ -15,7 +16,8 @@ class ImportAllProductsJob implements ShouldQueue
 
     public $data = [];
 
-    public function __construct($data) {
+    public function __construct($data)
+    {
         $this->data = $data;
     }
 
@@ -24,5 +26,7 @@ class ImportAllProductsJob implements ShouldQueue
         foreach ($this->data as $product) {
             ImportSingleProductJob::dispatch($product);
         }
+
+        Artisan::call('cache:clear');
     }
 }

@@ -1,3 +1,11 @@
+# 1.1.0
+
+- [New] Added `{{ in_stock :product="slug" }}` tag to check if a product is in stock.
+- [New] Pulls in `inventory_policy` from the Shopify API for variants (You will need to sync again).
+- [New] Displays **out of stock** on `{{ product_price }}` tag if policy exists and there is no stock.
+- [Update] Moved the Shopify Settings into Tools and branded it with the Shopify Bag icon.
+- [Fix] Product Price tag had been accidently removed.
+
 # 1.0.3
 
 - [Fix] Fixing create new product in Statamic throwing error.
