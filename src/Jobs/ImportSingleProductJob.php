@@ -76,13 +76,16 @@ class ImportSingleProductJob implements ShouldQueue
         $this->importVariants($this->data['variants'], $this->data['handle']);
 
         // Import Images
-        $asset = $this->importImages($this->data['image']);
-        $data['featured_image'] = $asset->path();
+        if ($this->data['image']) {
+            $asset = $this->importImages($this->data['image']);
+            $data['featured_image'] = $asset->path();
+        }
 
-        // TODO: Wrap this in a conditional if they want it.
-        foreach ($this->data['images'] as $image) {
-            $asset = $this->importImages($image);
-            $data['gallery'][] = $asset->path();
+        if ($this->data['images']) {
+            foreach ($this->data['images'] as $image) {
+                $asset = $this->importImages($image);
+                $data['gallery'][] = $asset->path();
+            }
         }
 
         $entry->data($data)->save();
