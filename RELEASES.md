@@ -1,3 +1,7 @@
+# 1.1.2
+
+- [Fix] Fixing error when no image is found for a product
+
 # 1.1.1
 
 - [New] Added lang array to config to overwrite some of the default text used in tags.
