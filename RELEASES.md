@@ -1,3 +1,7 @@
+# 1.1.3
+
+- [Fix] Fixing error with `cart.js` when variants didn't have images.
+
 # 1.1.2
 
 - [Fix] Fixing error when no image is found for a product
@@ -5,7 +9,7 @@
 # 1.1.1
 
 - [New] Added lang array to config to overwrite some of the default text used in tags.
-- [New] Added option to `product_variants` tag to show out of stock in the select. 
+- [New] Added option to `product_variants` tag to show out of stock in the select.
 - [New] Appends `data-in-stock` to each option in the variant loop to show if in/out of stock.
 
 # 1.1.0
@@ -42,7 +46,7 @@ Public Release!
 - Product Types renamed to Types
 - Product Tags renamed to tags
 - `product_variant` tag now accepts `show_price="true"` rather than `currency=""`
-- Massively cleaned up the default theme files. 
+- Massively cleaned up the default theme files.
 
 ### Other
 

@@ -1,6 +1,11 @@
 import client from './client'
 import { checkoutId } from './checkout'
-import { htmlToElements, formatCurrency, bannerMessage, debounce } from './helpers'
+import {
+  htmlToElements,
+  formatCurrency,
+  bannerMessage,
+  debounce
+} from './helpers'
 
 const cartLoading = document.getElementById('ss-cart-loading')
 const noItemsMessage = document.getElementById('ss-cart-no-items')
@@ -42,7 +47,7 @@ const hideCartOverview = () => {
  * Shows the cart overview.
  * Hides the message that nothing is in the basket.
  */
-const showCartOverview = (lineItems, price, checkoutLink) => {
+const showCartOverview = async (lineItems, price, checkoutLink) => {
   cartView.classList.remove('hidden')
   noItemsMessage.classList.add('hidden')
 
@@ -50,22 +55,31 @@ const showCartOverview = (lineItems, price, checkoutLink) => {
   const tableBody = document.querySelector('#ss-cart-view table tbody')
 
   // Append line item elements
-  lineItems.forEach(({ id, variant, title, quantity }) => {
+  await lineItems.forEach(({ id, variant, title, quantity }) => {
     const price = formatCurrency(variant.price)
     const subtotal = formatCurrency(quantity * variant.price)
-    const elements = htmlToElements(`<tr data-ss-variant-id="${id}">
-<td class="px-6 py-4 whitespace-nowrap" colspan="2">
-    <div class="flex items-center">
-        <div class="mr-3">
-            <picture class="aspect-w-1 aspect-h-1 overflow-hidden block relative w-20 h-20">
-                <img src="${variant.image.src}" class="pin-0 absolute object-cover" />
-            </picture>
-        </div>
-        <div>
-            <span class="block font-semibold">${title}</span>
-            <span>${variant.title}</span>
-        </div>
+
+    let html = `<tr data-ss-variant-id="${id}">
+    <td class="px-6 py-4 whitespace-nowrap" colspan="2">
+        <div class="flex items-center">
+            <div class="mr-3">
+                <picture class="aspect-w-1 aspect-h-1 overflow-hidden block relative w-20 h-20">`
+
+    if (variant.image) {
+      html =
+        html +
+        `<img src="${variant.image.src}" class="pin-0 absolute object-cover" />`
+    }
+
+    html =
+      html +
+      `</picture>
     </div>
+    <div>
+        <span class="block font-semibold">${title}</span>
+        <span>${variant.title}</span>
+    </div>
+</div>
 </td>
 <td class="px-6 py-4 whitespace-nowrap">
     ${price}
@@ -76,10 +90,12 @@ const showCartOverview = (lineItems, price, checkoutLink) => {
 <td class="px-6 py-4 whitespace-nowrap">
     ${subtotal}
 </td>
-<td class="px-6 py-4 whitespace-nowrap">
-    <a href="#" data-ss-delete class="text-red-600"><svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></a>
-</td>
-</tr>`)
+    <td class="px-6 py-4 whitespace-nowrap">
+        <a href="#" data-ss-delete class="text-red-600"><svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></a>
+    </td>
+</tr>`
+
+    const elements = htmlToElements(html)
 
     elements.forEach(el => {
       tableBody.appendChild(el)
@@ -193,7 +209,6 @@ const updateQtyInStorefront = debounce((row, qty) => {
  */
 const cart = () => {
   if (cartHolder == null && cartView == null) {
-    console.log('Something went wrong finding the form')
     return
   }
 
