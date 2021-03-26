@@ -8,7 +8,11 @@ Route::name('shopify.')->group(function () {
         ->withoutMiddleware([VerifyCsrfToken::class])
         ->name('webhook.order.created');
 
-    Route::post('/webhook/product/update', 'Webhooks\ProductUpdateController')
+    Route::post('/webhook/product/create', 'Webhooks\ProductCreateUpdateController')
+        ->withoutMiddleware([VerifyCsrfToken::class])
+        ->name('webhook.product.create');
+
+    Route::post('/webhook/product/update', 'Webhooks\ProductCreateUpdateController')
         ->withoutMiddleware([VerifyCsrfToken::class])
         ->name('webhook.product.update');
 

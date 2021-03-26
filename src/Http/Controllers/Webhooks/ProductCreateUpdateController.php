@@ -7,7 +7,7 @@ use Jackabox\Shopify\Jobs\ImportSingleProductJob;
 use PHPShopify\ShopifySDK;
 use Statamic\Facades\Entry;
 
-class ProductUpdateController extends WebhooksController
+class ProductCreateUpdateController extends WebhooksController
 {
     public function __invoke(Request $request)
     {
