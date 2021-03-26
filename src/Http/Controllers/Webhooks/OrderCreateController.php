@@ -5,11 +5,10 @@ namespace Jackabox\Shopify\Http\Controllers\Webhooks;
 use Illuminate\Http\Request;
 use Jackabox\Shopify\Jobs\ImportSingleProductJob;
 use PHPShopify\ShopifySDK;
-use Statamic\Facades\Entry;
 
-class ProductDeletionController extends WebhooksController
+class OrderCreateController extends WebhooksController
 {
-    public function listen(Request $request)
+    public function __invoke(Request $request)
     {
         $hmac_header = $request->header('X-Shopify-Hmac-Sha256');
         $data = $request->getContent();
@@ -22,20 +21,13 @@ class ProductDeletionController extends WebhooksController
         // Decode data
         $data = json_decode($data);
 
-        $productEntry =  Entry::query()
-            ->where('collection', 'products')
-            ->where('product_id', $data->id)
-            ->get();
+        // Fetch Single Product
+        $shopify = new ShopifySDK;
 
-        if ($productEntry->count()) {
-            Entry::query()
-                ->where('collection', 'variants')
-                ->where('product_slug', $productEntry->slug())
-                ->delete();
-
-            $productEntry->delete();
+        foreach ($data->line_items as $item) {
+            $product = $shopify->Product($item->product_id)->get();
+            ImportSingleProductJob::dispatch($product);
         }
-
 
         return response()->json([], 200);
     }

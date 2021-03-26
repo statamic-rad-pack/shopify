@@ -5,10 +5,11 @@ namespace Jackabox\Shopify\Http\Controllers\Webhooks;
 use Illuminate\Http\Request;
 use Jackabox\Shopify\Jobs\ImportSingleProductJob;
 use PHPShopify\ShopifySDK;
+use Statamic\Facades\Entry;
 
-class OrderCreationController extends WebhooksController
+class ProductCreateUpdateController extends WebhooksController
 {
-    public function listen(Request $request)
+    public function __invoke(Request $request)
     {
         $hmac_header = $request->header('X-Shopify-Hmac-Sha256');
         $data = $request->getContent();
@@ -19,16 +20,13 @@ class OrderCreationController extends WebhooksController
         }
 
         // Decode data
-        $data = json_decode($data);
+        $data = json_decode($data, true);
 
-        // Fetch Single Product
-        $shopify = new ShopifySDK;
+        // Dispatch job
+        ImportSingleProductJob::dispatch($data);
 
-        foreach ($data->line_items as $item) {
-            $product = $shopify->Product($item->product_id)->get();
-            ImportSingleProductJob::dispatch($product);
-        }
-
-        return response()->json([], 200);
+        return response()->json([
+            'message' => 'Product has been dispatched to the queue for update'
+        ], 200);
     }
 }
