@@ -4,7 +4,7 @@
     </a>
 
 <p>
-    
+
 [![Latest Stable Version](https://poser.pugx.org/jackabox/statamic-shopify/v)](//packagist.org/packages/jackabox/statamic-shopify)
 [![Total Downloads](https://poser.pugx.org/jackabox/statamic-shopify/downloads)](//packagist.org/packages/jackabox/statamic-shopify)
 [![License](https://poser.pugx.org/jackabox/statamic-shopify/license)](//packagist.org/packages/jackabox/statamic-shopify)
@@ -14,7 +14,7 @@
 
 A Statamic 3 addon that allows you to integrate Shopify. World-class ecommerce mixed with the brilliance of Statamic.
 
-[Live Demo](https://shopify.demo.jackwhiting.co.uk) - 
+[Live Demo](https://shopify.demo.jackwhiting.co.uk) -
 [Docs](https://statamic-shopify.jackwhiting.co.uk)
 
 
@@ -36,6 +36,6 @@ It utilises the Admin API to fetch products and listen to webhooks, and then all
 
 ### Issues
 
-Please open an issue on [GitHub](https://github.com/jackabox/statamic-shopify/issues) if you encounter a problem. 
+Please open an issue on [GitHub](https://github.com/jackabox/statamic-shopify/issues) if you encounter a problem.
 
 If you'd like to propose a new feature then you can also start a [discussion](https://github.com/jackabox/statamic-shopify/discussions).

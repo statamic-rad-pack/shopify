@@ -7,37 +7,23 @@ use Jackabox\Shopify\Jobs\ImportSingleProductJob;
 use PHPShopify\ShopifySDK;
 use Statamic\Facades\Entry;
 
-class ProductDeletionController extends WebhooksController
+class ProductUpdateController extends WebhooksController
 {
-    public function listen(Request $request)
+    public function __invoke(Request $request)
     {
         $hmac_header = $request->header('X-Shopify-Hmac-Sha256');
         $data = $request->getContent();
         $verified = $this->verify($data, $hmac_header);
-
-        ray($data);
 
         if (! $verified) {
             return response()->json(['error' => true], 403);
         }
 
         // Decode data
-        $data = json_decode($data);
+        $data = json_decode($data, true);
 
-        $productEntry =  Entry::query()
-            ->where('collection', 'products')
-            ->where('product_id', $data->id)
-            ->get();
-
-        if ($productEntry->count()) {
-            Entry::query()
-                ->where('collection', 'variants')
-                ->where('product_slug', $productEntry->slug())
-                ->delete();
-
-            $productEntry->delete();
-        }
-
+        // Dispatch job
+        ImportSingleProductJob::dispatch($data);
 
         return response()->json([
             'message' => 'Product has been dispatched to the queue for update'
