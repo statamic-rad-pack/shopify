@@ -6,9 +6,9 @@ use Illuminate\Http\Request;
 use Jackabox\Shopify\Jobs\ImportSingleProductJob;
 use PHPShopify\ShopifySDK;
 
-class OrderCreationController extends WebhooksController
+class OrderCreateController extends WebhooksController
 {
-    public function listen(Request $request)
+    public function __invoke(Request $request)
     {
         $hmac_header = $request->header('X-Shopify-Hmac-Sha256');
         $data = $request->getContent();

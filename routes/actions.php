@@ -4,7 +4,7 @@ use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::name('shopify.')->group(function () {
-    Route::post('/webhook/order', 'Webhooks\OrderCreationController@listen')
+    Route::post('/webhook/order', 'Webhooks\OrderCreateController')
         ->withoutMiddleware([VerifyCsrfToken::class])
         ->name('webhook.order.created');
 
@@ -16,9 +16,9 @@ Route::name('shopify.')->group(function () {
         ->withoutMiddleware([VerifyCsrfToken::class])
         ->name('webhook.product.update');
 
-    Route::post('/webhook/product-deletion', 'Webhooks\ProductDeletionController@listen')
+    Route::post('/webhook/product/delete', 'Webhooks\ProductDeleteController')
         ->withoutMiddleware([VerifyCsrfToken::class])
-        ->name('webhook.product.deleted');
+        ->name('webhook.product.delete');
 
     Route::get('/variants/{product}', 'Actions\VariantsController@fetch')
         ->name('variants.fetch');

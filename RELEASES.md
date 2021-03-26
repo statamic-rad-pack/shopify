@@ -1,3 +1,18 @@
+# 1.2.0
+
+- [New] All webhooks have been given a name.
+- [New] Added a webhook for when a product is created in Shopify.
+- [New] Added a webhook for when a product is updated in Shopify
+
+>  these two webhooks if utilised, should mean you don't have to run full imports after the first one.
+
+- [Fix] Incorrect name on Product Delete Webhook.
+- [Update] Product delete webhook now has a new path. See potentially breaking below.
+
+### Potentially breaking
+
+WebHook endpoint for **Product Deletion** has changed from `/!/statamic-shopify/webhook/product-deletion` to `/!/statamic-shopify/webhook/product/delete`
+
 # 1.1.3
 
 - [Fix] Fixing error with `cart.js` when variants didn't have images.

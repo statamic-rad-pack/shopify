@@ -7,15 +7,13 @@ use Jackabox\Shopify\Jobs\ImportSingleProductJob;
 use PHPShopify\ShopifySDK;
 use Statamic\Facades\Entry;
 
-class ProductDeletionController extends WebhooksController
+class ProductDeleteController extends WebhooksController
 {
-    public function listen(Request $request)
+    public function __invoke(Request $request)
     {
         $hmac_header = $request->header('X-Shopify-Hmac-Sha256');
         $data = $request->getContent();
         $verified = $this->verify($data, $hmac_header);
-
-        ray($data);
 
         if (! $verified) {
             return response()->json(['error' => true], 403);
