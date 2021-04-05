@@ -51,11 +51,6 @@ class ImportSingleProductJob implements ShouldQueue
         $vendors = $this->cleanArrayData($this->data['vendor']);
         $type = $this->cleanArrayData($this->data['product_type']);
 
-        ray($this->data);
-        ray($tags);
-        ray($vendors);
-        ray($type);
-
         $data = [
             'product_id' => $this->data['id'],
             'published_at' => Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s'),
@@ -116,21 +111,20 @@ class ImportSingleProductJob implements ShouldQueue
                     ->slug($variant['id']);
             }
 
-            $entry->data([
-                'variant_id' => $variant['id'],
-                'product_slug' => $product_slug,
-                'title' => $variant['title'],
-                'inventory_quantity' => $variant['inventory_quantity'],
-                'inventory_policy' => $variant['inventory_policy'],
-                'price' => $variant['price'],
-                'sku' => $variant['sku'],
-                'grams' => $variant['grams'],
-                'requires_shipping' => $variant['requires_shipping'],
-                'option1' => $variant['option1'],
-                'option2' => $variant['option2'],
-                'option3' => $variant['option3'],
-                'storefront_id' => base64_encode($variant['admin_graphql_api_id']),
-            ])->save();
+            $entry->set('variant_id', $variant['id']);
+            $entry->set('product_slug', $product_slug);
+            $entry->set('title', $variant['title']);
+            $entry->set('inventory_quantity', $variant['inventory_quantity']);
+            $entry->set('inventory_policy', $variant['inventory_policy']);
+            $entry->set('price', $variant['price']);
+            $entry->set('sku', $variant['sku']);
+            $entry->set('grams', $variant['grams']);
+            $entry->set('requires_shipping', $variant['requires_shipping']);
+            $entry->set('option1', $variant['option1']);
+            $entry->set('option2', $variant['option2']);
+            $entry->set('option3', $variant['option3']);
+            $entry->set('storefront_id', base64_encode($variant['admin_graphql_api_id']));
+            $entry->save();
         }
     }
 
@@ -151,7 +145,6 @@ class ImportSingleProductJob implements ShouldQueue
             $item = array_search($variant->variant_id, array_column($variants, 'id'));
 
             if ($item === false) {
-                ray('deleting');
                 $variant->delete();
             }
         }

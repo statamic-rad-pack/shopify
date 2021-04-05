@@ -3,6 +3,7 @@
 - [Bug] Now removes old variants that are no longer present in Shopify. Fixes #32.
 - [Bug] Additional fields are no longer being overwritten on Products. Fixes #30.
 - [Bug] Fixes the way product tags/type/vendors import. No longer a mismatch.
+- [Bug] Fixes variant data would be overwriten if extended. 
 
 # 1.2.0
 
