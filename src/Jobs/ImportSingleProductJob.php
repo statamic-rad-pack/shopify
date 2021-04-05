@@ -10,7 +10,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
-use PHPShopify\ShopifySDK;
 use Statamic\Facades\Asset;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Path;
@@ -97,6 +96,8 @@ class ImportSingleProductJob implements ShouldQueue
      */
     private function importVariants(array $variants, string $product_slug)
     {
+        $this->removeOldVariants($variants, $product_slug);
+
         foreach ($variants as $variant) {
             $entry = Entry::query()
                 ->where('collection', 'variants')
@@ -124,6 +125,29 @@ class ImportSingleProductJob implements ShouldQueue
                 'option3' => $variant['option3'],
                 'storefront_id' => base64_encode($variant['admin_graphql_api_id']),
             ])->save();
+        }
+    }
+
+    /**
+     * Remove old variants that are no longer used on a single product.
+     *
+     * @param array $variants
+     * @param string $product_slug
+     */
+    private function removeOldVariants(array $variants, string $product_slug)
+    {
+        $allVariants = Entry::query()
+            ->where('collection', 'variants')
+            ->where('product_slug', $product_slug)
+            ->get();
+
+        foreach ($allVariants as $variant) {
+            $item = array_search($variant->variant_id, array_column($variants, 'id'));
+
+            if ($item === false) {
+                ray('deleting');
+                $variant->delete();
+            }
         }
     }
 

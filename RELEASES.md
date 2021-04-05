@@ -1,3 +1,7 @@
+# 1.2.1
+
+- [Bug] Now removes old variants that are no longer present in Shopify. Fixes #32.
+
 # 1.2.0
 
 - [New] All webhooks have been given a name.
