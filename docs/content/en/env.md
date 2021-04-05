@@ -27,5 +27,5 @@ If you are using the webhook handlers you'll need the following.
 
 | Value             | Description  | 
 | -------------------| ------------- |
-| `SHOPIFY_WEBHOOK_SECRET`  | Found when creating your first notifcation. Read more about this [here](/cms/webhooks)  |
+| `SHOPIFY_WEBHOOK_SECRET`  | Found when creating your first notifcation. Read more about this [here](/CMS/webhooks)  |
 
