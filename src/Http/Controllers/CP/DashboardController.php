@@ -18,6 +18,7 @@ class DashboardController extends CpController
         $can_run_import = (config('shopify.url') && config('shopify.auth_key') && config('shopify.auth_password'));
 
         return view('shopify::cp.dashboard', [
+            'title' => 'Shopify',
             'shopify_url' => $shopify_url,
             'can_run_import' => $can_run_import
         ]);
