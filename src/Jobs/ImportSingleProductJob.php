@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Statamic\Facades\Asset;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Path;
+use Statamic\Support\Str;
 
 class ImportSingleProductJob implements ShouldQueue
 {
@@ -46,23 +47,23 @@ class ImportSingleProductJob implements ShouldQueue
             ->where('slug', $this->slug)
             ->first();
 
-        $formatTags = [];
-        $tags = $this->data['tags'] ? explode(', ', $this->data['tags']) : null;
+        $tags = $this->cleanArrayData($this->data['tags']);
+        $vendors = $this->cleanArrayData($this->data['vendor']);
+        $type = $this->cleanArrayData($this->data['product_type']);
 
-        if ($tags) {
-            foreach ($tags as $tag) {
-                $formatTags = $this->formatStrings($tag);
-            }
-        }
+        ray($this->data);
+        ray($tags);
+        ray($vendors);
+        ray($type);
 
         $data = [
             'product_id' => $this->data['id'],
             'published_at' => Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s'),
             'title' => (!$entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
             'content' => (!$entry || config('shopify.overwrite.content')) ? $this->data['body_html'] : $entry->content,
-            'vendor' => (!$entry || config('shopify.overwrite.vendor')) ? $this->formatStrings($this->data['vendor']) : $entry->vendor,
-            'type' => (!$entry || config('shopify.overwrite.type')) ? $this->formatStrings($this->data['product_type']) : $entry->type,
-            'tags' => (!$entry || config('shopify.overwrite.tags')) ? $formatTags : $entry->tags,
+            'vendor' => (!$entry || config('shopify.overwrite.vendor')) ? $vendors : $entry->vendor,
+            'product_type' => (!$entry || config('shopify.overwrite.type')) ? $type : $entry->product_type,
+            'product_tags' => (!$entry || config('shopify.overwrite.tags')) ? $tags : $entry->product_tags,
         ];
 
         if (!$entry) {
@@ -87,7 +88,12 @@ class ImportSingleProductJob implements ShouldQueue
             }
         }
 
-        $entry->data($data)->save();
+        // Recursively loop over the products and set the data as needed.
+        foreach ($data as $key => $prop) {
+            $entry->set($key, $prop);
+        }
+
+        $entry->save();
     }
 
     /**
@@ -206,6 +212,23 @@ class ImportSingleProductJob implements ShouldQueue
         return $asset;
     }
 
+    private function cleanArrayData($data)
+    {
+        if (!$data) {
+            return null;
+        }
+
+        $formattedItems = [];
+        $items = explode(', ', $data);
+
+        if ($items) {
+            foreach ($items as $item) {
+                $formattedItems[] = Str::slug($item);
+            }
+        }
+        return $formattedItems;
+    }
+
     /**
      * Clean up any query params ont he end of the URL.
      *
@@ -263,13 +286,5 @@ class ImportSingleProductJob implements ShouldQueue
     private function getPath(UploadedFile $file): String
     {
         return Path::assemble('Shopify/', $file->getClientOriginalName());
-    }
-
-    /**
-     * String formatter
-     */
-    private function formatStrings($string): string
-    {
-        return ucwords(str_replace('-', ' ', $string));
     }
 }
