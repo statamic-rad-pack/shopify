@@ -42,14 +42,24 @@ class ImportSingleProductJob implements ShouldQueue
      */
     public function handle()
     {
+
+        ray($this->data);
+
         $entry = Entry::query()
             ->where('collection', 'products')
             ->where('slug', $this->slug)
             ->first();
 
+        // Clean up data whilst checking if product exists
         $tags = $this->cleanArrayData($this->data['tags']);
         $vendors = $this->cleanArrayData($this->data['vendor']);
         $type = $this->cleanArrayData($this->data['product_type']);
+
+        // Get option Names
+        $options = [];
+        foreach ($this->data['options'] as $option) {
+            $options['option' . $option['position']] = $option['name'];
+        }
 
         $data = [
             'product_id' => $this->data['id'],
@@ -59,6 +69,7 @@ class ImportSingleProductJob implements ShouldQueue
             'vendor' => (!$entry || config('shopify.overwrite.vendor')) ? $vendors : $entry->vendor,
             'product_type' => (!$entry || config('shopify.overwrite.type')) ? $type : $entry->product_type,
             'product_tags' => (!$entry || config('shopify.overwrite.tags')) ? $tags : $entry->product_tags,
+            'options' => $options
         ];
 
         if (!$entry) {

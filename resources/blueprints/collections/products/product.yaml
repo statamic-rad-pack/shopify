@@ -38,6 +38,13 @@ sections:
           type: bard
           icon: bard
           listable: hidden
+      - handle: options
+        field:
+          mode: dynamic
+          display: Options
+          type: array
+          icon: array
+          listable: hidden
       -
         handle: variants
         field:
