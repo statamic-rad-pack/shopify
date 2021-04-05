@@ -1,6 +1,7 @@
 # 1.3.0
 
 - [New] Adds ability to pull options names into an array field. (See Upgrade Guide). Ref #31.
+- [Update] Default variant now has the title **'Default'** for single products rather than **'Default Title'**
 - [Bug] Now removes old variants that are no longer present in Shopify. Fixes #32.
 - [Bug] Additional fields are no longer being overwritten on Products. Fixes #30.
 - [Bug] Fixes the way product tags/type/vendors import. No longer a mismatch.

@@ -58,7 +58,9 @@ class ImportSingleProductJob implements ShouldQueue
         // Get option Names
         $options = [];
         foreach ($this->data['options'] as $option) {
-            $options['option' . $option['position']] = $option['name'];
+            if ($option['name'] != 'Title') {
+                $options['option' . $option['position']] = $option['name'];
+            }
         }
 
         $data = [
@@ -124,7 +126,7 @@ class ImportSingleProductJob implements ShouldQueue
 
             $entry->set('variant_id', $variant['id']);
             $entry->set('product_slug', $product_slug);
-            $entry->set('title', $variant['title']);
+            $entry->set('title', $variant['title'] === 'Default Title' ? 'Default' : $variant['title']);
             $entry->set('inventory_quantity', $variant['inventory_quantity']);
             $entry->set('inventory_policy', $variant['inventory_policy']);
             $entry->set('price', $variant['price']);
@@ -193,7 +195,7 @@ class ImportSingleProductJob implements ShouldQueue
         $name = $this->getImageNameFromUrl($url);
         $file = $this->uploadFakeFileFromUrl($name, $url);
 
-        // Check if it exists first - no point double importing.
+    // Check if it exists first - no point double importing.
         $asset = Asset::query()
             ->where('container', 'shopify')
             ->where('path', 'Shopify/' . $name)
