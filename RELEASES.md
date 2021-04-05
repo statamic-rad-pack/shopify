@@ -1,3 +1,27 @@
+# 1.3.0
+
+- [New] Adds ability to pull options names into an array field. (See Upgrade Guide). Ref #31.
+- [Update] Default variant now has the title **'Default'** for single products rather than **'Default Title'**
+- [Bug] Now removes old variants that are no longer present in Shopify. Fixes #32.
+- [Bug] Additional fields are no longer being overwritten on Products. Fixes #30.
+- [Bug] Fixes the way product tags/type/vendors import. No longer a mismatch.
+- [Bug] Fixes variant data would be overwriten if extended. 
+
+### Upgrade Guide
+
+If you want to display options/handle them on the site you need to update your `Product.yaml` blueprint in `resources/blueprints/collections/products` with the option field. Append the following. You're then free to hide it.
+
+```yaml
+  -
+    handle: options
+    field:
+      mode: dynamic
+      display: Options
+      type: array
+      icon: array
+      listable: hidden
+```
+
 # 1.2.0
 
 - [New] All webhooks have been given a name.

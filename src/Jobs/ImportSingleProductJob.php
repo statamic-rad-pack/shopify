@@ -10,10 +10,10 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
-use PHPShopify\ShopifySDK;
 use Statamic\Facades\Asset;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Path;
+use Statamic\Support\Str;
 
 class ImportSingleProductJob implements ShouldQueue
 {
@@ -42,17 +42,24 @@ class ImportSingleProductJob implements ShouldQueue
      */
     public function handle()
     {
+
+        ray($this->data);
+
         $entry = Entry::query()
             ->where('collection', 'products')
             ->where('slug', $this->slug)
             ->first();
 
-        $formatTags = [];
-        $tags = $this->data['tags'] ? explode(', ', $this->data['tags']) : null;
+        // Clean up data whilst checking if product exists
+        $tags = $this->cleanArrayData($this->data['tags']);
+        $vendors = $this->cleanArrayData($this->data['vendor']);
+        $type = $this->cleanArrayData($this->data['product_type']);
 
-        if ($tags) {
-            foreach ($tags as $tag) {
-                $formatTags = $this->formatStrings($tag);
+        // Get option Names
+        $options = [];
+        foreach ($this->data['options'] as $option) {
+            if ($option['name'] != 'Title') {
+                $options['option' . $option['position']] = $option['name'];
             }
         }
 
@@ -61,9 +68,10 @@ class ImportSingleProductJob implements ShouldQueue
             'published_at' => Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s'),
             'title' => (!$entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
             'content' => (!$entry || config('shopify.overwrite.content')) ? $this->data['body_html'] : $entry->content,
-            'vendor' => (!$entry || config('shopify.overwrite.vendor')) ? $this->formatStrings($this->data['vendor']) : $entry->vendor,
-            'type' => (!$entry || config('shopify.overwrite.type')) ? $this->formatStrings($this->data['product_type']) : $entry->type,
-            'tags' => (!$entry || config('shopify.overwrite.tags')) ? $formatTags : $entry->tags,
+            'vendor' => (!$entry || config('shopify.overwrite.vendor')) ? $vendors : $entry->vendor,
+            'product_type' => (!$entry || config('shopify.overwrite.type')) ? $type : $entry->product_type,
+            'product_tags' => (!$entry || config('shopify.overwrite.tags')) ? $tags : $entry->product_tags,
+            'options' => $options
         ];
 
         if (!$entry) {
@@ -88,7 +96,12 @@ class ImportSingleProductJob implements ShouldQueue
             }
         }
 
-        $entry->data($data)->save();
+        // Recursively loop over the products and set the data as needed.
+        foreach ($data as $key => $prop) {
+            $entry->set($key, $prop);
+        }
+
+        $entry->save();
     }
 
     /**
@@ -97,6 +110,8 @@ class ImportSingleProductJob implements ShouldQueue
      */
     private function importVariants(array $variants, string $product_slug)
     {
+        $this->removeOldVariants($variants, $product_slug);
+
         foreach ($variants as $variant) {
             $entry = Entry::query()
                 ->where('collection', 'variants')
@@ -109,21 +124,42 @@ class ImportSingleProductJob implements ShouldQueue
                     ->slug($variant['id']);
             }
 
-            $entry->data([
-                'variant_id' => $variant['id'],
-                'product_slug' => $product_slug,
-                'title' => $variant['title'],
-                'inventory_quantity' => $variant['inventory_quantity'],
-                'inventory_policy' => $variant['inventory_policy'],
-                'price' => $variant['price'],
-                'sku' => $variant['sku'],
-                'grams' => $variant['grams'],
-                'requires_shipping' => $variant['requires_shipping'],
-                'option1' => $variant['option1'],
-                'option2' => $variant['option2'],
-                'option3' => $variant['option3'],
-                'storefront_id' => base64_encode($variant['admin_graphql_api_id']),
-            ])->save();
+            $entry->set('variant_id', $variant['id']);
+            $entry->set('product_slug', $product_slug);
+            $entry->set('title', $variant['title'] === 'Default Title' ? 'Default' : $variant['title']);
+            $entry->set('inventory_quantity', $variant['inventory_quantity']);
+            $entry->set('inventory_policy', $variant['inventory_policy']);
+            $entry->set('price', $variant['price']);
+            $entry->set('sku', $variant['sku']);
+            $entry->set('grams', $variant['grams']);
+            $entry->set('requires_shipping', $variant['requires_shipping']);
+            $entry->set('option1', $variant['option1']);
+            $entry->set('option2', $variant['option2']);
+            $entry->set('option3', $variant['option3']);
+            $entry->set('storefront_id', base64_encode($variant['admin_graphql_api_id']));
+            $entry->save();
+        }
+    }
+
+    /**
+     * Remove old variants that are no longer used on a single product.
+     *
+     * @param array $variants
+     * @param string $product_slug
+     */
+    private function removeOldVariants(array $variants, string $product_slug)
+    {
+        $allVariants = Entry::query()
+            ->where('collection', 'variants')
+            ->where('product_slug', $product_slug)
+            ->get();
+
+        foreach ($allVariants as $variant) {
+            $item = array_search($variant->variant_id, array_column($variants, 'id'));
+
+            if ($item === false) {
+                $variant->delete();
+            }
         }
     }
 
@@ -159,7 +195,7 @@ class ImportSingleProductJob implements ShouldQueue
         $name = $this->getImageNameFromUrl($url);
         $file = $this->uploadFakeFileFromUrl($name, $url);
 
-        // Check if it exists first - no point double importing.
+    // Check if it exists first - no point double importing.
         $asset = Asset::query()
             ->where('container', 'shopify')
             ->where('path', 'Shopify/' . $name)
@@ -180,6 +216,23 @@ class ImportSingleProductJob implements ShouldQueue
         $this->cleanupFakeFile($name);
 
         return $asset;
+    }
+
+    private function cleanArrayData($data)
+    {
+        if (!$data) {
+            return null;
+        }
+
+        $formattedItems = [];
+        $items = explode(', ', $data);
+
+        if ($items) {
+            foreach ($items as $item) {
+                $formattedItems[] = Str::slug($item);
+            }
+        }
+        return $formattedItems;
     }
 
     /**
@@ -239,13 +292,5 @@ class ImportSingleProductJob implements ShouldQueue
     private function getPath(UploadedFile $file): String
     {
         return Path::assemble('Shopify/', $file->getClientOriginalName());
-    }
-
-    /**
-     * String formatter
-     */
-    private function formatStrings($string): string
-    {
-        return ucwords(str_replace('-', ' ', $string));
     }
 }
