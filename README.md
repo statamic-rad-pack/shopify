@@ -14,7 +14,7 @@
 
 A Statamic 3 addon that allows you to integrate Shopify. World-class ecommerce mixed with the brilliance of Statamic.
 
-[Live Demo](https://shopify.demo.jackwhiting.co.uk) -
+[Live Demo](https://shopify.jackwhiting.dev) -
 [Docs](https://statamic-shopify.jackwhiting.co.uk)
 
 
