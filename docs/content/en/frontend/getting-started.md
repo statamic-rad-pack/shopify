@@ -14,17 +14,17 @@ This addon only takes into account the Storefront API as we want more control ov
 
 ## Demo
 
-To see the front-end in action, you can view a demo at [https://shopify.demo.jackwhiting.co.uk](https://shopify.demo.jackwhiting.co.uk).
+To see the front-end in action, you can view a demo at [https://shopify.jackwhiting.dev](https://shopify.jackwhiting.dev).
 
 ## Storefront API
 
-The [Storefront API](https://shopify.github.io/js-buy-sdk/) has a lot of data you can retrieve, however we are only focusing on three elements. 
+The [Storefront API](https://shopify.github.io/js-buy-sdk/) has a lot of data you can retrieve, however we are only focusing on three elements.
 
 1. Creating a cart instance and remembering it across pages
 2. Handling adding products from our CMS to the cart
 3. Handling the cart overview page and handing that off to Shopify for checkout.
 
-A more detailed breakdown of our scripts can be found on the [Storefront API](/frontend/storefront-api) page. 
+A more detailed breakdown of our scripts can be found on the [Storefront API](/frontend/storefront-api) page.
 
 If you are looking to spin something up quickly and test things you can follow the example templates step below.
 
