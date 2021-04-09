@@ -31,10 +31,9 @@ Allows you to output your Site URL and Storefront Token to the front end and bin
 #### Usage
 
 ```twig
-{{ product_price :product="slug" show_from="true" }}
+{{ product_price show_from="true" }}
 ```
 
-- `product` slug is required
 - `show_from` will display a "From " prefix to the price if there are multiple variants.
 
 #### Output
@@ -117,7 +116,7 @@ You may only want to pull one variant's data to use, you can do this either from
 
 #### Usage
 
-```html
+```twig
 {{ product_variants:from_title title="Blue" }}
     {{ storefront_id }}
     {{ price }}
@@ -144,18 +143,10 @@ Check if a product is in stock or not.
 #### Usage
 
 ```twig
-{{ in_stock :product="slug" }}
+{{ in_stock }}
 ```
 
 ```twig
-{{ if {in_stock :product="slug"} }}
+{{ if {in_stock} }}
 {{ /if }}
-```
-
-- `product` slug is required.
-
-#### Output
-
-```json
-true // or false
 ```
