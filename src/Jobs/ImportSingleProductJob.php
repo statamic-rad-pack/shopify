@@ -17,7 +17,10 @@ use Statamic\Support\Str;
 
 class ImportSingleProductJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /** @var int */
     public $slug;
@@ -42,9 +45,6 @@ class ImportSingleProductJob implements ShouldQueue
      */
     public function handle()
     {
-
-        ray($this->data);
-
         $entry = Entry::query()
             ->where('collection', 'products')
             ->where('slug', $this->slug)
@@ -289,7 +289,7 @@ class ImportSingleProductJob implements ShouldQueue
      * @param UploadedFile $file
      * @return String
      */
-    private function getPath(UploadedFile $file): String
+    private function getPath(UploadedFile $file): string
     {
         return Path::assemble('Shopify/', $file->getClientOriginalName());
     }
