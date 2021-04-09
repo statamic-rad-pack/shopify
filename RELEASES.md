@@ -11,6 +11,7 @@
 ### Updated
 
 - **InStock**, **ProductVariant**, and **ProductPrice** tag updated so you no longer need to define `:product="slug"` each time.
+- Updated theme files to reflect the tag changes.
 
 # 1.3.0
 
