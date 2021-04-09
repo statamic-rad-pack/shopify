@@ -1,3 +1,9 @@
+# 1.3.2
+
+### Fixed
+
+- Fixing `ray()` debug left in ImportJob. #40
+
 # 1.3.1
 
 ### New
@@ -7,7 +13,7 @@
     - `product_variant:loop` - gives you access to variant data to use however you wish.
     - `product_variant:by_title` - lets you grab one variant by it's title.
     - `product_variant:by_index` - lets you grab one variant by index.
-    
+
 ### Updated
 
 - **InStock**, **ProductVariant**, and **ProductPrice** tag updated so you no longer need to define `:product="slug"` each time.
@@ -20,7 +26,7 @@
 - [Bug] Now removes old variants that are no longer present in Shopify. Fixes #32.
 - [Bug] Additional fields are no longer being overwritten on Products. Fixes #30.
 - [Bug] Fixes the way product tags/type/vendors import. No longer a mismatch.
-- [Bug] Fixes variant data would be overwriten if extended. 
+- [Bug] Fixes variant data would be overwriten if extended.
 
 ### Upgrade Guide
 
