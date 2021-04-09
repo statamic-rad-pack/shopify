@@ -1,3 +1,18 @@
+# 1.3.1
+
+### New
+
+- **ProductVariant** tag has been updated to give you multiple ways to interact with them.
+    - `product_variant:generate` - outputs the html prerendered (default)
+    - `product_variant:loop` - gives you access to variant data to use however you wish.
+    - `product_variant:by_title` - lets you grab one variant by it's title.
+    - `product_variant:by_index` - lets you grab one variant by index.
+    
+### Updated
+
+- **InStock**, **ProductVariant**, and **ProductPrice** tag updated so you no longer need to define `:product="slug"` each time.
+- Updated theme files to reflect the tag changes.
+
 # 1.3.0
 
 - [New] Adds ability to pull options names into an array field. (See Upgrade Guide). Ref #31.
