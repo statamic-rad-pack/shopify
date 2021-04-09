@@ -14,11 +14,11 @@ class ProductPrice extends Tags
      */
     public function index()
     {
-        if (!$this->params->get('product')) {
-            return;
+        if (!$this->context->get('slug')) {
+            return null;
         }
 
-        $variants = $this->fetchProductVariants($this->params->get('product'));
+        $variants = $this->fetchProductVariants($this->context->get('slug'));
 
         if (!$variants) {
             return null;
