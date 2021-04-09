@@ -10,15 +10,26 @@ class ProductVariants extends Tags
     use HasProductVariants;
 
     /**
+     * Kept in for backwards compatibility.
+     *
+     * @deprecated
+     *
      * @return string|array
      */
     public function index()
     {
-        if (!$this->params->get('product')) {
-            return;
-        }
+        return $this->generate();
+    }
 
-        $variants = $this->fetchProductVariants($this->params->get('product'));
+    /**
+     * Generate the output of the variants automatically.
+     * Saves having to manually call the index/options.
+     *
+     * @return string|array
+     */
+    public function generate()
+    {
+        $variants = $this->fetchProductVariants($this->context->get('slug'));
 
         if (!$variants) {
             return;
@@ -36,9 +47,56 @@ class ProductVariants extends Tags
     }
 
     /**
+     * Return the collection back so we can use it on the front end.
+     *
+     * @return \Illuminate\Support\Collection|null
+     */
+    public function loop()
+    {
+        dump($this->fetchProductVariants($this->context->get('slug')));
+        return $this->fetchProductVariants($this->context->get('slug'));
+    }
+
+    /**
+     * Return a single variant by the title.
+     *
+     * @return mixed|null
+     */
+    public function fromTitle()
+    {
+        if (!$this->params->get('title')) {
+            return null;
+        }
+
+        $variants = $this->fetchProductVariants($this->context->get('slug'));
+
+        return $variants
+            ->where('title', $this->params->get('title'))
+            ->first();
+    }
+
+    /**
+     * Return a single variant by the index.
+     *
+     * @return mixed|null
+     */
+    public function fromIndex()
+    {
+        if ($this->params->get('index') === null) {
+            return null;
+        }
+
+        $variants = $this->fetchProductVariants($this->context->get('slug'));
+
+        return $variants
+            ->splice($this->params->get('index'), 1)
+            ->first();
+    }
+
+    /**
      * @return string
      */
-    public function startSelect(): string
+    private function startSelect(): string
     {
         return '<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select ' . $this->params->get('class') . '">';
     }
@@ -48,7 +106,7 @@ class ProductVariants extends Tags
      * @param null $currency
      * @return string
      */
-    public function parseOptions($variants): string
+    private function parseOptions($variants): string
     {
         $html = '';
 
@@ -79,7 +137,7 @@ class ProductVariants extends Tags
     /**
      * @return string
      */
-    public function endSelect(): string
+    private function endSelect(): string
     {
         return '</select>';
     }
