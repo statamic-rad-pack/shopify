@@ -68,11 +68,13 @@ class ImportSingleProductJob implements ShouldQueue
             'published_at' => Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s'),
             'title' => (!$entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
             'content' => (!$entry || config('shopify.overwrite.content')) ? $this->data['body_html'] : $entry->content,
-            'vendor' => (!$entry || config('shopify.overwrite.vendor')) ? $vendors : $entry->vendor,
-            'product_type' => (!$entry || config('shopify.overwrite.type')) ? $type : $entry->product_type,
-            'product_tags' => (!$entry || config('shopify.overwrite.tags')) ? $tags : $entry->product_tags,
+            config('shopify.taxonomies.vendor') => (!$entry || config('shopify.overwrite.vendor')) ? $vendors : $entry->vendor,
+            config('shopify.taxonomies.type') => (!$entry || config('shopify.overwrite.type')) ? $type : $entry->product_type,
+            config('shopify.taxonomies.tags') => (!$entry || config('shopify.overwrite.tags')) ? $tags : $entry->product_tags,
             'options' => $options
         ];
+
+        ray($data);
 
         if (!$entry) {
             $entry = Entry::make()
