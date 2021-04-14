@@ -1,3 +1,9 @@
+# 1.3.3
+
+### New
+
+- You can now override the taxonomies used in the CMS.
+
 # 1.3.2
 
 ### Fixed
