@@ -74,8 +74,6 @@ class ImportSingleProductJob implements ShouldQueue
             'options' => $options
         ];
 
-        ray($data);
-
         if (!$entry) {
             $entry = Entry::make()
                 ->collection('products')
