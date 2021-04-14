@@ -53,5 +53,15 @@ return [
     'lang' => [
         'out_of_stock' => 'Out of Stock',
         'from' => 'From'
+    ],
+
+    /**
+     * If you've renamed the taxonomies in your admin panel, you
+     * can update these values so everything is kept in sync
+     */
+    'taxonomies' => [
+        'type' => env('SHOPIFY_TAXONOMY_TYPE', 'product_type'),
+        'tags' => env('SHOPIFY_TAXONOMY_TAGS', 'product_tags'),
+        'vendor' => env('SHOPIFY_TAXONOMY_VENDOR', 'vendor'),
     ]
 ];
