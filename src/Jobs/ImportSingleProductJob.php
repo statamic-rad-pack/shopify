@@ -155,7 +155,7 @@ class ImportSingleProductJob implements ShouldQueue
             ->get();
 
         foreach ($allVariants as $variant) {
-            $item = array_search($variant->variant_id, array_column($variants, 'id'));
+            $item = array_search($variant->slug, array_column($variants, 'id'));
 
             if ($item === false) {
                 $variant->delete();
@@ -195,7 +195,7 @@ class ImportSingleProductJob implements ShouldQueue
         $name = $this->getImageNameFromUrl($url);
         $file = $this->uploadFakeFileFromUrl($name, $url);
 
-    // Check if it exists first - no point double importing.
+        // Check if it exists first - no point double importing.
         $asset = Asset::query()
             ->where('container', 'shopify')
             ->where('path', 'Shopify/' . $name)

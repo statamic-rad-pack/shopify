@@ -1,4 +1,10 @@
-# 1.3.3
+# 1.3.5
+
+### Fixed
+
+- Fixing variants getting deleted each sync causing overwrite. #45
+
+# 1.3.4
 
 ### New
 
