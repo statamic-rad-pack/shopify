@@ -1,3 +1,9 @@
+# 1.4.0
+
+### Fixed
+
+- Fixing variant `columns() null` error due to variant blueprint being hidden. #51
+
 # 1.3.5
 
 ### Fixed
