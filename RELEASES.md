@@ -1,3 +1,15 @@
+# 1.3.6
+
+### New
+
+- Adding `compare_at_price` for variants to check if on sale - you'll need to add this to your blueprint to be visible in the admin. #55
+
+### Fixed
+
+- Fixing variant `columns() null` error due to variant blueprint being hidden. #51
+- Fixed ImportSingleProduct failing to find old variants and deleting them. #57
+- Updates to docs. #52. #49.
+
 # 1.3.5
 
 ### Fixed

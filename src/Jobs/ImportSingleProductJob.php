@@ -130,6 +130,7 @@ class ImportSingleProductJob implements ShouldQueue
             $entry->set('inventory_quantity', $variant['inventory_quantity']);
             $entry->set('inventory_policy', $variant['inventory_policy']);
             $entry->set('price', $variant['price']);
+            $entry->set('compare_at_price', $variant['compare_at_price']);
             $entry->set('sku', $variant['sku']);
             $entry->set('grams', $variant['grams']);
             $entry->set('requires_shipping', $variant['requires_shipping']);
@@ -155,7 +156,7 @@ class ImportSingleProductJob implements ShouldQueue
             ->get();
 
         foreach ($allVariants as $variant) {
-            $item = array_search($variant->slug, array_column($variants, 'id'));
+            $item = array_search($variant->slug(), array_column($variants, 'id'));
 
             if ($item === false) {
                 $variant->delete();

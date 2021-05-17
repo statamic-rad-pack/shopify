@@ -42,7 +42,7 @@ There are example templates for the `cart`, `product` and `products` page in the
 php artisan vendor:publish --tag="shopify-theme"
 ```
 
-You should also follow the steps on the [Storefront Integration](/frontend/js-sdk). For how to install the custom JavaScript along with what each element does.
+You should also follow the steps on the [Storefront Integration](/frontend/storefront-api). For how to install the custom JavaScript along with what each element does.
 
 <alert type="info">
 
