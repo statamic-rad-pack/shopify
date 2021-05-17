@@ -156,7 +156,7 @@ class ImportSingleProductJob implements ShouldQueue
             ->get();
 
         foreach ($allVariants as $variant) {
-            $item = array_search($variant->slug, array_column($variants, 'id'));
+            $item = array_search($variant->slug(), array_column($variants, 'id'));
 
             if ($item === false) {
                 $variant->delete();

@@ -1,8 +1,13 @@
 # 1.4.0
 
+### New
+
+- Adding `compare_at_price` for variants to check if on sale. #55
+
 ### Fixed
 
 - Fixing variant `columns() null` error due to variant blueprint being hidden. #51
+- Fixed ImportSingleProduct failing to find old variants and deleting them. #57
 
 # 1.3.5
 
