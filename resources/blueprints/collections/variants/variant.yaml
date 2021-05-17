@@ -45,7 +45,14 @@ sections:
           listable: hidden
           validate:
             - required
-          width: 33
+          width: 50
+      - handle: compare_at_price
+        field:
+          display: Compare At Price
+          type: disabled_text
+          icon: disabled_text
+          listable: hidden
+          width: 50
       -
         handle: inventory_quantity
         field:
@@ -57,14 +64,14 @@ sections:
           validate:
             - nullable
             - numeric
-          width: 33
+          width: 50
       -
         handle: grams
         field:
           display: 'Weight (Grams)'
           type: disabled_text
           icon: disabled_text
-          width: 33
+          width: 50
           listable: hidden
       -
         handle: option1
