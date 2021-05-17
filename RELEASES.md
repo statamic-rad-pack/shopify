@@ -1,8 +1,8 @@
-# 1.4.0
+# 1.3.6
 
 ### New
 
-- Adding `compare_at_price` for variants to check if on sale. #55
+- Adding `compare_at_price` for variants to check if on sale - you'll need to add this to your blueprint to be visible in the admin. #55
 
 ### Fixed
 
