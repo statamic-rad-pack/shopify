@@ -37,7 +37,7 @@ Similarly, rather than running the full import to catch any changes to products,
 Your URL should point to the following endpoint:
 
 ```bash
-https://YOURSITE/!/statamic-shopify/webhook/product/create
+https://YOURSITE/!/statamic-shopify/webhook/product/update
 ```
 
 ## Product Delete

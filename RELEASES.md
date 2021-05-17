@@ -8,6 +8,7 @@
 
 - Fixing variant `columns() null` error due to variant blueprint being hidden. #51
 - Fixed ImportSingleProduct failing to find old variants and deleting them. #57
+- Updates to docs. #52. #49.
 
 # 1.3.5
 
