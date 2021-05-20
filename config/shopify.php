@@ -60,8 +60,9 @@ return [
      * can update these values so everything is kept in sync
      */
     'taxonomies' => [
-        'type' => env('SHOPIFY_TAXONOMY_TYPE', 'product_type'),
-        'tags' => env('SHOPIFY_TAXONOMY_TAGS', 'product_tags'),
+        'type' => env('SHOPIFY_TAXONOMY_TYPE', 'type'),
+        'tags' => env('SHOPIFY_TAXONOMY_TAGS', 'tags'),
         'vendor' => env('SHOPIFY_TAXONOMY_VENDOR', 'vendor'),
+        'collections' => env('SHOPIFY_TAXONOMY_COLLECTIONS', 'collections'),
     ]
 ];
