@@ -1,3 +1,9 @@
+# 1.4.0
+
+### New
+
+- Collections can now be imported (#24). Note: You'll need to publish the assets or create a new taxonomy for them in the admin panel. Once set up you can either run the 'Import All Products' again or you can use the new 'Import Collections' (`php artisan shopify:import:collections`).
+
 # 1.3.6
 
 ### New
