@@ -9,12 +9,11 @@ trait FetchAllProducts
 {
     public function fetchProducts()
     {
-        $shopify = new ShopifySDK;
+        $shopify = new ShopifySDK();
 
         $productResource = $shopify->Product();
         $products = $productResource->get(['limit' => config('shopify.api_limit')]);
         $next_page = $productResource->getNextPageParams();
-        ray($products);
 
         // Initial Loop
         ImportAllProductsJob::dispatch($products);
