@@ -5,6 +5,7 @@ taxonomies:
   - type
   - tags
   - vendor
+  - collections
 revisions: false
 route: '/products/{slug}'
 sort_dir: asc

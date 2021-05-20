@@ -1,6 +1,6 @@
 <template>
     <div class="flex items-center">
-        <button type="button" class="btn-primary" @click="fetchProducts()">Import All</button>
+        <button type="button" class="btn-primary" @click="fetch()">Import All</button>
         <p class="ml-2 text-sm" :class="messageColor" v-if="message">{{ message }}</p>
     </div>
 </template>
@@ -21,7 +21,7 @@ export default {
     },
 
     methods: {
-        fetchProducts() {
+        fetch() {
             this.message = 'working....'
             this.messageColor = 'text-black'
 
