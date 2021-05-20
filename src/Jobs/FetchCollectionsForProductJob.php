@@ -8,6 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use PHPShopify\ShopifySDK;
+use Statamic\Facades\Taxonomy;
 
 class FetchCollectionsForProductJob implements ShouldQueue
 {
@@ -22,6 +23,11 @@ class FetchCollectionsForProductJob implements ShouldQueue
 
     public function handle()
     {
+        // Check if we have published the collection taxonomy.
+        if (! Taxonomy::findByHandle(config('shopify.taxonomies.collections'))) {
+            return;
+        }
+
         $shopify = new ShopifySDK;
 
         $collectionResource = $shopify->CustomCollection();

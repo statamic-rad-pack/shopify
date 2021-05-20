@@ -27,11 +27,11 @@ class ImportCollectionsForProductJob implements ShouldQueue
         $product_collections = collect();
 
         foreach ($this->collections as $collection) {
-            $term = Term::findBySlug($collection['handle'], 'collections');
+            $term = Term::findBySlug($collection['handle'], config('shopify.taxonomies.collections'));
 
             if (!$term) {
                 $term = Term::make()
-                    ->taxonomy('collections')
+                    ->taxonomy(config('shopify.taxonomies.collections'))
                     ->slug($collection['handle'])
                     ->data([
                         'title' => $collection['title'],
