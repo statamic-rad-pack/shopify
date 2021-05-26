@@ -14,10 +14,12 @@ class Variants extends Fieldtype
     {
         $product = $this->field()->parent();
 
-        if (!$product->initialPath()) return;
+        if (!$product->initialPath()) {
+            return;
+        }
 
         $variantBlueprint = new VariantBlueprint();
-        $variantFields = $variantBlueprint()->fields()->addValues([])->preProcess();
+        $variantFields = $variantBlueprint()->fields()->preProcess();
 
         return [
             'action'             => cp_route('shopify.variants.store'),
@@ -28,15 +30,5 @@ class Variants extends Fieldtype
             'variantMeta'        => $variantFields->meta(),
             'productSlug'        => $product->slug(),
         ];
-    }
-
-    public function process($data)
-    {
-        return $data;
-    }
-
-    public function preProcess($data)
-    {
-        return $data;
     }
 }
