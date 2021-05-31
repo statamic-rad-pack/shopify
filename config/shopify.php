@@ -59,7 +59,7 @@ return [
      * Asset Container to Store the imported Assets
      */
     'asset' => [
-        'path' => env('SHOPIFY_ASSET_PATH', 'Shopify'),
+        'path' => env('SHOPIFY_ASSET_PATH', 'shopify'),
         'container' => env('SHOPIFY_ASSET_CONTAINER', 'shopify'),
     ],
 
