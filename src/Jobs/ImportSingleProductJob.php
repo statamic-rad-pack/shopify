@@ -201,8 +201,8 @@ class ImportSingleProductJob implements ShouldQueue
 
         // Check if it exists first - no point double importing.
         $asset = Asset::query()
-            ->where('container', 'shopify')
-            ->where('path', 'Shopify/' . $name)
+            ->where('container', config('shopify.asset.container'))
+            ->where('path', config('shopify.asset.path') . '/' . $name)
             ->first();
 
         if ($asset) {
@@ -211,7 +211,7 @@ class ImportSingleProductJob implements ShouldQueue
 
         // If it doesn't exists, let's make it exist.
         $asset = Asset::make()
-            ->container('shopify')
+            ->container(config('shopify.asset.container'))
             ->path($this->getPath($file));
 
         $asset->upload($file)->save();
@@ -295,6 +295,6 @@ class ImportSingleProductJob implements ShouldQueue
      */
     private function getPath(UploadedFile $file): string
     {
-        return Path::assemble('Shopify/', $file->getClientOriginalName());
+        return Path::assemble(config('shopify.asset.path') . '/', $file->getClientOriginalName());
     }
 }

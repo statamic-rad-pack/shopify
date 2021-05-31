@@ -1,3 +1,14 @@
+# 1.4.2
+
+### Fixed
+
+- Removing some unnecessary fields on the variant fieldtype.
+
+
+### New
+
+- Allows the user to override the container/folder that the assets are uploaded to with `SHOPIFY_ASSET_CONTAINER` and `SHOPIFY_ASSET_PATH`.
+
 # 1.4.1
 
 ### Fixed

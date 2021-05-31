@@ -56,6 +56,14 @@ return [
     ],
 
     /**
+     * Asset Container to Store the imported Assets
+     */
+    'asset' => [
+        'path' => env('SHOPIFY_ASSET_PATH', 'Shopify'),
+        'container' => env('SHOPIFY_ASSET_CONTAINER', 'shopify'),
+    ],
+
+    /**
      * If you've renamed the taxonomies in your admin panel, you
      * can update these values so everything is kept in sync
      */
