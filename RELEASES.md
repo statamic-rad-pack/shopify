@@ -1,3 +1,10 @@
+# 1.4.3
+
+### Fixed
+
+- Products assigned to more than 250 collections would overwrite on pagination.
+- Smart collections now import alongside custom assigned collections. See #64.
+
 # 1.4.2
 
 ### Fixed
