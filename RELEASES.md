@@ -4,7 +4,6 @@
 
 - Removing some unnecessary fields on the variant fieldtype.
 
-
 ### New
 
 - Allows the user to override the container/folder that the assets are uploaded to with `SHOPIFY_ASSET_CONTAINER` and `SHOPIFY_ASSET_PATH`.
