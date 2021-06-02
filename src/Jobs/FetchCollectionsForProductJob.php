@@ -12,9 +12,13 @@ use Statamic\Facades\Taxonomy;
 
 class FetchCollectionsForProductJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     public $product;
+    public $shopify;
 
     public function __construct($product)
     {
@@ -28,25 +32,50 @@ class FetchCollectionsForProductJob implements ShouldQueue
             return;
         }
 
-        $shopify = new ShopifySDK;
+        $this->shopify = new ShopifySDK();
 
-        $collectionResource = $shopify->CustomCollection();
-        $collections = $collectionResource->get([
+        $collections = [];
+
+        $collections = array_merge($collections, $this->getManualCollections());
+        $collections = array_merge($collections, $this->getSmartCollections());
+
+        ImportCollectionsForProductJob::dispatch($collections, $this->product);
+    }
+
+    public function getManualCollections()
+    {
+        $collectionResource = $this->shopify->CustomCollection();
+
+        return $this->loopCollections($collectionResource);
+    }
+
+    public function getSmartCollections()
+    {
+        $smartCollectionResource = $this->shopify->SmartCollection();
+
+        return $this->loopCollections($smartCollectionResource);
+    }
+
+    private function loopCollections($resource)
+    {
+        $items = [];
+
+        $collections = $resource->get([
             'limit' => config('shopify.api_limit'),
             'product_id' => $this->product->data()['product_id']
         ]);
 
-        $next_page = $collectionResource->getNextPageParams();
+        $next_page = $resource->getNextPageParams();
 
-        // Initial Loop
-        ImportCollectionsForProductJob::dispatch($collections, $this->product);
+        $items = array_merge($items, $collections);
 
-        // Recursively loop.
         while ($next_page) {
-            $collections = $collectionResource->get($collectionResource->getNextPageParams());
-            $next_page = $collectionResource->getNextPageParams();
+            $collections = $resource->get($resource->getNextPageParams());
+            $next_page = $resource->getNextPageParams();
 
-            ImportCollectionsForProductJob::dispatch($collections, $this->product);
+            $items = array_merge($items, $collections);
         }
+
+        return $items;
     }
 }
