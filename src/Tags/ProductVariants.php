@@ -128,7 +128,7 @@ class ProductVariants extends Tags
                 $title .= ' (' . config('shopify.lang.out_of_stock') . ')';
             }
 
-            $html .= '<option value="' . $variant['storefront_id'] . '" data-in-stock="' . $out_of_stock . '">' . $title . '</option>';
+            $html .= '<option value="' . $variant['storefront_id'] . '" data-in-stock="' . $out_of_stock . '"' . ($out_of_stock ? " disabled" : "") . '>' . $title . '</option>';
         }
 
         return $html;
