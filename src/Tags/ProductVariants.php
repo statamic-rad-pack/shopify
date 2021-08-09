@@ -113,10 +113,12 @@ class ProductVariants extends Tags
         foreach ($variants as $variant) {
             $title = $variant['title'];
             $out_of_stock = false;
+            $disabled = '';
 
             if (isset($variant['inventory_policy'])) {
                 if ($variant['inventory_policy'] === 'deny' && $variant['inventory_quantity'] === 0) {
                     $out_of_stock = true;
+                    $disabled = 'disabled';
                 }
             }
 
@@ -128,7 +130,7 @@ class ProductVariants extends Tags
                 $title .= ' (' . config('shopify.lang.out_of_stock') . ')';
             }
 
-            $html .= '<option value="' . $variant['storefront_id'] . '" data-in-stock="' . $out_of_stock . '">' . $title . '</option>';
+            $html .= '<option value="' . $variant['storefront_id'] . '" data-in-stock="' . $out_of_stock . '" ' . $disabled . '>' . $title . '</option>';
         }
 
         return $html;
