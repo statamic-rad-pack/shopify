@@ -1,3 +1,10 @@
+# 1.5.0
+
+### New
+
+- Product variants that are out of stock are **disbaled** by default in the option. You can manually control this by looping around variants and changing the output. (#70).
+- Products imported which are drafts or unpublished, are no longer marked as published in Statamic and will be set to draft. (#75).
+
 # 1.4.3
 
 ### Fixed

@@ -2,7 +2,7 @@
     "name": "jackabox/statamic-shopify",
     "description": "A Shopify Addon for Statamic",
     "license": "proprietary",
-    "version": "1.4.3",
+    "version": "1.5.0",
     "autoload": {
         "psr-4": {
             "Jackabox\\Shopify\\": "src"
