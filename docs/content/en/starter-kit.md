@@ -4,7 +4,7 @@ category: Installation
 position: 5
 ---
 
-The [starter kit](https://github.com/jackabox/statamic-shopify-starter-kit) is thw recommended way to install Statamic Shopify.
+The [starter kit](https://github.com/jackabox/statamic-shopify-starter-kit) is the recommended way to install Statamic Shopify.
 
 The boilerplate not only installs and sets up the plugin for you but it also comes with a demo that is integrated with Shopify's Storefront API on the front-end. It's built with:
 
