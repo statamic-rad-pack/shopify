@@ -11,7 +11,10 @@ use Statamic\Facades\Term;
 
 class ImportCollectionsForProductJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     public $product;
     public $collections;
