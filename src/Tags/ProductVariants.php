@@ -53,7 +53,6 @@ class ProductVariants extends Tags
      */
     public function loop()
     {
-        dump($this->fetchProductVariants($this->context->get('slug')));
         return $this->fetchProductVariants($this->context->get('slug'));
     }
 
