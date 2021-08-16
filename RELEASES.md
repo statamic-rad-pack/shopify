@@ -1,3 +1,9 @@
+# 1.5.1
+
+### Fixed
+
+- Removing debugs and dumps (#78)
+
 # 1.5.0
 
 ### New
