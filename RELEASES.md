@@ -1,3 +1,9 @@
+# 1.5.2
+
+### Fixed
+
+- Out of stock flag in `product_variants` now works if stock is negative/0 rather than just 0 (#81)
+
 # 1.5.1
 
 ### Fixed
