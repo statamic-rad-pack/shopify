@@ -207,7 +207,7 @@ class ImportSingleProductJob implements ShouldQueue
             ->first();
 
         if ($asset) {
-            return $asset->hydrate();
+            return;
         }
 
         // If it doesn't exists, let's make it exist.
