@@ -113,8 +113,12 @@ class ProductVariants extends Tags
             $title = $variant['title'];
             $out_of_stock = false;
 
-            if (isset($variant['inventory_policy'])) {
-                if ($variant['inventory_policy'] === 'deny' && $variant['inventory_quantity'] <= 0) {
+            if (isset($variant['inventory_policy']) && isset($variant['inventory_management'])) {
+                if (
+                    $variant['inventory_policy'] === 'deny' &&
+                    $variant['inventory_management'] === 'shopify' &&
+                    $variant['inventory_quantity'] <= 0
+                ) {
                     $out_of_stock = true;
                 }
             }

@@ -1,3 +1,8 @@
+# 1.6.0
+
+### New
+
+- **Potentially Breaking:**: Now imports `inventory_management` option for each variant to check if the product is out of stock. This allows for sale of products which aren't out of stock and only denies if the "track inventory" option is checked within Shopify. If, it's unchecked the system will believe that there is either "unlimited stock" or "you have manually adjusted". (See #89)
 # 1.5.2
 
 ### Fixed
