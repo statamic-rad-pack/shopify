@@ -133,6 +133,7 @@ class ImportSingleProductJob implements ShouldQueue
             $entry->set('title', $variant['title'] === 'Default Title' ? 'Default' : $variant['title']);
             $entry->set('inventory_quantity', $variant['inventory_quantity']);
             $entry->set('inventory_policy', $variant['inventory_policy']);
+            $entry->set('inventory_management', $variant['inventory_management']);
             $entry->set('price', $variant['price']);
             $entry->set('compare_at_price', $variant['compare_at_price']);
             $entry->set('sku', $variant['sku']);
