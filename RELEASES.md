@@ -1,3 +1,7 @@
+# 1.6.1
+
+- Removing `->hydrate()` from assets upload/store. This will hopefully help with #86.
+
 # 1.6.0
 
 ### New
