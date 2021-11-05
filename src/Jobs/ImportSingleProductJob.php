@@ -208,7 +208,7 @@ class ImportSingleProductJob implements ShouldQueue
             ->first();
 
         if ($asset) {
-            return $asset->hydrate();
+            return $asset;
         }
 
         // If it doesn't exists, let's make it exist.
@@ -217,7 +217,6 @@ class ImportSingleProductJob implements ShouldQueue
             ->path($this->getPath($file));
 
         $asset->upload($file)->save();
-        $asset->hydrate();
 
         $this->cleanupFakeFile($name);
 

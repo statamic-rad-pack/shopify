@@ -22,7 +22,7 @@ class OrderCreateController extends WebhooksController
         $data = json_decode($data);
 
         // Fetch Single Product
-        $shopify = new ShopifySDK;
+        $shopify = new ShopifySDK();
 
         foreach ($data->line_items as $item) {
             $product = $shopify->Product($item->product_id)->get();
