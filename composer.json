@@ -1,41 +1,41 @@
 {
-    "name": "jackabox/statamic-shopify",
-    "description": "A Shopify Addon for Statamic",
-    "license": "proprietary",
-    "version": "1.6.0",
-    "autoload": {
-        "psr-4": {
-            "Jackabox\\Shopify\\": "src"
-        }
-    },
-    "authors": [
-        {
-            "name": "Jack Whiting",
-            "email": "hi@jackwhiting.co.uk",
-            "homepage": "https://jackwhiting.co.uk",
-            "role": "Developer"
-        }
-    ],
-    "support": {
-        "email": "hi@jackwhiting.co.uk"
-    },
-    "extra": {
-        "statamic": {
-            "name": "Shopify",
-            "description": "Shopify Addon for Statamic"
-        },
-        "laravel": {
-            "providers": [
-                "Jackabox\\Shopify\\ServiceProvider"
-            ]
-        }
-    },
-    "require": {
-        "phpclassic/php-shopify": "^1.1"
-    },
-    "config": {
-        "optimize-autoloader": true,
-        "preferred-install": "dist",
-        "sort-packages": true
+  "name": "jackabox/statamic-shopify",
+  "description": "A Shopify Addon for Statamic",
+  "license": "proprietary",
+  "version": "1.7.0",
+  "autoload": {
+    "psr-4": {
+      "Jackabox\\Shopify\\": "src"
     }
+  },
+  "authors": [
+    {
+      "name": "Jack Whiting",
+      "email": "hi@jackwhiting.co.uk",
+      "homepage": "https://jackwhiting.co.uk",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "email": "hi@jackwhiting.co.uk"
+  },
+  "extra": {
+    "statamic": {
+      "name": "Shopify",
+      "description": "Shopify Addon for Statamic"
+    },
+    "laravel": {
+      "providers": [
+        "Jackabox\\Shopify\\ServiceProvider"
+      ]
+    }
+  },
+  "require": {
+    "phpclassic/php-shopify": "^1.1"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  }
 }

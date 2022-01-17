@@ -24,11 +24,12 @@ class ShopifyImportSingleProduct extends Command
         $this->info('Fetching data for product ' . $this->argument('productId'));
 
         // Fetch Single Product
-        $shopify = new ShopifySDK;
+        $shopify = new ShopifySDK();
         $product = $shopify->Product($this->argument('productId'))->get();
 
         // Pass to import Job.
-        ImportSingleProductJob::dispatch($product);
+        ImportSingleProductJob::dispatch($product)
+            ->onQueue(config('shopify.queue'));
 
         $this->info('Product has been dispatched for import');
     }

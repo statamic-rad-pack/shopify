@@ -72,5 +72,11 @@ return [
         'tags' => env('SHOPIFY_TAXONOMY_TAGS', 'tags'),
         'vendor' => env('SHOPIFY_TAXONOMY_VENDOR', 'vendor'),
         'collections' => env('SHOPIFY_TAXONOMY_COLLECTIONS', 'collections'),
-    ]
+    ],
+
+    /**
+     * The queue connection you want the Shopify jobs to run on.
+     * Please note you having more than 1 process running at once on this queue may cause issues.
+     */
+    'queue' => env('SHOPIFY_JOB_QUEUE', 'default')
 ];

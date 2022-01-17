@@ -23,7 +23,7 @@ class ProductCreateUpdateController extends WebhooksController
         $data = json_decode($data, true);
 
         // Dispatch job
-        ImportSingleProductJob::dispatch($data);
+        ImportSingleProductJob::dispatch($data)->onQueue(config('shopify.queue'));
 
         return response()->json([
             'message' => 'Product has been dispatched to the queue for update'

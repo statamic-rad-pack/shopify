@@ -1,6 +1,14 @@
-# 1.6.1
+# 1.7.0
 
-- Removing `->hydrate()` from assets upload/store. This will hopefully help with #86.
+### Fixed
+
+- Changed the way the checkout ID gets intitalised to prevent errors if the ID is cleared/not intialised properly. To get this change on an existing site, you'll need to update your JS or republish the JS. (See #103).
+- Fixed an issue with the delete webhook not properly removing files. (See #104).
+
+### New
+
+- Added the option to define a queue for the Shopify jobs. Defaults to `default`. If you'd like to set a unique process you can set a env variable of `SHOPIFY_JOB_QUEUE`. (See #95).
+
 
 # 1.6.0
 

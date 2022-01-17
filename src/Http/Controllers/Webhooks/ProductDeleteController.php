@@ -22,23 +22,30 @@ class ProductDeleteController extends WebhooksController
         // Decode data
         $data = json_decode($data);
 
+        if (! is_object($data) && ! $data->id) {
+            return;
+        }
+
         $productEntry =  Entry::query()
             ->where('collection', 'products')
             ->where('product_id', $data->id)
-            ->get();
+            ->first();
 
-        if ($productEntry->count()) {
-            Entry::query()
+        if ($productEntry && $productEntry->slug()) {
+            $entry = Entry::query()
                 ->where('collection', 'variants')
                 ->where('product_slug', $productEntry->slug())
-                ->delete();
+                ->get();
+
+            foreach ($entry as $e) {
+                $e->delete();
+            }
 
             $productEntry->delete();
         }
 
-
         return response()->json([
-            'message' => 'Product has been dispatched to the queue for update'
+            'message' => 'Product has been deleted'
         ], 200);
     }
 }
