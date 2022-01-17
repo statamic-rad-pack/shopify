@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "828ec055fa82a99b58829314ee6c39aa",
+    "content-hash": "7c21e21dfc2248ed21d8eaeb4e3f7491",
     "packages": [
         {
             "name": "phpclassic/php-shopify",
-            "version": "v1.1.16",
+            "version": "v1.1.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpclassic/php-shopify.git",
-                "reference": "1d1c3e83a758ccd603a5b672ec6cd973a0928ac4"
+                "reference": "32ec82af1bad7c1cf52363b4711fcc3a820abfbc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpclassic/php-shopify/zipball/1d1c3e83a758ccd603a5b672ec6cd973a0928ac4",
-                "reference": "1d1c3e83a758ccd603a5b672ec6cd973a0928ac4",
+                "url": "https://api.github.com/repos/phpclassic/php-shopify/zipball/32ec82af1bad7c1cf52363b4711fcc3a820abfbc",
+                "reference": "32ec82af1bad7c1cf52363b4711fcc3a820abfbc",
                 "shasum": ""
             },
             "require": {
@@ -53,9 +53,9 @@
             ],
             "support": {
                 "issues": "https://github.com/phpclassic/php-shopify/issues",
-                "source": "https://github.com/phpclassic/php-shopify/tree/v1.1.16"
+                "source": "https://github.com/phpclassic/php-shopify/tree/v1.1.21"
             },
-            "time": "2020-12-17T08:07:12+00:00"
+            "time": "2021-12-18T11:23:03+00:00"
         }
     ],
     "packages-dev": [],
@@ -66,5 +66,5 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.1.0"
 }

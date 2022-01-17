@@ -1,6 +1,9 @@
-# 1.6.1
+# 1.7.0
 
-- Removing `->hydrate()` from assets upload/store. This will hopefully help with #86.
+### Fixed
+
+- Changed the way the checkout ID gets intitalised to prevent errors if the ID is cleared/not intialised properly (See #103).
+
 
 # 1.6.0
 
