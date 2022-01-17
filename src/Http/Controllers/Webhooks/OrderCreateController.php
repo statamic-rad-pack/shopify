@@ -26,7 +26,7 @@ class OrderCreateController extends WebhooksController
 
         foreach ($data->line_items as $item) {
             $product = $shopify->Product($item->product_id)->get();
-            ImportSingleProductJob::dispatch($product);
+            ImportSingleProductJob::dispatch($product)->onQueue(config('shopify.queue'));
         }
 
         return response()->json([], 200);

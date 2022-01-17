@@ -26,11 +26,11 @@ class ImportProductsController extends CpController
     public function fetchSingleProduct(Request $request): JsonResponse
     {
         // Fetch Single Product
-        $shopify = new ShopifySDK;
+        $shopify = new ShopifySDK();
         $product = $shopify->Product($request->get('product'))->get();
 
         // Pass to import Job.
-        ImportSingleProductJob::dispatch($product);
+        ImportSingleProductJob::dispatch($product)->onQueue(config('shopify.queue'));
 
         return response()->json([
             'message' => 'Product import has been queued.'

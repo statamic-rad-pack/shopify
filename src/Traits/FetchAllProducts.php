@@ -16,14 +16,16 @@ trait FetchAllProducts
         $next_page = $productResource->getNextPageParams();
 
         // Initial Loop
-        ImportAllProductsJob::dispatch($products);
+        ImportAllProductsJob::dispatch($products)
+            ->onQueue(config('shopify.queue'));
 
         // Recursively loop.
         while ($next_page) {
             $products = $productResource->get($productResource->getNextPageParams());
             $next_page = $productResource->getNextPageParams();
 
-            ImportAllProductsJob::dispatch($products);
+            ImportAllProductsJob::dispatch($products)
+                ->onQueue(config('shopify.queue'));
         }
     }
 }

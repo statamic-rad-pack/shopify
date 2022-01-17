@@ -2,7 +2,11 @@
 
 ### Fixed
 
-- Changed the way the checkout ID gets intitalised to prevent errors if the ID is cleared/not intialised properly (See #103).
+- Changed the way the checkout ID gets intitalised to prevent errors if the ID is cleared/not intialised properly. To get this change on an existing site, you'll need to update your JS or republish the JS. (See #103).
+
+### New
+
+- Added the optin to define a queue for the Shopify jobs. Defaults to `default`. If you'd like to set a unique process you can set a env variable of `SHOPIFY_JOB_QUEUE`.
 
 
 # 1.6.0

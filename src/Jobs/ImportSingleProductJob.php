@@ -105,7 +105,7 @@ class ImportSingleProductJob implements ShouldQueue
         $entry->save();
 
         // Get the collections
-        FetchCollectionsForProductJob::dispatch($entry);
+        FetchCollectionsForProductJob::dispatch($entry)->onQueue(config('shopify.queue'));
     }
 
     /**

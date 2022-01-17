@@ -39,7 +39,8 @@ class FetchCollectionsForProductJob implements ShouldQueue
         $collections = array_merge($collections, $this->getManualCollections());
         $collections = array_merge($collections, $this->getSmartCollections());
 
-        ImportCollectionsForProductJob::dispatch($collections, $this->product);
+        ImportCollectionsForProductJob::dispatch($collections, $this->product)
+            ->onQueue(config('shopify.queue'));
     }
 
     public function getManualCollections()

@@ -20,7 +20,7 @@ class ImportCollectionsController extends CpController
             ->get();
 
         foreach ($products as $product) {
-            FetchCollectionsForProductJob::dispatch($product);
+            FetchCollectionsForProductJob::dispatch($product)->onQueue(config('shopify.queue'));
         }
 
         return response()->json([

@@ -28,7 +28,8 @@ class ShopifyImportCollections extends Command
             ->get();
 
         foreach ($products as $product) {
-            FetchCollectionsForProductJob::dispatch($product);
+            FetchCollectionsForProductJob::dispatch($product)
+                ->onQueue(config('shopify.queue'));
         }
 
         $this->info('Collections have been dispatched for import');
