@@ -12,7 +12,7 @@ const checkout = async () => {
   let shopifyCheckout = localStorage.getItem('statamic.shopify.cart.id')
 
   // If not, let's create a new checkout for the user and set it as the ID.
-  if (!shopifyCheckout) {
+  if (!shopifyCheckout || shopifyCheckout === 'undefined') {
     const { id } = await client.checkout.create()
     localStorage.setItem('statamic.shopify.cart.id', id)
     shopifyCheckout = id
@@ -21,7 +21,7 @@ const checkout = async () => {
   return shopifyCheckout
 }
 
-const checkoutId = checkout()
+const checkoutId = localStorage.getItem('statamic.shopify.cart.id')
 
 export { checkoutId }
 

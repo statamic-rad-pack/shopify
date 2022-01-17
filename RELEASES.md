@@ -1,3 +1,9 @@
+# 1.7.2
+
+### Fixed
+
+- Remove an issue with the `async` and `await` from the causing issues with the cart.
+
 # 1.7.0
 
 ### Fixed
