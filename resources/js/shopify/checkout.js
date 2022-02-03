@@ -21,7 +21,7 @@ const checkout = async () => {
   return shopifyCheckout
 }
 
-const checkoutId = localStorage.getItem('statamic.shopify.cart.id')
+const checkoutId = checkout()
 
 export { checkoutId }
 
