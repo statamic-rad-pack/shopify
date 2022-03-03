@@ -9,8 +9,9 @@ position: 3
 | Value             | Description  |
 | -------------------| ------------- |
 | `SHOPIFY_APP_URL`  | The url to your store (no https://)  |
-| `SHOPIFY_AUTH_KEY`  | The Admin API key found when creating your private app |
-| `SHOPIFY_AUTH_PASSWORD` | The Admin API password found when creating your private app |
+| `SHOPIFY_ADMIN_TOKEN`  | The Admin API access token you received when generating the private app (the new way) |
+| `SHOPIFY_AUTH_KEY`  | The Admin API key found when creating your private app (the old way) |
+| `SHOPIFY_AUTH_PASSWORD` | The Admin API password found when creating your private app (the old way) |
 
 ## Required For Frontend
 
