@@ -1,8 +1,14 @@
+# 1.7.4
+
+### New
+
+- Adds support for new apps generated via Shopify, these require the use of an Admin API Token rather than the Auth/Password combo. You can add this option by specifiying `SHOPIFY_ADMIN_TOKEN` in your `.env` file.
+
 # 1.7.3
 
 ### Fixed
 
-- Fixed an issue with the localStorage values returning null on initial load of products. Please publish assets again. If you've modified the JS files, Please review PR #111 (view here)[https://github.com/jackabox/statamic-shopify/pull/111/files?diff=split&w=0] for changes you may need to make.
+- Fixed an issue with the localStorage values returning null on initial load of products. Please publish assets again. If you've modified the JS files, Please review PR #111 for changes you may need to make.
 
 # 1.7.2
 
