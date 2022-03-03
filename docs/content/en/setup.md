@@ -22,9 +22,24 @@ Add `jackabox/statamic-shopify` as a dependency to your project:
 composer require jackabox/statamic-shopify
 ```
 
-## Creating A Shopify App
+## Creating a Shopify App (New)
 
-Before we can get anything working, we need to ensure we have a private app setup in our Shopify Admin. 
+Shopify recently updated the way apps work. The below method is how you should now set up and use the apps.
+
+1. Visit the "Apps" section in your Shopify admin, the URL should be similar to https://MY-SITE.myshopify.com/admin/apps.
+2. Click "Develop Apps" in the top right.
+3. Click "Create an app" in the top right to make a new one.
+4. Set a nice name to remember as well as your email.
+5. Click the "Configure" Tab.
+    5a. Click "Configure" next to Admin API Integration.
+    5b. Set read access to **"Product listings", "Read Inventory", "Read Product Listings" and "Products"**.
+    5c. Click "Save" in the top right.
+6. Click the "API Credentials" tab. If you've configured you're api integration properly you should see a button that says "Install App". Click this.
+7. You'll be presented with an Admin API access token. You can only access this once, so make sure you copy it down and make a note. Add this to your `.env` as `SHOPIFY_ADMIN_TOKEN`
+
+## Creating A Shopify App (Old)
+
+Before we can get anything working, we need to ensure we have a private app setup in our Shopify Admin.
 
 1. Visit the "Apps" section in your Shopify admin, the URL should be similar to https://MY-SITE.myshopify.com/admin/apps.
 2. Scroll down and click "Manage private apps"
@@ -67,19 +82,19 @@ You can install each asset individually.
 #### Blueprints
 
 ```bash
-php artisan vendor:publish --tag="shopify-blueprints" 
+php artisan vendor:publish --tag="shopify-blueprints"
 ```
 
 #### Content
 
 ```bash
-php artisan vendor:publish --tag="shopify-content" 
+php artisan vendor:publish --tag="shopify-content"
 ```
 
 #### Config
 
 ```bash
-php artisan vendor:publish --tag="shopify-config" 
+php artisan vendor:publish --tag="shopify-config"
 ```
 
 #### JavaScript
@@ -87,7 +102,7 @@ php artisan vendor:publish --tag="shopify-config"
 Publishes the JavaScript files which have been created to speed up your integration with the Storefront API.
 
 ```bash
-php artisan vendor:publish --tag="shopify-scripts" 
+php artisan vendor:publish --tag="shopify-scripts"
 ```
 
 #### Theme Files
@@ -95,5 +110,5 @@ php artisan vendor:publish --tag="shopify-scripts"
 You can publish the starter theme files if you want to get started quickly or see how the JavaScript integrates.
 
 ```bash
-php artisan vendor:publish --tag="shopify-theme" 
+php artisan vendor:publish --tag="shopify-theme"
 ```
