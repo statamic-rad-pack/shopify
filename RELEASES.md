@@ -1,3 +1,10 @@
+# 1.7.5
+
+### Fixed
+
+- Fixed admin dashboard no longer showing with new admin token update. Fixes #115. Fixes #118.
+
+
 # 1.7.4
 
 ### New
