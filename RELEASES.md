@@ -1,5 +1,12 @@
 # 1.7.4
 
+### Fixed
+
+- Fixed admin dashboard no longer showing with new admin token update. Fixes #115. Fixes #118.
+
+
+# 1.7.4
+
 ### New
 
 - Adds support for new apps generated via Shopify, these require the use of an Admin API Token rather than the Auth/Password combo. You can add this option by specifiying `SHOPIFY_ADMIN_TOKEN` in your `.env` file.
