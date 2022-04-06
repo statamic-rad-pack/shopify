@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Statamic\Facades\Asset;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Path;
+use Statamic\Facades\Term;
 use Statamic\Support\Str;
 
 class ImportSingleProductJob implements ShouldQueue
@@ -51,7 +52,6 @@ class ImportSingleProductJob implements ShouldQueue
             ->first();
 
         // Clean up data whilst checking if product exists
-        $tags = $this->cleanArrayData($this->data['tags']);
         $vendors = $this->cleanArrayData($this->data['vendor']);
         $type = $this->cleanArrayData($this->data['product_type']);
 
@@ -62,6 +62,9 @@ class ImportSingleProductJob implements ShouldQueue
                 $options['option' . $option['position']] = $option['name'];
             }
         }
+
+        // import tag terms
+        $tags = $this->importTags($this->data['tags']);
 
         $data = [
             'product_id' => $this->data['id'],
@@ -106,6 +109,42 @@ class ImportSingleProductJob implements ShouldQueue
 
         // Get the collections
         FetchCollectionsForProductJob::dispatch($entry)->onQueue(config('shopify.queue'));
+    }
+
+    /**
+     * Take a string of comma-separated tags (as returned by the shopify api for
+     * a product) and create terms in the according tag taxonomy
+     *
+     * @param string $tagData The tag data
+     *
+     * @return array Array of tag slugs
+     */
+    protected function importTags(string $tagData) : array
+    {
+        $collectionHandle = config('shopify.taxonomies.tags');
+
+        // 'Tag foo, Tag bar' => ['tag-foo' => 'Tag foo', 'tag-bar' => 'Tag bar']
+        $tags = collect($this->cleanArrayData($tagData, false))
+            ->mapWithKeys(function ($tagTitle) {
+                return [Str::slug($tagTitle) => $tagTitle];
+            });
+
+        foreach ($tags as $tagSlug => $tagTitle) {
+            $term = Term::findBySlug($tagSlug, $collectionHandle);
+
+            if (!$term) {
+                $term = Term::make()
+                    ->taxonomy($collectionHandle)
+                    ->slug($tagSlug);
+            }
+
+            $term->data([
+                'title' => $tagTitle,
+            ]);
+            $term->save();
+        }
+
+        return $tags->keys()->toArray();
     }
 
     /**
@@ -223,7 +262,7 @@ class ImportSingleProductJob implements ShouldQueue
         return $asset;
     }
 
-    private function cleanArrayData($data)
+    private function cleanArrayData($data, $slugify = true)
     {
         if (!$data) {
             return null;
@@ -234,7 +273,7 @@ class ImportSingleProductJob implements ShouldQueue
 
         if ($items) {
             foreach ($items as $item) {
-                $formattedItems[] = Str::slug($item);
+                $formattedItems[] = ($slugify ? Str::slug($item) : $item);
             }
         }
         return $formattedItems;
