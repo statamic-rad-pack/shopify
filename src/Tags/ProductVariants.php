@@ -95,7 +95,7 @@ class ProductVariants extends Tags
     /**
      * @return string
      */
-    private function startSelect(): string
+    public function startSelect(): string
     {
         return '<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select ' . $this->params->get('class') . '">';
     }
@@ -105,7 +105,7 @@ class ProductVariants extends Tags
      * @param null $currency
      * @return string
      */
-    private function parseOptions($variants): string
+    public function parseOptions($variants): string
     {
         $html = '';
 
@@ -140,7 +140,7 @@ class ProductVariants extends Tags
     /**
      * @return string
      */
-    private function endSelect(): string
+    public function endSelect(): string
     {
         return '</select>';
     }

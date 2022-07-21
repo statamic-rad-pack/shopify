@@ -1,4 +1,8 @@
-# 1.8.0
+# 1.7.6
+
+### Changed
+
+- Loosened methods on `ProductVariant.php` tag so that they can be overwritten by extension. (#126)
 
 ### Fixed
 
