@@ -14,12 +14,12 @@ sections:
         handle: slug
         field:
           type: disabled_text
-          required: true
           localizable: true
           icon: disabled_text
           display: 'Variant ID'
           validate:
             - required
+            - 'unique_entry_value:{collection},{id},{site}'
           width: 50
       -
         handle: sku
@@ -46,9 +46,10 @@ sections:
           validate:
             - required
           width: 50
-      - handle: compare_at_price
+      -
+        handle: compare_at_price
         field:
-          display: Compare At Price
+          display: 'Compare At Price'
           type: disabled_text
           icon: disabled_text
           listable: hidden
@@ -106,3 +107,27 @@ sections:
           type: toggle
           icon: toggle
           listable: hidden
+      -
+        handle: storefront_id
+        field:
+          display: 'Storefront ID'
+          type: hidden
+          icon: hidden
+          listable: hidden
+          instructions_position: above
+      -
+        handle: inventory_policy
+        field:
+          display: 'Inventory Policy'
+          type: hidden
+          icon: hidden
+          listable: hidden
+          instructions_position: above
+      -
+        handle: inventory_management
+        field:
+          display: 'Inventory Management'
+          type: hidden
+          icon: hidden
+          listable: hidden
+          instructions_position: above
