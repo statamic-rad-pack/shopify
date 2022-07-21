@@ -1,3 +1,14 @@
+# 1.7.6
+
+### Changed
+
+- Loosened methods on `ProductVariant.php` tag so that they can be overwritten by extension. (#126)
+
+### Fixed
+
+- Fixed an issue with storefront_id, inventory_policy, and inventory_management being missing from variant (#122).
+- Fixed an issue with the example js not invalidating carts if they were completed. (#123)
+
 # 1.7.5
 
 ### Fixed
