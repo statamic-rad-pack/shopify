@@ -1,6 +1,8 @@
 # 1.8.0
 
-Changelog TBC
+### Fixed
+
+- Fixed an issue with storefront_id, inventory_policy, and inventory_management being missing from variant (#122).
 
 # 1.7.5
 
