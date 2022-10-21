@@ -47,7 +47,7 @@ class ImportSingleProductJob implements ShouldQueue
     {
         $entry = Entry::query()
             ->where('collection', 'products')
-            ->where('slug', $this->slug)
+            ->where('product_id', $this->data['id'])
             ->first();
 
         // Clean up data whilst checking if product exists

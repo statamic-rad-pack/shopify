@@ -1,3 +1,9 @@
+# 1.7.7
+
+### Changed
+
+- Products now re-import off the `product_id` rather than the slug. This is to prevent duplications and changes whenever the product is changed in the Shopify Admin. **NOTE: we do not overwrite the slug again in Statamic in case it has been changed here for SEO purposes.** (#135)
+- 
 # 1.7.6
 
 ### Changed
