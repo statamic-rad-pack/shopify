@@ -1,3 +1,9 @@
+# 1.7.8
+
+### Fixed
+
+- Fixed an issue with redundancies made in #111. This should fix cart checkout removal issues and quantities. (#136).
+
 # 1.7.7
 
 ### Changed

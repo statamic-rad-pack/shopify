@@ -1,5 +1,4 @@
 import client from './client'
-import { checkoutId } from './checkout'
 import {
   htmlToElements,
   formatCurrency,
@@ -163,7 +162,7 @@ const deleteRowFromStorefront = (row) => {
   items.push(id)
 
   client.checkout
-    .removeLineItems(checkoutId, items)
+    .removeLineItems(localStorage.getItem('statamic.shopify.cart.id'), items)
     .then(({ lineItems, subtotalPriceV2 }) => {
       setCartCount(lineItems)
       setCartSubtotal(subtotalPriceV2.amount)
@@ -195,7 +194,7 @@ const updateQtyInStorefront = debounce((row, qty) => {
   ]
 
   client.checkout
-    .updateLineItems(checkoutId, items)
+    .updateLineItems(localStorage.getItem('statamic.shopify.cart.id'), items)
     .then(({ lineItems, subtotalPriceV2 }) => {
       setCartCount(lineItems)
       setCartSubtotal(subtotalPriceV2.amount)
