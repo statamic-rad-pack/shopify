@@ -8,6 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Statamic\Facades\Term;
+use function config;
 
 class ImportCollectionsForProductJob implements ShouldQueue
 {
@@ -30,7 +31,10 @@ class ImportCollectionsForProductJob implements ShouldQueue
         $product_collections = collect();
 
         foreach ($this->collections as $collection) {
-            $term = Term::findBySlug($collection['handle'], config('shopify.taxonomies.collections'));
+            $term = Term::query()
+                ->where('slug', $collection['handle'])
+                ->where('taxonomy', config('shopify.taxonomies.collections'))
+                ->first();
 
             if (!$term) {
                 $term = Term::make()
