@@ -1,9 +1,9 @@
 <?php
 
-namespace Jackabox\Shopify\Tags;
+namespace StatamicRadPack\Shopify\Tags;
 
-use Jackabox\Shopify\Traits\HasProductVariants;
 use Statamic\Tags\Tags;
+use StatamicRadPack\Shopify\Traits\HasProductVariants;
 
 class ProductPrice extends Tags
 {
@@ -14,20 +14,20 @@ class ProductPrice extends Tags
      */
     public function index()
     {
-        if (!$this->context->get('slug')) {
+        if (! $this->context->get('slug')) {
             return null;
         }
 
         $variants = $this->fetchProductVariants($this->context->get('slug'));
 
-        if (!$variants) {
+        if (! $variants) {
             return null;
         }
 
         $html = '';
 
         // Out of Stock
-        if (!$this->isInStock($variants)) {
+        if (! $this->isInStock($variants)) {
             return config('shopify.lang.out_of_stock', 'Out of Stock');
         }
 
@@ -35,10 +35,10 @@ class ProductPrice extends Tags
         $pricePluck = $variants->pluck('price');
 
         if ($pricePluck->count() > 1 && $this->params->get('show_from') === true) {
-            $html .= config('shopify.lang.from', 'From') . ' ';
+            $html .= config('shopify.lang.from', 'From').' ';
         }
 
-        $html .= config('shopify.currency') . $pricePluck->sort()->splice(0, 1)[0];
+        $html .= config('shopify.currency').$pricePluck->sort()->splice(0, 1)[0];
 
         return $html;
     }

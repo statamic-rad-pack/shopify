@@ -1,10 +1,8 @@
 <?php
 
-namespace Jackabox\Shopify\Http\Controllers\Webhooks;
+namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 
 use Illuminate\Http\Request;
-use Jackabox\Shopify\Jobs\ImportSingleProductJob;
-use PHPShopify\ShopifySDK;
 use Statamic\Facades\Entry;
 
 class ProductDeleteController extends WebhooksController
@@ -26,7 +24,7 @@ class ProductDeleteController extends WebhooksController
             return;
         }
 
-        $productEntry =  Entry::query()
+        $productEntry = Entry::query()
             ->where('collection', 'products')
             ->where('product_id', $data->id)
             ->first();
@@ -45,7 +43,7 @@ class ProductDeleteController extends WebhooksController
         }
 
         return response()->json([
-            'message' => 'Product has been deleted'
+            'message' => 'Product has been deleted',
         ], 200);
     }
 }

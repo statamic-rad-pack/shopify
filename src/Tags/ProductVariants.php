@@ -1,9 +1,9 @@
 <?php
 
-namespace Jackabox\Shopify\Tags;
+namespace StatamicRadPack\Shopify\Tags;
 
-use Jackabox\Shopify\Traits\HasProductVariants;
 use Statamic\Tags\Tags;
+use StatamicRadPack\Shopify\Traits\HasProductVariants;
 
 class ProductVariants extends Tags
 {
@@ -31,7 +31,7 @@ class ProductVariants extends Tags
     {
         $variants = $this->fetchProductVariants($this->context->get('slug'));
 
-        if (!$variants) {
+        if (! $variants) {
             return;
         }
 
@@ -40,7 +40,7 @@ class ProductVariants extends Tags
             $html .= $this->parseOptions($variants);
             $html .= $this->endSelect();
         } else {
-            $html = '<input type="hidden" name="ss-product-variant" id="ss-product-variant" value="' . $variants[0]['storefront_id'] . '">';
+            $html = '<input type="hidden" name="ss-product-variant" id="ss-product-variant" value="'.$variants[0]['storefront_id'].'">';
         }
 
         return $html;
@@ -63,7 +63,7 @@ class ProductVariants extends Tags
      */
     public function fromTitle()
     {
-        if (!$this->params->get('title')) {
+        if (! $this->params->get('title')) {
             return null;
         }
 
@@ -92,18 +92,13 @@ class ProductVariants extends Tags
             ->first();
     }
 
-    /**
-     * @return string
-     */
     public function startSelect(): string
     {
-        return '<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select ' . $this->params->get('class') . '">';
+        return '<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select '.$this->params->get('class').'">';
     }
 
     /**
-     * @param $variants
-     * @param null $currency
-     * @return string
+     * @param  null  $currency
      */
     public function parseOptions($variants): string
     {
@@ -124,22 +119,19 @@ class ProductVariants extends Tags
             }
 
             if ($this->params->get('show_price')) {
-                $title .= ' - ' . config('shopify.currency') . $variant['price'];
+                $title .= ' - '.config('shopify.currency').$variant['price'];
             }
 
             if ($this->params->get('show_out_of_stock') && $out_of_stock) {
-                $title .= ' (' . config('shopify.lang.out_of_stock') . ')';
+                $title .= ' ('.config('shopify.lang.out_of_stock').')';
             }
 
-            $html .= '<option value="' . $variant['storefront_id'] . '" data-in-stock="' . $out_of_stock . '"' . ($out_of_stock ? " disabled" : "") . '>' . $title . '</option>';
+            $html .= '<option value="'.$variant['storefront_id'].'" data-in-stock="'.$out_of_stock.'"'.($out_of_stock ? ' disabled' : '').'>'.$title.'</option>';
         }
 
         return $html;
     }
 
-    /**
-     * @return string
-     */
     public function endSelect(): string
     {
         return '</select>';

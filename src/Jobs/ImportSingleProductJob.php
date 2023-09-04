@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackabox\Shopify\Jobs;
+namespace StatamicRadPack\Shopify\Jobs;
 
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -30,9 +30,6 @@ class ImportSingleProductJob implements ShouldQueue
 
     /**
      * ImportSingleProductJob constructor.
-     *
-     * @param array $data
-     * @param string|null $handle
      */
     public function __construct(array $data, string $handle = null)
     {
@@ -40,9 +37,6 @@ class ImportSingleProductJob implements ShouldQueue
         $this->slug = $handle ? $handle : $data['handle'];
     }
 
-    /**
-     *
-     */
     public function handle()
     {
         $entry = Entry::query()
@@ -59,7 +53,7 @@ class ImportSingleProductJob implements ShouldQueue
         $options = [];
         foreach ($this->data['options'] as $option) {
             if ($option['name'] != 'Title') {
-                $options['option' . $option['position']] = $option['name'];
+                $options['option'.$option['position']] = $option['name'];
             }
         }
 
@@ -67,15 +61,15 @@ class ImportSingleProductJob implements ShouldQueue
             'product_id' => $this->data['id'],
             'published' => $this->data['status'] === 'active' ? true : false,
             'published_at' => Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s'),
-            'title' => (!$entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
-            'content' => (!$entry || config('shopify.overwrite.content')) ? $this->data['body_html'] : $entry->content,
-            config('shopify.taxonomies.vendor') => (!$entry || config('shopify.overwrite.vendor')) ? $vendors : $entry->vendor,
-            config('shopify.taxonomies.type') => (!$entry || config('shopify.overwrite.type')) ? $type : $entry->product_type,
-            config('shopify.taxonomies.tags') => (!$entry || config('shopify.overwrite.tags')) ? $tags : $entry->product_tags,
-            'options' => $options
+            'title' => (! $entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
+            'content' => (! $entry || config('shopify.overwrite.content')) ? $this->data['body_html'] : $entry->content,
+            config('shopify.taxonomies.vendor') => (! $entry || config('shopify.overwrite.vendor')) ? $vendors : $entry->vendor,
+            config('shopify.taxonomies.type') => (! $entry || config('shopify.overwrite.type')) ? $type : $entry->product_type,
+            config('shopify.taxonomies.tags') => (! $entry || config('shopify.overwrite.tags')) ? $tags : $entry->product_tags,
+            'options' => $options,
         ];
 
-        if (!$entry) {
+        if (! $entry) {
             $entry = Entry::make()
                 ->collection('products')
                 ->slug($this->data['handle']);
@@ -108,10 +102,6 @@ class ImportSingleProductJob implements ShouldQueue
         FetchCollectionsForProductJob::dispatch($entry)->onQueue(config('shopify.queue'));
     }
 
-    /**
-     * @param array $variants
-     * @param string $product_slug
-     */
     private function importVariants(array $variants, string $product_slug)
     {
         $this->removeOldVariants($variants, $product_slug);
@@ -122,7 +112,7 @@ class ImportSingleProductJob implements ShouldQueue
                 ->where('slug', $variant['id'])
                 ->first();
 
-            if (!$entry) {
+            if (! $entry) {
                 $entry = Entry::make()
                     ->collection('variants')
                     ->slug($variant['id']);
@@ -149,9 +139,6 @@ class ImportSingleProductJob implements ShouldQueue
 
     /**
      * Remove old variants that are no longer used on a single product.
-     *
-     * @param array $variants
-     * @param string $product_slug
      */
     private function removeOldVariants(array $variants, string $product_slug)
     {
@@ -173,8 +160,6 @@ class ImportSingleProductJob implements ShouldQueue
      * TODO: Look into this one.
      * Not implemented due to issues with stack and saving images.
      * Currently images are all stored on the defalt product as a gallery.
-     *
-     * @param $variant
      */
     private function importImagesToVariant($variant)
     {
@@ -192,7 +177,6 @@ class ImportSingleProductJob implements ShouldQueue
     /**
      * TODO: check the container is the one we want from the config
      *
-     * @param array $image
      * @return mixed
      */
     private function importImages(array $image)
@@ -204,7 +188,7 @@ class ImportSingleProductJob implements ShouldQueue
         // Check if it exists first - no point double importing.
         $asset = Asset::query()
             ->where('container', config('shopify.asset.container'))
-            ->where('path', config('shopify.asset.path') . '/' . $name)
+            ->where('path', config('shopify.asset.path').'/'.$name)
             ->first();
 
         if ($asset) {
@@ -225,7 +209,7 @@ class ImportSingleProductJob implements ShouldQueue
 
     private function cleanArrayData($data)
     {
-        if (!$data) {
+        if (! $data) {
             return null;
         }
 
@@ -237,14 +221,12 @@ class ImportSingleProductJob implements ShouldQueue
                 $formattedItems[] = Str::slug($item);
             }
         }
+
         return $formattedItems;
     }
 
     /**
      * Clean up any query params ont he end of the URL.
-     *
-     * @param string $url
-     * @return string
      */
     private function cleanImageURL(string $url): string
     {
@@ -253,9 +235,6 @@ class ImportSingleProductJob implements ShouldQueue
 
     /**
      * Grab the image name from the file.
-     *
-     * @param string $url
-     * @return string
      */
     private function getImageNameFromUrl(string $url): string
     {
@@ -264,10 +243,6 @@ class ImportSingleProductJob implements ShouldQueue
 
     /**
      * Make a fake file so Statamic can interpert the data we need.
-     *
-     * @param string $name
-     * @param string $url
-     * @return UploadedFile
      */
     public function uploadFakeFileFromUrl(string $name, string $url): UploadedFile
     {
@@ -278,8 +253,6 @@ class ImportSingleProductJob implements ShouldQueue
 
     /**
      * Remove the fake file as we don't need it lingering around.
-     *
-     * @param string $name
      */
     private function cleanupFakeFile(string $name): void
     {
@@ -290,12 +263,9 @@ class ImportSingleProductJob implements ShouldQueue
      * TODO: let's make asset container variable.
      *
      * Get the path to upload to based on name/params.
-     *
-     * @param UploadedFile $file
-     * @return String
      */
     private function getPath(UploadedFile $file): string
     {
-        return Path::assemble(config('shopify.asset.path') . '/', $file->getClientOriginalName());
+        return Path::assemble(config('shopify.asset.path').'/', $file->getClientOriginalName());
     }
 }

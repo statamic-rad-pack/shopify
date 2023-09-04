@@ -1,9 +1,9 @@
 <?php
 
-namespace Jackabox\Shopify\Traits;
+namespace StatamicRadPack\Shopify\Traits;
 
-use Jackabox\Shopify\Jobs\ImportAllProductsJob;
 use PHPShopify\ShopifySDK;
+use StatamicRadPack\Shopify\Jobs\ImportAllProductsJob;
 
 trait FetchAllProducts
 {

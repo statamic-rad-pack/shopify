@@ -1,10 +1,10 @@
 <?php
 
-namespace Jackabox\Shopify\Http\Controllers\Webhooks;
+namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 
 use Illuminate\Http\Request;
-use Jackabox\Shopify\Jobs\ImportSingleProductJob;
 use PHPShopify\ShopifySDK;
+use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 
 class OrderCreateController extends WebhooksController
 {

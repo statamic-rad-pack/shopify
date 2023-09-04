@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackabox\Shopify\Traits;
+namespace StatamicRadPack\Shopify\Traits;
 
 use Statamic\Facades\Entry;
 
@@ -13,7 +13,7 @@ trait HasProductVariants
             ->where('product_slug', $product)
             ->get();
 
-        if (!$entries->count()) {
+        if (! $entries->count()) {
             return null;
         }
 

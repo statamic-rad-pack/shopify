@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackabox\Shopify\Blueprints;
+namespace StatamicRadPack\Shopify\Blueprints;
 
 use Statamic\Facades\Blueprint;
 

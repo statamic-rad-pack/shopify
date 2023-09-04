@@ -1,50 +1,50 @@
 <?php
 
-namespace Jackabox\Shopify;
+namespace StatamicRadPack\Shopify;
 
+use Illuminate\Support\Facades\Artisan;
+use PHPShopify\ShopifySDK;
 use Statamic\Facades\Collection;
 use Statamic\Facades\CP\Nav;
 use Statamic\Facades\Permission;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
-use PHPShopify\ShopifySDK;
-use Illuminate\Support\Facades\Artisan;
 
 class ServiceProvider extends AddonServiceProvider
 {
     protected $publishAfterInstall = false;
 
     protected $routes = [
-        'cp' => __DIR__ . '/../routes/cp.php',
-        'web' => __DIR__ . '/../routes/web.php',
-        'actions' => __DIR__ . '/../routes/actions.php',
+        'cp' => __DIR__.'/../routes/cp.php',
+        'web' => __DIR__.'/../routes/web.php',
+        'actions' => __DIR__.'/../routes/actions.php',
     ];
 
     protected $fieldtypes = [
-        \Jackabox\Shopify\Fieldtypes\Variants::class,
-        \Jackabox\Shopify\Fieldtypes\DisabledText::class,
+        \StatamicRadPack\Shopify\Fieldtypes\Variants::class,
+        \StatamicRadPack\Shopify\Fieldtypes\DisabledText::class,
     ];
 
     protected $scripts = [
-        __DIR__ . '/../dist/js/statamic-shopify-cp.js',
+        __DIR__.'/../dist/js/statamic-shopify-cp.js',
     ];
 
     protected $tags = [
-        \Jackabox\Shopify\Tags\ShopifyTokens::class,
-        \Jackabox\Shopify\Tags\ShopifyScripts::class,
-        \Jackabox\Shopify\Tags\ProductPrice::class,
-        \Jackabox\Shopify\Tags\ProductVariants::class,
-        \Jackabox\Shopify\Tags\InStock::class
+        \StatamicRadPack\Shopify\Tags\ShopifyTokens::class,
+        \StatamicRadPack\Shopify\Tags\ShopifyScripts::class,
+        \StatamicRadPack\Shopify\Tags\ProductPrice::class,
+        \StatamicRadPack\Shopify\Tags\ProductVariants::class,
+        \StatamicRadPack\Shopify\Tags\InStock::class,
     ];
 
     protected $scopes = [
-        \Jackabox\Shopify\Scopes\VariantByProduct::class,
+        \StatamicRadPack\Shopify\Scopes\VariantByProduct::class,
     ];
 
     protected $commands = [
-        \Jackabox\Shopify\Commands\ShopifyImportProducts::class,
-        \Jackabox\Shopify\Commands\ShopifyImportSingleProduct::class,
-        \Jackabox\Shopify\Commands\ShopifyImportCollections::class,
+        \StatamicRadPack\Shopify\Commands\ShopifyImportProducts::class,
+        \StatamicRadPack\Shopify\Commands\ShopifyImportSingleProduct::class,
+        \StatamicRadPack\Shopify\Commands\ShopifyImportCollections::class,
     ];
 
     public function boot()
@@ -53,8 +53,8 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->createNavigation();
 
-        $this->loadViewsFrom(__DIR__ . '/../resources/views/', 'shopify');
-        $this->mergeConfigFrom(__DIR__ . '/../config/shopify.php', 'shopify');
+        $this->loadViewsFrom(__DIR__.'/../resources/views/', 'shopify');
+        $this->mergeConfigFrom(__DIR__.'/../config/shopify.php', 'shopify');
 
         Statamic::booted(function () {
             $this->setShopifyApiConfig();
@@ -64,32 +64,32 @@ class ServiceProvider extends AddonServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../resources/js/shopify' => resource_path('js/vendor/shopify'),
-                __DIR__ . '/../resources/js/front.js' => resource_path('js/vendor/shopify.js'),
+                __DIR__.'/../resources/js/shopify' => resource_path('js/vendor/shopify'),
+                __DIR__.'/../resources/js/front.js' => resource_path('js/vendor/shopify.js'),
             ], 'shopify-scripts');
 
             $this->publishes([
-                __DIR__ . '/../content/assets' => base_path('content/assets'),
-                __DIR__ . '/../content/collections' => base_path('content/collections'),
-                __DIR__ . '/../content/taxonomies' => base_path('content/taxonomies'),
+                __DIR__.'/../content/assets' => base_path('content/assets'),
+                __DIR__.'/../content/collections' => base_path('content/collections'),
+                __DIR__.'/../content/taxonomies' => base_path('content/taxonomies'),
             ], 'shopify-content');
 
             $this->publishes([
-                __DIR__ . '/../resources/blueprints' => resource_path('blueprints'),
+                __DIR__.'/../resources/blueprints' => resource_path('blueprints'),
             ], 'shopify-blueprints');
 
             $this->publishes([
-                __DIR__ . '/../config/shopify.php' => config_path('shopify.php'),
+                __DIR__.'/../config/shopify.php' => config_path('shopify.php'),
             ], 'shopify-config');
 
             $this->publishes([
-                __DIR__ . '/../dist/js' => public_path('vendor/statamic-shopify/js'),
+                __DIR__.'/../dist/js' => public_path('vendor/statamic-shopify/js'),
             ], 'shopify-resources');
 
             $this->publishes([
-                __DIR__ . '/../resources/views/cart.antlers.html' => base_path('resources/views/shopify/cart.antlers.html'),
-                __DIR__ . '/../resources/views/product.antlers.html' => base_path('resources/views/shopify/product.antlers.html'),
-                __DIR__ . '/../resources/views/products.antlers.html' => base_path('resources/views/shopify/products.antlers.html'),
+                __DIR__.'/../resources/views/cart.antlers.html' => base_path('resources/views/shopify/cart.antlers.html'),
+                __DIR__.'/../resources/views/product.antlers.html' => base_path('resources/views/shopify/product.antlers.html'),
+                __DIR__.'/../resources/views/products.antlers.html' => base_path('resources/views/shopify/products.antlers.html'),
             ], 'shopify-theme');
         }
     }

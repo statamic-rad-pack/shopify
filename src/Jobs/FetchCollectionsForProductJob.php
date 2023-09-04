@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackabox\Shopify\Jobs;
+namespace StatamicRadPack\Shopify\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,6 +18,7 @@ class FetchCollectionsForProductJob implements ShouldQueue
     use SerializesModels;
 
     public $product;
+
     public $shopify;
 
     public function __construct($product)
@@ -63,7 +64,7 @@ class FetchCollectionsForProductJob implements ShouldQueue
 
         $collections = $resource->get([
             'limit' => config('shopify.api_limit'),
-            'product_id' => $this->product->data()['product_id']
+            'product_id' => $this->product->data()['product_id'],
         ]);
 
         $next_page = $resource->getNextPageParams();

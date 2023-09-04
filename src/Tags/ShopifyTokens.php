@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackabox\Shopify\Tags;
+namespace StatamicRadPack\Shopify\Tags;
 
 use Statamic\Tags\Tags;
 
@@ -12,8 +12,8 @@ class ShopifyTokens extends Tags
     public function index()
     {
         return "<script>
-window.shopifyUrl = '" . config('shopify.url') . "';
-window.shopifyToken = '" . config('shopify.storefront_token') . "';
+window.shopifyUrl = '".config('shopify.url')."';
+window.shopifyToken = '".config('shopify.storefront_token')."';
 </script>";
     }
 }
