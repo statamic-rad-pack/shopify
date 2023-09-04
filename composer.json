@@ -1,41 +1,49 @@
 {
-  "name": "statamic-rad-pack/statamic-shopify",
-  "description": "A Shopify Addon for Statamic",
-  "license": "proprietary",
-  "autoload": {
-    "psr-4": {
-      "StatamicRadPack\\Shopify\\": "src"
-    }
-  },
-  "authors": [
-    {
-      "name": "Jack Whiting",
-      "email": "hi@jackwhiting.co.uk",
-      "homepage": "https://jackwhiting.co.uk",
-      "role": "Developer"
-    }
-  ],
-  "support": {
-    "email": "hi@jackwhiting.co.uk"
-  },
-  "extra": {
-    "statamic": {
-      "name": "Shopify",
-      "description": "Shopify Addon for Statamic"
+    "name": "statamic-rad-pack/statamic-shopify",
+    "description": "A Shopify Addon for Statamic",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Jack Whiting",
+            "email": "hi@jackwhiting.co.uk",
+            "homepage": "https://jackwhiting.co.uk",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "email": "hi@jackwhiting.co.uk"
     },
-    "laravel": {
-      "providers": [
-        "StatamicRadPack\\Shopify\\ServiceProvider"
-      ]
+    "require": {
+        "phpclassic/php-shopify": "^1.1",
+        "pixelfear/composer-dist-plugin": "^0.1",
+        "statamic/cms": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "StatamicRadPack\\Shopify\\": "src"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pixelfear/composer-dist-plugin": true
+        },
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "extra": {
+        "download-dist": {
+            "path": "dist",
+            "url": "https://github.com/statamic-rad-pack/shopify/releases/download/{$version}/dist.tar.gz"
+        },
+        "laravel": {
+            "providers": [
+                "StatamicRadPack\\Shopify\\ServiceProvider"
+            ]
+        },
+        "statamic": {
+            "description": "Shopify Addon for Statamic",
+            "name": "Shopify"
+        }
     }
-  },
-  "require": {
-    "phpclassic/php-shopify": "^1.1",
-    "statamic/cms": "^4.0"
-  },
-  "config": {
-    "optimize-autoloader": true,
-    "preferred-install": "dist",
-    "sort-packages": true
-  }
 }
