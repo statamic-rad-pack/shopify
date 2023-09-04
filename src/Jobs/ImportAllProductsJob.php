@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackabox\Shopify\Jobs;
+namespace StatamicRadPack\Shopify\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

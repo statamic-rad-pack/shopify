@@ -1,18 +1,17 @@
 <?php
 
-namespace Jackabox\Shopify\Commands;
+namespace StatamicRadPack\Shopify\Commands;
 
 use Illuminate\Console\Command;
-use Jackabox\Shopify\Jobs\ImportAllProductsJob;
-use Jackabox\Shopify\Traits\FetchAllProducts;
-use PHPShopify\ShopifySDK;
 use Statamic\Console\RunsInPlease;
+use StatamicRadPack\Shopify\Traits\FetchAllProducts;
 
 class ShopifyImportProducts extends Command
 {
-    use RunsInPlease, FetchAllProducts;
+    use FetchAllProducts, RunsInPlease;
 
     protected $signature = 'shopify:import:all';
+
     protected $description = 'Imports your products from Shopify to Statamic';
 
     public function handle()

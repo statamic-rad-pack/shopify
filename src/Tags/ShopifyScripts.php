@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackabox\Shopify\Tags;
+namespace StatamicRadPack\Shopify\Tags;
 
 use Statamic\Tags\Tags;
 
@@ -11,6 +11,6 @@ class ShopifyScripts extends Tags
      */
     public function index()
     {
-        return '<script src="' . url('/js/vendor/statamic-shopify-front.js') . '"></script>';
+        return '<script src="'.url('/js/vendor/statamic-shopify-front.js').'"></script>';
     }
 }

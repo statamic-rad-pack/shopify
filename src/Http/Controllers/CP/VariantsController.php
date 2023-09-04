@@ -1,11 +1,11 @@
 <?php
 
-namespace Jackabox\Shopify\Http\Controllers\CP;
+namespace StatamicRadPack\Shopify\Http\Controllers\CP;
 
 use Illuminate\Http\Request;
-use Jackabox\Shopify\Blueprints\VariantBlueprint;
 use Statamic\Facades\Entry;
 use Statamic\Http\Controllers\CP\CpController;
+use StatamicRadPack\Shopify\Blueprints\VariantBlueprint;
 
 class VariantsController extends CpController
 {
@@ -29,7 +29,9 @@ class VariantsController extends CpController
             });
     }
 
-    public function store() {}
+    public function store()
+    {
+    }
 
     public function update(Request $request)
     {

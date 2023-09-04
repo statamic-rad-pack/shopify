@@ -1,10 +1,10 @@
 {
-  "name": "jackabox/statamic-shopify",
+  "name": "statamic-rad-pack/statamic-shopify",
   "description": "A Shopify Addon for Statamic",
   "license": "proprietary",
   "autoload": {
     "psr-4": {
-      "Jackabox\\Shopify\\": "src"
+      "StatamicRadPack\\Shopify\\": "src"
     }
   },
   "authors": [
@@ -25,12 +25,13 @@
     },
     "laravel": {
       "providers": [
-        "Jackabox\\Shopify\\ServiceProvider"
+        "StatamicRadPack\\Shopify\\ServiceProvider"
       ]
     }
   },
   "require": {
-    "phpclassic/php-shopify": "^1.1"
+    "phpclassic/php-shopify": "^1.1",
+    "statamic/cms": "^4.0"
   },
   "config": {
     "optimize-autoloader": true,

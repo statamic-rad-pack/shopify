@@ -1,11 +1,9 @@
 <?php
 
-namespace Jackabox\Shopify\Http\Controllers\Webhooks;
+namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 
 use Illuminate\Http\Request;
-use Jackabox\Shopify\Jobs\ImportSingleProductJob;
-use PHPShopify\ShopifySDK;
-use Statamic\Facades\Entry;
+use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 
 class ProductCreateUpdateController extends WebhooksController
 {
@@ -26,7 +24,7 @@ class ProductCreateUpdateController extends WebhooksController
         ImportSingleProductJob::dispatch($data)->onQueue(config('shopify.queue'));
 
         return response()->json([
-            'message' => 'Product has been dispatched to the queue for update'
+            'message' => 'Product has been dispatched to the queue for update',
         ], 200);
     }
 }

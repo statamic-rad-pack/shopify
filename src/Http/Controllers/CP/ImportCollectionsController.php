@@ -1,15 +1,11 @@
 <?php
 
-namespace Jackabox\Shopify\Http\Controllers\CP;
+namespace StatamicRadPack\Shopify\Http\Controllers\CP;
 
 use Illuminate\Http\JsonResponse;
-use Jackabox\Shopify\Jobs\FetchCollectionsForProductJob;
-use Jackabox\Shopify\Jobs\ImportCollectionsForProductJob;
-use PHPShopify\ShopifySDK;
 use Statamic\Facades\Entry;
-use Statamic\Facades\Taxonomy;
-use Statamic\Facades\Term;
 use Statamic\Http\Controllers\CP\CpController;
+use StatamicRadPack\Shopify\Jobs\FetchCollectionsForProductJob;
 
 class ImportCollectionsController extends CpController
 {
@@ -24,7 +20,7 @@ class ImportCollectionsController extends CpController
         }
 
         return response()->json([
-            'message' => 'Import has been queued.'
+            'message' => 'Import has been queued.',
         ]);
     }
 }

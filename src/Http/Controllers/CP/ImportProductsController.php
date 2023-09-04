@@ -1,14 +1,13 @@
 <?php
 
-namespace Jackabox\Shopify\Http\Controllers\CP;
+namespace StatamicRadPack\Shopify\Http\Controllers\CP;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Jackabox\Shopify\Jobs\ImportAllProductsJob;
-use Jackabox\Shopify\Jobs\ImportSingleProductJob;
-use Jackabox\Shopify\Traits\FetchAllProducts;
 use PHPShopify\ShopifySDK;
 use Statamic\Http\Controllers\CP\CpController;
+use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
+use StatamicRadPack\Shopify\Traits\FetchAllProducts;
 
 class ImportProductsController extends CpController
 {
@@ -19,7 +18,7 @@ class ImportProductsController extends CpController
         $this->fetchProducts();
 
         return response()->json([
-            'message' => 'Import has been queued.'
+            'message' => 'Import has been queued.',
         ]);
     }
 
@@ -33,7 +32,7 @@ class ImportProductsController extends CpController
         ImportSingleProductJob::dispatch($product)->onQueue(config('shopify.queue'));
 
         return response()->json([
-            'message' => 'Product import has been queued.'
+            'message' => 'Product import has been queued.',
         ]);
     }
 }

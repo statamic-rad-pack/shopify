@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackabox\Shopify\Scopes;
+namespace StatamicRadPack\Shopify\Scopes;
 
 use Statamic\Query\Scopes\Scope;
 
