@@ -1,7 +1,5 @@
 name: Release
 
-on:
-  workflow_dispatch:
 jobs:
   get_draft_release:
     runs-on: ubuntu-latest
