@@ -1,6 +1,5 @@
 <?php
 
-use StatamicRadPack\Shopify\Http\Controllers\Actions\VariantsController;
 use StatamicRadPack\Shopify\Http\Controllers\CP\DashboardController;
 use StatamicRadPack\Shopify\Http\Controllers\CP\ImportCollectionsController;
 use StatamicRadPack\Shopify\Http\Controllers\CP\ImportProductsController;
