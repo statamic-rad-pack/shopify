@@ -28,7 +28,5 @@ class ImportAllProductsJob implements ShouldQueue
         foreach ($this->data as $product) {
             ImportSingleProductJob::dispatch($product)->onQueue(config('shopify.queue'));
         }
-
-        Artisan::call('cache:clear');
     }
 }
