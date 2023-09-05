@@ -36,6 +36,6 @@ It utilises the Admin API to fetch products and listen to webhooks, and then all
 
 ### Issues
 
-Please open an issue on [GitHub](issues) if you encounter a problem.
+Please open an issue on [GitHub](https://github.com/statamic-rad-pack/shopify/issues) if you encounter a problem. 
 
-If you'd like to propose a new feature then you can also start a [discussion](discussions).
+If you'd like to propose a new feature then you can also start a [discussion](https://github.com/statamic-rad-pack/shopify/discussions).
