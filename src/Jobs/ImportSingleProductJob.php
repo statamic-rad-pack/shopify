@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Statamic\Facades\Asset;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Path;
+use Statamic\Facades\Term;
 use Statamic\Support\Str;
 
 class ImportSingleProductJob implements ShouldQueue
@@ -45,9 +46,9 @@ class ImportSingleProductJob implements ShouldQueue
             ->first();
 
         // Clean up data whilst checking if product exists
-        $tags = $this->cleanArrayData($this->data['tags']);
-        $vendors = $this->cleanArrayData($this->data['vendor']);
-        $type = $this->cleanArrayData($this->data['product_type']);
+        $tags = $this->importTaxonomy($this->data['tags'], config('shopify.taxonomies.tags'));
+        $vendors = $this->importTaxonomy($this->data['vendor'], config('shopify.taxonomies.vendor'));
+        $type = $this->importTaxonomy($this->data['product_type'], config('shopify.taxonomies.type'));
 
         // Get option Names
         $options = [];
@@ -63,11 +64,20 @@ class ImportSingleProductJob implements ShouldQueue
             'published_at' => Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s'),
             'title' => (! $entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
             'content' => (! $entry || config('shopify.overwrite.content')) ? $this->data['body_html'] : $entry->content,
-            config('shopify.taxonomies.vendor') => (! $entry || config('shopify.overwrite.vendor')) ? $vendors : $entry->vendor,
-            config('shopify.taxonomies.type') => (! $entry || config('shopify.overwrite.type')) ? $type : $entry->product_type,
-            config('shopify.taxonomies.tags') => (! $entry || config('shopify.overwrite.tags')) ? $tags : $entry->product_tags,
             'options' => $options,
         ];
+        
+        if (! $entry || config('shopify.overwrite.vendor')) {
+            $data[config('shopify.taxonomies.vendor')] = $vendors;
+        }
+        
+        if (! $entry || config('shopify.overwrite.type')) {
+            $data[config('shopify.taxonomies.type')] = $type;
+        }
+        
+        if (! $entry || config('shopify.overwrite.tags')) {
+            $data[config('shopify.taxonomies.tags')] = $tags;
+        }  
 
         if (! $entry) {
             $entry = Entry::make()
@@ -96,6 +106,42 @@ class ImportSingleProductJob implements ShouldQueue
 
         // Get the collections
         FetchCollectionsForProductJob::dispatch($entry)->onQueue(config('shopify.queue'));
+    }
+    
+    private function importTaxonomy(string $tags, string $taxonomyHandle)
+    {
+        if (! $tags){
+            return null;
+        }
+        
+        $tags = explode(', ', $tags);
+        
+        // 'Tag foo, Tag bar' => ['tag-foo' => 'Tag foo', 'tag-bar' => 'Tag bar']
+        $tags = collect($tags)
+            ->mapWithKeys(function ($tagTitle) {
+                return [Str::slug($tagTitle) => $tagTitle];
+            });
+
+        foreach ($tags as $tagSlug => $tagTitle) {
+            $term = Term::query()
+                ->where('taxonomy', $taxonomyHandle)
+                ->where('slug', $tagSlug)
+                ->first();
+
+            if (!$term) {
+                $term = Term::make()
+                    ->taxonomy($taxonomyHandle)
+                    ->slug($tagSlug);
+                    
+                $term->data([
+                    'title' => $tagTitle,
+                ]);
+                
+                $term->save();                    
+            }
+        }
+
+        return $tags->keys()->toArray();   
     }
 
     private function importVariants(array $variants, string $product_slug)
@@ -200,24 +246,6 @@ class ImportSingleProductJob implements ShouldQueue
         $this->cleanupFakeFile($name);
 
         return $asset;
-    }
-
-    private function cleanArrayData($data)
-    {
-        if (! $data) {
-            return null;
-        }
-
-        $formattedItems = [];
-        $items = explode(', ', $data);
-
-        if ($items) {
-            foreach ($items as $item) {
-                $formattedItems[] = Str::slug($item);
-            }
-        }
-
-        return $formattedItems;
     }
 
     /**
