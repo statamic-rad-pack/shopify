@@ -44,7 +44,7 @@ const handleProductFormSubmit = (form) => {
 
   client.checkout
     .addLineItems(
-      localStorage.getItem('statamic.shopify.cart.id'),
+      checkoutId,
       lineItemsToAdd
     )
     .then((checkout) => {
