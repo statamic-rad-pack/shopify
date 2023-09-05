@@ -131,3 +131,15 @@ sections:
           icon: hidden
           listable: hidden
           instructions_position: above
+      -
+        handle: image
+        field:
+          mode: grid
+          restrict: false
+          allow_uploads: true
+          display: 'Image'
+          type: assets
+          icon: assets
+          listable: hidden
+          container: shopify
+          max_files: 1

@@ -91,11 +91,7 @@ class ImportSingleProductJob implements ShouldQueue
             }
         }
 
-        // Recursively loop over the products and set the data as needed.
-        foreach ($data as $key => $prop) {
-            $entry->set($key, $prop);
-        }
-
+        $entry->merge($data);
         $entry->save();
 
         // Get the collections
@@ -117,22 +113,35 @@ class ImportSingleProductJob implements ShouldQueue
                     ->collection('variants')
                     ->slug($variant['id']);
             }
+            
+            $data = [
+                'variant_id' => $variant['id'],
+                'product_slug' => $product_slug,
+                'title' => $variant['title'] === 'Default Title' ? 'Default' : $variant['title'],
+                'inventory_quantity' => $variant['inventory_quantity'],
+                'inventory_policy' => $variant['inventory_policy'],
+                'inventory_management' => $variant['inventory_management'],
+                'price' => $variant['price'],
+                'compare_at_price' => $variant['compare_at_price'],
+                'sku' => $variant['sku'],
+                'grams' => $variant['grams'],
+                'requires_shipping' => $variant['requires_shipping'],
+                'option1' => $variant['option1'],
+                'option2' => $variant['option2'],
+                'option3' => $variant['option3'],
+                'storefront_id' => base64_encode($variant['admin_graphql_api_id'])
+            ];
 
-            $entry->set('variant_id', $variant['id']);
-            $entry->set('product_slug', $product_slug);
-            $entry->set('title', $variant['title'] === 'Default Title' ? 'Default' : $variant['title']);
-            $entry->set('inventory_quantity', $variant['inventory_quantity']);
-            $entry->set('inventory_policy', $variant['inventory_policy']);
-            $entry->set('inventory_management', $variant['inventory_management']);
-            $entry->set('price', $variant['price']);
-            $entry->set('compare_at_price', $variant['compare_at_price']);
-            $entry->set('sku', $variant['sku']);
-            $entry->set('grams', $variant['grams']);
-            $entry->set('requires_shipping', $variant['requires_shipping']);
-            $entry->set('option1', $variant['option1']);
-            $entry->set('option2', $variant['option2']);
-            $entry->set('option3', $variant['option3']);
-            $entry->set('storefront_id', base64_encode($variant['admin_graphql_api_id']));
+            if ($variant['image_id']) {
+                foreach (($this->data['images'] ?? []) as $image) {
+                    if ($image['id'] == $variant['image_id']) {
+                        $asset = $this->importImages($image);
+                        $data['image'] => $asset->path();
+                    }
+                }
+            }
+
+            $entry->merge($data);
             $entry->save();
         }
     }
@@ -153,24 +162,6 @@ class ImportSingleProductJob implements ShouldQueue
             if ($item === false) {
                 $variant->delete();
             }
-        }
-    }
-
-    /**
-     * TODO: Look into this one.
-     * Not implemented due to issues with stack and saving images.
-     * Currently images are all stored on the defalt product as a gallery.
-     */
-    private function importImagesToVariant($variant)
-    {
-        $images = collect($this->data['images']);
-
-        $variant_image = $images->filter(function ($item) use ($variant) {
-            return in_array($variant['id'], $item['variant_ids']);
-        })->first();
-
-        if ($variant_image) {
-            $asset = $this->importImages($variant_image);
         }
     }
 
@@ -199,6 +190,10 @@ class ImportSingleProductJob implements ShouldQueue
         $asset = Asset::make()
             ->container(config('shopify.asset.container'))
             ->path($this->getPath($file));
+            
+        $asset->merge([
+            'alt' => $image['alt'] ?? '',
+        ]);
 
         $asset->upload($file)->save();
 
