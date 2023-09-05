@@ -182,7 +182,7 @@ class ImportSingleProductJob implements ShouldQueue
                 foreach (($this->data['images'] ?? []) as $image) {
                     if ($image['id'] == $variant['image_id']) {
                         $asset = $this->importImages($image);
-                        $data['image'] => $asset->path();
+                        $data['image'] = $asset->path();
                     }
                 }
             }
