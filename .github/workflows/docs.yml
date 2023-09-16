@@ -34,9 +34,18 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: yarn run generate
 
-      - run: yarn vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      # Pull vercel project info
+      - name: Vercel pull
+        working-directory: ${{env.working-directory}}
+        run: yarn vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
-      - run: yarn vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      # Build for vercel output
+      - name: Vercel build
+        working-directory: ${{env.working-directory}}
+        run: yarn vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
-      - id: deploy
+      # Build for vercel output
+      - name: Vercel deploy
+        working-directory: ${{env.working-directory}}
+        id: deploy
         run: echo "::set-output name=url::$(yarn vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})"
