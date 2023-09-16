@@ -67,6 +67,8 @@ The addon pulls the following information for variants.
 | Option 2           | `option2`           | Option 2 from variant (if non, returns null) | |
 | Option 3           | `option3`           | Option 3 from variant (if non, returns null) | |
 | Requires shipping | `requires_shipping`  | Flag for if the product needs shipping | |
+| Image  | `image`  | Variant image as set in Shopify | |
+
 
 <alert type="warning">
 
