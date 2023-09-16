@@ -1,4 +1,4 @@
-name: docs
+name: Generate Docs
 on:
   release:
   workflow_dispatch:
@@ -11,6 +11,7 @@ jobs:
     environment:
       name: production
       url: ${{ steps.deploy.outputs.url }}
+    env:
       working-directory: docs
     steps:
      # Check out master branch
