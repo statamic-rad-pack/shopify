@@ -10,9 +10,6 @@
             "role": "Developer"
         }
     ],
-    "support": {
-        "email": "hi@jackwhiting.co.uk"
-    },
     "require": {
         "phpclassic/php-shopify": "^1.1",
         "pixelfear/composer-dist-plugin": "^0.1",
