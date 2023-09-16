@@ -27,7 +27,7 @@ class Shopify extends Tags
 
         return $this->isInStock($variants);
     }
-    
+
     /**
      * @return string|array
      */
@@ -69,7 +69,7 @@ class Shopify extends Tags
     {
         return '<script src="'.url('/js/vendor/statamic-shopify-front.js').'"></script>';
     }
-    
+
     /**
      * @return string|array
      */
@@ -81,17 +81,20 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
 </script>";
     }
 
+    /**
+     * handle any shopify:variants:x tags
+     */
     public function wildcard($tag)
     {
         if (str_contains($tag, ':') && Str::before($tag, ':') == 'variants') {
             $method = 'variant'.Str::studly(Str::after($tag, ':'));
 
             if (method_exists($this, $method)) {
-                return $this->{$method}();  
+                return $this->{$method}();
             }
         }
     }
-    
+
     /**
      * Generate the output of the variants automatically.
      * Saves having to manually call the index/options.
