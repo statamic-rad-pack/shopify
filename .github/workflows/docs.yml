@@ -44,7 +44,7 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: yarn vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
-      # Build for vercel output
+      # Deploy to vercel
       - name: Vercel deploy
         working-directory: ${{env.working-directory}}
         id: deploy
