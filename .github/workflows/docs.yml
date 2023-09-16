@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: ${{ steps.deploy.outputs.url }}
     env:
       working-directory: docs
     steps:
@@ -29,11 +28,6 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: yarn
 
-      # The generate command is used to invoke Nuxt static site generation
-      - name: Generate
-        working-directory: ${{env.working-directory}}
-        run: yarn run generate
-
       # Pull vercel project info
       - name: Vercel pull
         working-directory: ${{env.working-directory}}
@@ -48,4 +42,4 @@ jobs:
       - name: Vercel deploy
         working-directory: ${{env.working-directory}}
         id: deploy
-        run: echo "::set-output name=url::$(yarn vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})"
+        run: yarn vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
