@@ -14,7 +14,7 @@ Allows you to output your Site URL and Storefront Token to the front end and bin
 #### Usage
 
 ```twig
-{{ shopify_tokens }}
+{{ shopify:tokens }}
 ```
 
 #### Output
@@ -31,7 +31,7 @@ Allows you to output your Site URL and Storefront Token to the front end and bin
 #### Usage
 
 ```twig
-{{ product_price show_from="true" }}
+{{ shopify:product_price show_from="true" }}
 ```
 
 - `show_from` will display a "From " prefix to the price if there are multiple variants.
@@ -65,7 +65,7 @@ If you want a simple way to include the variants a tag has been made to load the
 #### Usage
 
 ```twig
-{{ product_variants:generate show_price="true" show_out_of_stock="true" class="border" }}
+{{ shopify:variants:generate show_price="true" show_out_of_stock="true" class="border" }}
 ```
 
 This will automatically use the `slug` from the context of the post to fetch the variants.
@@ -105,36 +105,19 @@ If you want a bit more manual control over how to handle the variants, you can u
 #### Usage
 
 ```twig
-{{ product_variants:loop }}
+{{ shopify:variants }}
     {{ title }}
-{{ /product_variants:loop }}
+{{ /shopify:variants }}
 ```
 
-### From Title
-
-You may only want to pull one variant's data to use, you can do this either from the title.
-
-#### Usage
+You can use [tag conditions](https://statamic.dev/conditions) to filter the variants returned, for example:
 
 ```twig
-{{ product_variants:from_title title="Blue" }}
-    {{ storefront_id }}
-    {{ price }}
-{{ /product_variants:from_title }}
+{{ shopify:variants title:is="my_title" }}
+    {{ title }}
+{{ /shopify:variants }}
 ```
 
-### From Index
-
-You can also pull one variant's data through the index.
-
-#### Usage
-
-```twig
-{{ product_variants:from_index index="0" }}
-    {{ storefront_id }}
-    {{ price }}
-{{ /product_variants:from_index }}
-```
 
 ## In Stock
 
@@ -143,10 +126,10 @@ Check if a product is in stock or not.
 #### Usage
 
 ```twig
-{{ in_stock }}
+{{ shopify:in_stock }}
 ```
 
 ```twig
-{{ if {in_stock} }}
+{{ if {shopify:in_stock} }}
 {{ /if }}
 ```
