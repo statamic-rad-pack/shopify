@@ -28,18 +28,18 @@ class ProductPrice extends Tags
 
         // Out of Stock
         if (! $this->isInStock($variants)) {
-            return config('shopify.lang.out_of_stock', 'Out of Stock');
+            return __('shopify.out_of_stock');
         }
 
         // Lowest Price
         $pricePluck = $variants->pluck('price');
 
+        $price = $pricePluck->sort()->splice(0, 1)[0];
+
         if ($pricePluck->count() > 1 && $this->params->get('show_from') === true) {
-            $html .= config('shopify.lang.from', 'From').' ';
+            return __('shopify.display_price_from', ['currency' => config('shopify.currency'), 'price' => $price]);
         }
 
-        $html .= config('shopify.currency').$pricePluck->sort()->splice(0, 1)[0];
-
-        return $html;
+        return __('shopify.display_price', ['currency' => config('shopify.currency'), 'price' => $price]);
     }
 }

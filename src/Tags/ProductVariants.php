@@ -118,15 +118,19 @@ class ProductVariants extends Tags
                 }
             }
 
+            $langKey = 'shopify.option_title';
+            $langParams = ['title' => $title];
+
             if ($this->params->get('show_price')) {
-                $title .= ' - '.config('shopify.currency').$variant['price'];
+                $langKey .= '_price';
+                $langParams['price'] = __('shopify.display_price', ['currency' => config('shopify.currency'), 'price' => $variant['price']]);
             }
 
             if ($this->params->get('show_out_of_stock') && $out_of_stock) {
-                $title .= ' ('.config('shopify.lang.out_of_stock').')';
+                $langKey .= '_nostock';
             }
 
-            $html .= '<option value="'.$variant['storefront_id'].'" data-in-stock="'.$out_of_stock.'"'.($out_of_stock ? ' disabled' : '').'>'.$title.'</option>';
+            $html .= '<option value="'.$variant['storefront_id'].'" data-in-stock="'.$out_of_stock.'"'.($out_of_stock ? ' disabled' : '').'>'.__($langKey, $langParams).'</option>';
         }
 
         return $html;
