@@ -105,36 +105,19 @@ If you want a bit more manual control over how to handle the variants, you can u
 #### Usage
 
 ```twig
-{{ shopify:variants:loop }}
+{{ shopify:variants }}
     {{ title }}
-{{ /shopify:variants:loop }}
+{{ /shopify:variants }}
 ```
 
-### From Title
-
-You may only want to pull one variant's data to use, you can do this either from the title.
-
-#### Usage
+You can use [tag conditions](https://statamic.dev/conditions) to filter the variants returned, for example:
 
 ```twig
-{{ shopify:variants:from_title title="Blue" }}
-    {{ storefront_id }}
-    {{ price }}
-{{ /shopify:variants:from_title }}
+{{ shopify:variants title:is="my_title" }}
+    {{ title }}
+{{ /shopify:variants }}
 ```
 
-### From Index
-
-You can also pull one variant's data through the index.
-
-#### Usage
-
-```twig
-{{ shopify:variants:from_index index="0" }}
-    {{ storefront_id }}
-    {{ price }}
-{{ /shopify:variants:from_index }}
-```
 
 ## In Stock
 

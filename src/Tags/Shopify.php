@@ -3,12 +3,13 @@
 namespace StatamicRadPack\Shopify\Tags;
 
 use Statamic\Support\Str;
+use Statamic\Tags\Concerns\QueriesConditions;
+use Statamic\Tags\Concerns\QueriesOrderBys;
 use Statamic\Tags\Tags;
-use StatamicRadPack\Shopify\Traits\HasProductVariants;
 
 class Shopify extends Tags
 {
-    use HasProductVariants;
+    use QueriesConditions, QueriesOrderBys;
 
     /**
      * @return string|array
@@ -110,9 +111,9 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
         }
 
         if ($variants->count() > 1) {
-            $html = $this->startSelect();
-            $html .= $this->variantParseOptions($variants);
-            $html .= $this->endSelect();
+            $html = '<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select '.$this->params->get('class').'">';
+            $html .= $this->variantSelectOptions($variants);
+            $html .= '</select>';
         } else {
             $html = '<input type="hidden" name="ss-product-variant" id="ss-product-variant" value="'.$variants[0]['storefront_id'].'">';
         }
@@ -125,56 +126,41 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
      *
      * @return \Illuminate\Support\Collection|null
      */
-    private function variantLoop()
+    private function variants()
     {
         return $this->fetchProductVariants($this->context->get('slug'));
     }
 
-    /**
-     * Return a single variant by the title.
-     *
-     * @return mixed|null
+    /*
+     * @deprecated
+     */
+    private function variantLoop()
+    {
+        return 'No longer supported, use {{ shopify:variants }} instead';
+    }
+
+    /*
+     * @deprecated
      */
     private function variantFromTitle()
     {
-        if (! $this->params->get('title')) {
-            return null;
-        }
-
-        $variants = $this->fetchProductVariants($this->context->get('slug'));
-
-        return $variants
-            ->where('title', $this->params->get('title'))
-            ->first();
+        return 'No longer supported, use {{ shopify:variants title:is="title" }} instead';
     }
 
-    /**
-     * Return a single variant by the index.
-     *
-     * @return mixed|null
+    /*
+     * @deprecated
      */
     private function variantFromIndex()
     {
-        if ($this->params->get('index') === null) {
-            return null;
-        }
-
-        $variants = $this->fetchProductVariants($this->context->get('slug'));
-
-        return $variants
-            ->splice($this->params->get('index'), 1)
-            ->first();
-    }
-
-    private function startSelect(): string
-    {
-        return '<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select '.$this->params->get('class').'">';
+        return 'No longer supported, use {{ {shopify:variants}[index] }} instead';
     }
 
     /**
-     * @param  null  $currency
+     * Turn a variant into a select option
+     *
+     * @param  array  $variants
      */
-    private function variantParseOptions($variants): string
+    private function variantSelectOptions($variants): string
     {
         $html = '';
 
@@ -206,8 +192,62 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
         return $html;
     }
 
-    private function endSelect(): string
+    /**
+     * Get product variants for a given product slug
+     *
+     * @param  string  $productSlug
+     */
+    protected function fetchProductVariants($productSlug)
     {
-        return '</select>';
+        $query = Entry::query()
+            ->where('collection', 'variants')
+            ->where('product_slug', $productSlug);
+
+        $this->queryConditions($query);
+        $this->queryOrderBys($query);
+
+        $entries = $query->get();
+
+        if (! $entries->count()) {
+            return null;
+        }
+
+        return $entries->map(function ($variant) {
+            $values = [];
+            $values['id'] = $variant->id();
+            $values['slug'] = $variant->slug();
+
+            // Map all variant values to data to ensure we are getting everything.
+            foreach ($variant->data() as $key => $value) {
+                $values[$key] = $value;
+            }
+
+            return $values;
+        });
+    }
+
+    /**
+     * Check if all variants are in stock
+     *
+     * @param  array  $variants
+     */
+    protected function isInStock($variants): bool
+    {
+        $stock = 0;
+        $deny = false;
+
+        foreach ($variants as $variant) {
+            $stock += $variant['inventory_quantity'];
+
+            if (isset($variant['inventory_policy']) && isset($variant['inventory_management'])) {
+                $deny = $variant['inventory_policy'] === 'deny' && $variant['inventory_management'] === 'shopify';
+            }
+        }
+
+        if ($stock === 0 and $deny) {
+            return false;
+        }
+
+        return true;
     }
 }
