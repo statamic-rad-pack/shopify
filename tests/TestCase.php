@@ -5,8 +5,7 @@ namespace StatamicRadPack\Shopify\Tests;
 use JMac\Testing\Traits\AdditionalAssertions;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Statamic\Extend\Manifest;
-use Statamic\Facades\Blueprint as BlueprintFacade;
-use Statamic\Facades\YAML;
+use Statamic\Facades;
 use Statamic\Providers\StatamicServiceProvider;
 use Statamic\Statamic;
 use StatamicRadPack\Shopify\ServiceProvider;
@@ -71,20 +70,26 @@ class TestCase extends OrchestraTestCase
         $app['config']->set('statamic.editions.pro', true);
 
         Statamic::booted(function () {
-            $blueprintContents = YAML::parse(file_get_contents(__DIR__.'/../resources/blueprints/collections/products/product.yaml'));
+            $blueprintContents = Facades\YAML::parse(file_get_contents(__DIR__.'/../resources/blueprints/collections/products/product.yaml'));
 
-            $productCollectionBlueprint = BlueprintFacade::make()
+            $productCollectionBlueprint = Facades\Blueprint::make()
                 ->setNamespace('collections.products')
                 ->setHandle('product')
                 ->setContents($blueprintContents)
                 ->save();
 
-            $blueprintContents = YAML::parse(file_get_contents(__DIR__.'/../resources/blueprints/collections/variants/variant.yaml'));
+            Facades\Collection::make('products')
+                ->save();
 
-            $variantCollectionBlueprint = BlueprintFacade::make()
+            $blueprintContents = Facades\YAML::parse(file_get_contents(__DIR__.'/../resources/blueprints/collections/variants/variant.yaml'));
+
+            $variantCollectionBlueprint = Facades\Blueprint::make()
                 ->setNamespace('collections.variants')
                 ->setHandle('variant')
                 ->setContents($blueprintContents)
+                ->save();
+
+            Facades\Collection::make('variants')
                 ->save();
         });
     }

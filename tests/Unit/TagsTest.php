@@ -36,7 +36,7 @@ class TagsTest extends TestCase
     /** @test */
     public function outputs_product_price()
     {
-        $product = Facades\Entry::make([
+        $product = Facades\Entry::make()->data([
             'title' => 'Obi wan',
             'vendor' => 'Kenobe',
             'slug' => 'obi-wan',
@@ -46,7 +46,7 @@ class TagsTest extends TestCase
 
         $product->save();
 
-        $variant = Facades\Entry::make([
+        $variant = Facades\Entry::make()->data([
             'title' => 'T-shirt',
             'slug' => 'obi-wan-tshirt',
             'sku' => 'obi-wan-tshirt',
@@ -71,7 +71,7 @@ class TagsTest extends TestCase
     /** @test */
     public function outputs_in_stock()
     {
-        $product = Facades\Entry::make([
+        $product = Facades\Entry::make()->data([
             'title' => 'Obi wan',
             'vendor' => 'Kenobe',
             'slug' => 'obi-wan',
@@ -81,7 +81,7 @@ class TagsTest extends TestCase
 
         $product->save();
 
-        $variant = Facades\Entry::make([
+        $variant = Facades\Entry::make()->data([
             'title' => 'T-shirt',
             'slug' => 'obi-wan-tshirt',
             'sku' => 'obi-wan-tshirt',
@@ -105,7 +105,7 @@ class TagsTest extends TestCase
     /** @test */
     public function outputs_product_variants_generate()
     {
-        $product = Facades\Entry::make([
+        $product = Facades\Entry::make()->data([
             'title' => 'Obi wan',
             'vendor' => 'Kenobe',
             'slug' => 'obi-wan',
@@ -115,7 +115,7 @@ class TagsTest extends TestCase
 
         $product->save();
 
-        $variant = Facades\Entry::make([
+        $variant = Facades\Entry::make()->data([
             'title' => 'T-shirt',
             'slug' => 'obi-wan-tshirt',
             'sku' => 'obi-wan-tshirt',
@@ -140,7 +140,7 @@ class TagsTest extends TestCase
             'inventory_quantity' => 10
         ])->save();
 
-        $variant2 = Facades\Entry::make([
+        $variant2 = Facades\Entry::make()->data([
             'title' => 'Another T-shirt',
             'slug' => 'obi-wan-tshirt-2',
             'sku' => 'obi-wan-tshirt-2',
@@ -159,7 +159,7 @@ class TagsTest extends TestCase
     /** @test */
     public function outputs_product_variants()
     {
-        $product = Facades\Entry::make([
+        $product = Facades\Entry::make()->data([
             'title' => 'Obi wan',
             'vendor' => 'Kenobe',
             'slug' => 'obi-wan',
@@ -169,7 +169,7 @@ class TagsTest extends TestCase
 
         $product->save();
 
-        $variant = Facades\Entry::make([
+        $variant = Facades\Entry::make()->data([
             'title' => 'T-shirt',
             'slug' => 'obi-wan-tshirt',
             'sku' => 'obi-wan-tshirt',
@@ -182,7 +182,7 @@ class TagsTest extends TestCase
 
         $variant->save();
 
-        $variant2 = Facades\Entry::make([
+        $variant2 = Facades\Entry::make()->data([
             'title' => 'Another T-shirt',
             'slug' => 'obi-wan-tshirt-2',
             'sku' => 'obi-wan-tshirt-2',
