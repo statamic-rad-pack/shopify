@@ -29,11 +29,7 @@ class ServiceProvider extends AddonServiceProvider
     ];
 
     protected $tags = [
-        \StatamicRadPack\Shopify\Tags\ShopifyTokens::class,
-        \StatamicRadPack\Shopify\Tags\ShopifyScripts::class,
-        \StatamicRadPack\Shopify\Tags\ProductPrice::class,
-        \StatamicRadPack\Shopify\Tags\ProductVariants::class,
-        \StatamicRadPack\Shopify\Tags\InStock::class,
+        \StatamicRadPack\Shopify\Tags\Shopify::class,
     ];
 
     protected $scopes = [
@@ -86,9 +82,7 @@ class ServiceProvider extends AddonServiceProvider
             ], 'shopify-resources');
 
             $this->publishes([
-                __DIR__.'/../resources/views/cart.antlers.html' => base_path('resources/views/shopify/cart.antlers.html'),
-                __DIR__.'/../resources/views/product.antlers.html' => base_path('resources/views/shopify/product.antlers.html'),
-                __DIR__.'/../resources/views/products.antlers.html' => base_path('resources/views/shopify/products.antlers.html'),
+                __DIR__.'/../resources/views' => resource_path('views/vendor/shopify'),
             ], 'shopify-theme');
         }
     }

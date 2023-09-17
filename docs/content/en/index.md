@@ -13,7 +13,7 @@ features:
 ---
 
 
-A [Statamic 3](https://statamic.com) addon that allows you to integrate [Shopify](https://shopify.com). World-class ecommerce mixed with the brilliance of Statamic.
+A [Statamic](https://statamic.com) addon that allows you to integrate [Shopify](https://shopify.com). World-class ecommerce mixed with the brilliance of Statamic.
 
 ## Purpose
 
