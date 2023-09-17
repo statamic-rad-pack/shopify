@@ -128,13 +128,13 @@ class TagsTest extends TestCase
 
         $variant->save();
 
-        $this->assertEqual('<input type="hidden" name="ss-product-variant" id="ss-product-variant" value="abc">', $this->tag('{{ shopify:product_variants:generate show_price="true" show_out_of_stock="true" }}', ['slug' => 'obi-wan']));
+        $this->assertEqual('<input type="hidden" name="ss-product-variant" id="ss-product-variant" value="abc">', $this->tag('{{ shopify:variants:generate show_price="true" show_out_of_stock="true" }}', ['slug' => 'obi-wan']));
 
         $variant->merge([
             'inventory_quantity' => 0
         ])->save();
 
-        $this->assertEqual('', $this->tag('{{ shopify:product_variants:generate show_price="true" show_out_of_stock="false" }}', ['slug' => 'obi-wan']));
+        $this->assertEqual('', $this->tag('{{ shopify:variants:generate show_price="true" show_out_of_stock="false" }}', ['slug' => 'obi-wan']));
 
         $variant->merge([
             'inventory_quantity' => 10
@@ -153,11 +153,11 @@ class TagsTest extends TestCase
 
         $variant2->save();
 
-        $this->assertEqual('<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select "><option value="abc" data-in-stock="true">T-shirt - £9.99</option><option value="def" data-in-stock="true">Another T-shirt - £10.99</option></select>', $this->tag('{{ shopify:product_variants:generate show_price="true" show_out_of_stock="false" }}', ['slug' => 'obi-wan']));
+        $this->assertEqual('<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select "><option value="abc" data-in-stock="true">T-shirt - £9.99</option><option value="def" data-in-stock="true">Another T-shirt - £10.99</option></select>', $this->tag('{{ shopify:variants:generate show_price="true" show_out_of_stock="false" }}', ['slug' => 'obi-wan']));
     }
 
     /** @test */
-    public function outputs_product_variants_loop()
+    public function outputs_product_variants()
     {
         $product = Facades\Entry::make([
             'title' => 'Obi wan',
@@ -195,6 +195,9 @@ class TagsTest extends TestCase
 
         $variant2->save();
 
-        $this->assertEqual('abcdef', $this->tag('{{ shopify:product_variants:loop }}{{ sku }}{{ /shopify:product_variants:loop }}', ['slug' => 'obi-wan']));
+        $this->assertEqual('abcdef', $this->tag('{{ shopify:variants }}{{ sku }}{{ /shopify:variants }}', ['slug' => 'obi-wan']));
+
+        $this->assertEqual('abc', $this->tag('{{ shopify:variants sku:is="abc" }}{{ sku }}{{ /shopify:variants }}', ['slug' => 'obi-wan']));
+
     }
 }
