@@ -8,7 +8,7 @@ use Statamic\Http\Controllers\CP\CpController;
 
 class VariantsController extends CpController
 {
-    public function fetch(Request $request, $product)
+    public function fetch(Request $request, string $product)
     {
         return Entry::query()
             ->where('collection', 'variants')
