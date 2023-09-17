@@ -26,11 +26,11 @@ SITEURL/!/shopify/variants/{product}?option1=VALUE&option2=VALUE&option3=VALUE
 #### Returned Data
 
 ```json
-{
+[{
   title: 'Example Title',
   storefront_id: '',
   price: '10.00',
   inventory_quantity: 10
-}
+}]
 ```
 
