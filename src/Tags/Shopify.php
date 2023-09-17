@@ -2,6 +2,7 @@
 
 namespace StatamicRadPack\Shopify\Tags;
 
+use Statamic\Facades\Entry;
 use Statamic\Support\Str;
 use Statamic\Tags\Concerns\QueriesConditions;
 use Statamic\Tags\Concerns\QueriesOrderBys;
@@ -126,7 +127,7 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
      *
      * @return \Illuminate\Support\Collection|null
      */
-    private function variants()
+    public function variants()
     {
         return $this->fetchProductVariants($this->context->get('slug'));
     }
@@ -186,7 +187,7 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
                 $title .= ' ('.config('shopify.lang.out_of_stock').')';
             }
 
-            $html .= '<option value="'.$variant['storefront_id'].'" data-in-stock="'.$out_of_stock.'"'.($out_of_stock ? ' disabled' : '').'>'.$title.'</option>';
+            $html .= '<option value="'.$variant['storefront_id'].'" data-in-stock="'.($out_of_stock ? 'false' : 'true').'"'.($out_of_stock ? ' disabled' : '').'>'.$title.'</option>';
         }
 
         return $html;
