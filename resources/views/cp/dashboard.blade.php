@@ -38,7 +38,7 @@
                 <li>Have you published the assets?</li>
             </ul>
 
-            <p class="max-w-md text-sm leading-loose">If not, ensure you've ran through the <a href="https://statamic-shopify.jackwhiting.co.uk/setup" class="text-blue-700">Quickstart</a> guide on the documentation.</p>
+            <p class="max-w-md text-sm leading-loose">If not, ensure you've ran through the <a href="https://statamic-shopify-docs.vercel.app/setup" class="text-blue-700">Quickstart</a> guide on the documentation.</p>
         </div>
     @endif
 @endsection

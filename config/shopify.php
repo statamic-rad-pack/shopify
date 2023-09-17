@@ -10,7 +10,7 @@ return [
      * If you use a different customer facing url (eg store.mycustomdomain.com)
      * please enter that here
      */
-    'storefront_url' => false,
+    'storefront_url' => null,
 
     /**
      * Front-end storefront token

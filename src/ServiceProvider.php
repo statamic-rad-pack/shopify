@@ -86,9 +86,7 @@ class ServiceProvider extends AddonServiceProvider
             ], 'shopify-resources');
 
             $this->publishes([
-                __DIR__.'/../resources/views/cart.antlers.html' => base_path('resources/views/shopify/cart.antlers.html'),
-                __DIR__.'/../resources/views/product.antlers.html' => base_path('resources/views/shopify/product.antlers.html'),
-                __DIR__.'/../resources/views/products.antlers.html' => base_path('resources/views/shopify/products.antlers.html'),
+                __DIR__.'/../resources/views' => resource_path('views/vendor/shopify'),
             ], 'shopify-theme');
         }
     }
