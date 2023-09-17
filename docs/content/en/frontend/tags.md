@@ -9,7 +9,7 @@ There are a few tags included in the addon that help you get the information you
 
 ## Tokens
 
-Allows you to output your Site URL and Storefront Token to the front end and binds them to the window so you can use them in the JS SDK.
+Allows you to output your Site URL and Storefront Token to the front end and binds them to the window so you can use them in the JS SDK. If you are using a custom storefront url instead of a myshopify.com domain, you can specify that with the `storefront_url` key the `config/shopify.php`.
 
 #### Usage
 

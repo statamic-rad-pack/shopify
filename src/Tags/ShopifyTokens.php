@@ -12,7 +12,7 @@ class ShopifyTokens extends Tags
     public function index()
     {
         return "<script>
-window.shopifyUrl = '".config('shopify.url')."';
+window.shopifyUrl = '".(config('shopify.storefront_url') ?? config('shopify.url'))."';
 window.shopifyToken = '".config('shopify.storefront_token')."';
 </script>";
     }
