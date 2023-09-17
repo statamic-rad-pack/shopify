@@ -29,11 +29,7 @@ class ServiceProvider extends AddonServiceProvider
     ];
 
     protected $tags = [
-        \StatamicRadPack\Shopify\Tags\ShopifyTokens::class,
-        \StatamicRadPack\Shopify\Tags\ShopifyScripts::class,
-        \StatamicRadPack\Shopify\Tags\ProductPrice::class,
-        \StatamicRadPack\Shopify\Tags\ProductVariants::class,
-        \StatamicRadPack\Shopify\Tags\InStock::class,
+        \StatamicRadPack\Shopify\Tags\Shopify::class,
     ];
 
     protected $scopes = [
