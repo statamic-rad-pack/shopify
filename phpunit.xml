@@ -17,7 +17,6 @@
     <env name="SESSION_DRIVER" value="array"/>
     <env name="QUEUE_DRIVER" value="sync"/>
     <env name="MAIL_DRIVER" value="array"/>
-    <env name="MAILCHIMP_DRIVER" value="log"/>
   </php>
   <source>
     <include>
