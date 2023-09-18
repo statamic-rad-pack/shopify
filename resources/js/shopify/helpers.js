@@ -25,9 +25,9 @@ export const bannerMessage = (elements, type = 'success', timeout = 6000) => {
 
   // Set type
   if (type === 'error') {
-    banner.classList.add('bg-red-400')
+    banner.classList.add('bg-red-500')
   } else {
-    banner.classList.add('bg-green-400')
+    banner.classList.add('bg-green-500')
   }
 
   // Append elements
@@ -38,7 +38,7 @@ export const bannerMessage = (elements, type = 'success', timeout = 6000) => {
   // Hide after timeout
   setTimeout(() => {
     banner.innerHTML = ''
-    banner.classList.remove('bg-red-300', 'bg-green-300')
+    banner.classList.remove('bg-red-500', 'bg-green-500')
     banner.classList.add('hidden')
   }, timeout)
 }

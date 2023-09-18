@@ -50,13 +50,13 @@ const hideCartOverview = () => {
 const showCartOverview = async (lineItems, price, checkoutLink) => {
   cartView.classList.remove('hidden')
   noItemsMessage.classList.add('hidden')
-  
+
   // Table
   const tableBody = document.querySelector('#ss-cart-view table tbody')
 
   // Append line item elements
   await lineItems.forEach(lineItem => {
-    const { id, variant, title, quantity } = lineItem;        
+    const { id, variant, title, quantity } = lineItem;
     const price = formatCurrency(variant.price.attrs.amount.value)
     const subtotal = formatCurrency(quantity * variant.price.attrs.amount.value)
 
@@ -64,7 +64,7 @@ const showCartOverview = async (lineItems, price, checkoutLink) => {
     <td class="px-6 py-4 whitespace-nowrap" colspan="2">
         <div class="flex items-center">
             <div class="mr-3">
-                <picture class="aspect-w-1 aspect-h-1 overflow-hidden block relative w-20 h-20">`
+                <picture class="aspect-square overflow-hidden block relative w-20 h-20">`
 
     if (variant.image) {
       html =
