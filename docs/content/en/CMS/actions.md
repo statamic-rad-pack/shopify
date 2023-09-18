@@ -19,18 +19,18 @@ SITEURL/!/shopify/variants/{product}?option1=VALUE&option2=VALUE&option3=VALUE
 | Option             | Description   | Required  |
 | -------------------| ------------- | --------- |
 | `product`          | Product slug as stored in Statamic | Y |
-| `option1`          | Value to search option1 for | Y |
+| `option1`          | Value to search option1 for | N |
 | `option2`          | Value to search option2 for | N |
 | `option3`          | Value to search option3 for | N |
 
 #### Returned Data
 
 ```json
-{
+[{
   title: 'Example Title',
-  storefront_id: '',
+  storefront_id: '1234',
   price: '10.00',
   inventory_quantity: 10
-}
+}]
 ```
 

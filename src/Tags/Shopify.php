@@ -2,6 +2,7 @@
 
 namespace StatamicRadPack\Shopify\Tags;
 
+use Statamic\Facades\Entry;
 use Statamic\Support\Str;
 use Statamic\Tags\Concerns\QueriesConditions;
 use Statamic\Tags\Concerns\QueriesOrderBys;
@@ -48,19 +49,19 @@ class Shopify extends Tags
 
         // Out of Stock
         if (! $this->isInStock($variants)) {
-            return config('shopify.lang.out_of_stock', 'Out of Stock');
+            return __('shopify::messages.out_of_stock');
         }
 
         // Lowest Price
         $pricePluck = $variants->pluck('price');
 
+        $price = $pricePluck->sort()->splice(0, 1)[0];
+
         if ($pricePluck->count() > 1 && $this->params->get('show_from') === true) {
-            $html .= config('shopify.lang.from', 'From').' ';
+            return __('shopify::messages.display_price_from', ['currency' => config('shopify.currency'), 'price' => $price]);
         }
 
-        $html .= config('shopify.currency').$pricePluck->sort()->splice(0, 1)[0];
-
-        return $html;
+        return __('shopify::messages.display_price', ['currency' => config('shopify.currency'), 'price' => $price]);
     }
 
     /**
@@ -68,7 +69,7 @@ class Shopify extends Tags
      */
     public function scripts()
     {
-        return '<script src="'.url('/vendor/statamic-shopify/js/statamic-shopify-front.js').'"></script>';
+        return '<script src="'.url('/vendor/shopify/js/statamic-shopify-front.js').'"></script>';
     }
 
     /**
@@ -126,7 +127,7 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
      *
      * @return \Illuminate\Support\Collection|null
      */
-    private function variants()
+    public function variants()
     {
         return $this->fetchProductVariants($this->context->get('slug'));
     }
@@ -178,15 +179,19 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
                 }
             }
 
+            $langKey = 'shopify::messages.option_title';
+            $langParams = ['title' => $title];
+
             if ($this->params->get('show_price')) {
-                $title .= ' - '.config('shopify.currency').$variant['price'];
+                $langKey .= '_price';
+                $langParams['price'] = __('shopify::messages.display_price', ['currency' => config('shopify.currency'), 'price' => $variant['price']]);
             }
 
             if ($this->params->get('show_out_of_stock') && $out_of_stock) {
-                $title .= ' ('.config('shopify.lang.out_of_stock').')';
+                $langKey .= '_nostock';
             }
 
-            $html .= '<option value="'.$variant['storefront_id'].'" data-in-stock="'.$out_of_stock.'"'.($out_of_stock ? ' disabled' : '').'>'.$title.'</option>';
+            $html .= '<option value="'.$variant['storefront_id'].'" data-in-stock="'.($out_of_stock ? 'false' : 'true').'"'.($out_of_stock ? ' disabled' : '').'>'.__($langKey, $langParams).'</option>';
         }
 
         return $html;

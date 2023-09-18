@@ -1,4 +1,5 @@
 import client from './client'
+import { checkoutId } from './checkout'
 import {
   htmlToElements,
   formatCurrency,
@@ -22,7 +23,7 @@ const setCartCount = () => {
   }
 
   client.checkout
-    .fetch(localStorage.getItem('statamic.shopify.cart.id'))
+    .fetch(checkoutId)
     .then(({ lineItems }) => {
       let count = 0
       lineItems.forEach((item) => (count = count + item.quantity))
@@ -49,14 +50,15 @@ const hideCartOverview = () => {
 const showCartOverview = async (lineItems, price, checkoutLink) => {
   cartView.classList.remove('hidden')
   noItemsMessage.classList.add('hidden')
-
+  
   // Table
   const tableBody = document.querySelector('#ss-cart-view table tbody')
 
   // Append line item elements
-  await lineItems.forEach(({ id, variant, title, quantity }) => {
-    const price = formatCurrency(variant.price)
-    const subtotal = formatCurrency(quantity * variant.price)
+  await lineItems.forEach(lineItem => {
+    const { id, variant, title, quantity } = lineItem;        
+    const price = formatCurrency(variant.price.attrs.amount.value)
+    const subtotal = formatCurrency(quantity * variant.price.attrs.amount.value)
 
     let html = `<tr data-ss-variant-id="${id}">
     <td class="px-6 py-4 whitespace-nowrap" colspan="2">
@@ -86,7 +88,7 @@ const showCartOverview = async (lineItems, price, checkoutLink) => {
 <td class="px-6 py-4 whitespace-nowrap">
     <input type="number" name="qty" min="1" class="border w-20 p-1" value="${quantity}"/>
 </td>
-<td class="px-6 py-4 whitespace-nowrap">
+<td class="px-6 py-4 whitespace-nowrap" data-ss-line-total>
     ${subtotal}
 </td>
     <td class="px-6 py-4 whitespace-nowrap">
@@ -120,6 +122,19 @@ const showCartOverview = async (lineItems, price, checkoutLink) => {
  */
 const setCartSubtotal = (amount) => {
   const subtotalEl = document.querySelector('[data-ss-subtotal]')
+
+  if (subtotalEl != null) {
+    subtotalEl.innerHTML = formatCurrency(amount)
+  }
+}
+
+/**
+ * Set the subtotal for a given cart line on the page.
+ *
+ * @param amount
+ */
+const setCartLineSubtotal = (id, amount) => {
+  const subtotalEl = document.querySelector('[data-ss-variant-id="' + id + '"] [data-ss-line-total]')
 
   if (subtotalEl != null) {
     subtotalEl.innerHTML = formatCurrency(amount)
@@ -162,7 +177,7 @@ const deleteRowFromStorefront = (row) => {
   items.push(id)
 
   client.checkout
-    .removeLineItems(localStorage.getItem('statamic.shopify.cart.id'), items)
+    .removeLineItems(checkoutId, items)
     .then(({ lineItems, subtotalPriceV2 }) => {
       setCartCount(lineItems)
       setCartSubtotal(subtotalPriceV2.amount)
@@ -194,10 +209,15 @@ const updateQtyInStorefront = debounce((row, qty) => {
   ]
 
   client.checkout
-    .updateLineItems(localStorage.getItem('statamic.shopify.cart.id'), items)
+    .updateLineItems(checkoutId, items)
     .then(({ lineItems, subtotalPriceV2 }) => {
       setCartCount(lineItems)
       setCartSubtotal(subtotalPriceV2.amount)
+      lineItems.forEach(lineItem => {
+        if (lineItem.id == id) {
+          setCartLineSubtotal(id, lineItem.quantity *  lineItem.variant.price.attrs.amount.value)
+        }
+      });
     })
     .catch((err) => {})
 }, 500)
@@ -213,7 +233,7 @@ const cart = () => {
 
   // Fetch the cart
   client.checkout
-    .fetch(localStorage.getItem('statamic.shopify.cart.id'))
+    .fetch(checkoutId)
     .then((checkout) => {
       const { lineItems, subtotalPriceV2, webUrl } = checkout
 
