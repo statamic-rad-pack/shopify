@@ -27,7 +27,7 @@ Rather than running the full import continuously you can add a webhook on **Prod
 Your URL should point to the following endpoint:
 
 ```bash
-https://YOURSITE/!/statamic-shopify/webhook/product/create
+https://YOURSITE/!/shopify/webhook/product/create
 ```
 
 ## Product Update
@@ -37,7 +37,7 @@ Similarly, rather than running the full import to catch any changes to products,
 Your URL should point to the following endpoint:
 
 ```bash
-https://YOURSITE/!/statamic-shopify/webhook/product/update
+https://YOURSITE/!/shopify/webhook/product/update
 ```
 
 ## Product Delete
@@ -47,7 +47,7 @@ If you want products to be removed from Statamic whenever you delete them from S
 Your URL should point to the following endpoint:
 
 ```bash
-https://YOURSITE/!/statamic-shopify/webhook/product/delete
+https://YOURSITE/!/shopify/webhook/product/delete
 ```
 
 ## Order Created
@@ -57,5 +57,5 @@ This will scan for all `line_items` and refetch the product data.
 Your URL should point to the following endpoint:
 
 ```bash
-https://YOURSITE/!/statamic-shopify/webhook/order
+https://YOURSITE/!/shopify/webhook/order
 ```

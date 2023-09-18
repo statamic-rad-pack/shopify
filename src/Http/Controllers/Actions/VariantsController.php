@@ -8,21 +8,13 @@ use Statamic\Http\Controllers\CP\CpController;
 
 class VariantsController extends CpController
 {
-    public function fetch(Request $request, $product)
+    public function fetch(Request $request, string $product)
     {
-        if (! $request->get('option1')) {
-            return response()->json('No options set');
-        }
-
-        if (! $product) {
-            return response()->json('No product');
-        }
-
         return Entry::query()
             ->where('collection', 'variants')
-            ->where('option1', $request->get('option1'))
-            ->where('option2', $request->get('option2'))
-            ->where('option3', $request->get('option3'))
+            ->when($option = $request->get('option1'), fn ($query) => $query->where('option1', $option))
+            ->when($option = $request->get('option2'), fn ($query) => $query->where('option2', $option))
+            ->when($option = $request->get('option3'), fn ($query) => $query->where('option3', $option))
             ->where('product_slug', $product)
             ->get()
             ->map(function ($variant) {
@@ -32,7 +24,6 @@ class VariantsController extends CpController
                 $values['inventory_quantity'] = $variant->inventory_quantity;
 
                 return $values;
-            })
-            ->first();
+            }) ?? [];
     }
 }
