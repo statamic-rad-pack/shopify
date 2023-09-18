@@ -1,0 +1,40 @@
+name: Deploy demo store
+on:
+  release:
+  workflow_dispatch:
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_DEMO_STORE_PROJECT_ID }}
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+     # Check out master branch
+      - name: Checkout
+        uses: actions/checkout@master
+        with:
+          repository: 'statamic-rad-pack/shopify-demo'
+
+      # Downloads, configures and caches Node.js
+      - name: Setup node env
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      # Install all dependencies needed to build our documentation
+      - name: Install dependencies
+        run: yarn
+
+      # Pull vercel project info
+      - name: Vercel pull
+        run: yarn vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Build for vercel output
+      - name: Vercel build
+        run: yarn vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Deploy to vercel
+      - name: Vercel deploy
+        run: yarn vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

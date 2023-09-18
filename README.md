@@ -15,7 +15,7 @@
 
 A Statamic addon that allows you to integrate Shopify. World-class ecommerce mixed with the brilliance of Statamic.
 
-[Live Demo](https://shopify.jackwhiting.dev) -
+[Live Demo](https://statamic-shopify-demostore.vercel.app) -
 [Docs](https://statamic-shopify-docs.vercel.app)
 <!-- /statamic:hide -->
 
