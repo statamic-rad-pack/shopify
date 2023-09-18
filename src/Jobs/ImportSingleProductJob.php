@@ -11,6 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use PHPShopify\ShopifySDK;
 use Statamic\Facades\Entry;
+use Statamic\Facades\Term;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
 use Statamic\Support\Str;
 
