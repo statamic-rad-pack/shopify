@@ -16,10 +16,10 @@ This plugin requires a Shopify account to work. If you're testing this, you can 
 
 ## Installation
 
-Add `jackabox/statamic-shopify` as a dependency to your project:
+Add `statamic-rad-pack/shopify` as a dependency to your project:
 
 ```bash
-composer require jackabox/statamic-shopify
+composer require statamic-rad-pack/shopify
 ```
 
 ## Creating a Shopify App (New)
@@ -72,7 +72,7 @@ There are several assets the plugin provides you with
 When installing the app for the first time it will copy across all of the necessary assets. If you want to manually do this you can run the following command.
 
 ```bash
-php artisan vendor:publish --provider="Jackabox\Shopify\ServiceProvider"
+php artisan vendor:publish --provider="StatamicRadPack\Shopify\ServiceProvider"
 ```
 
 ### Granular Setup
