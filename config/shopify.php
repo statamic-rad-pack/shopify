@@ -89,5 +89,10 @@ return [
      * The queue connection you want the Shopify jobs to run on.
      * Please note you having more than 1 process running at once on this queue may cause issues.
      */
-    'queue' => env('SHOPIFY_JOB_QUEUE', 'default')
+    'queue' => env('SHOPIFY_JOB_QUEUE', 'default'),
+    
+    /**
+     * What class should we use to parse metafields
+     */
+    'metafields_parser' => \StatamicRadPack\Shopify\Actions\ParseMetafields::class,
 ];

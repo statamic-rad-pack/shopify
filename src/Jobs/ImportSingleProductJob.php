@@ -9,7 +9,9 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use PHPShopify\ShopifySDK;
 use Statamic\Facades\Asset;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Path;
@@ -96,6 +98,17 @@ class ImportSingleProductJob implements ShouldQueue
             $entry->set($key, $prop);
         }
 
+        try {
+            $productMetafields = (new ShopifySDK())->Product($this->data['id'])->Metafield()->get();
+            $metafields = $this->parseMetafields($productMetafields, 'product');
+
+            if ($metafields) {
+                $entry->merge($metafields);
+            }
+        } catch (\Throwable $e) {
+            Log::error('Could not retrieve metafields for product'.$this->data['id']);
+        }
+
         $entry->save();
 
         // Get the collections
@@ -133,6 +146,18 @@ class ImportSingleProductJob implements ShouldQueue
             $entry->set('option2', $variant['option2']);
             $entry->set('option3', $variant['option3']);
             $entry->set('storefront_id', base64_encode($variant['admin_graphql_api_id']));
+
+            try {
+                $variantMetafields = (new ShopifySDK())->ProductVariant($variant['id'])->Metafield()->get();
+                $metafields = $this->parseMetafields($variantMetafields, 'product-variant');
+
+                if ($metafields) {
+                    $entry->merge($metafields);
+                }
+            } catch (\Throwable $e) {
+                Log::error('Could not retrieve metafields for variant '.$this->data['id']);
+            }
+
             $entry->save();
         }
     }
@@ -267,5 +292,13 @@ class ImportSingleProductJob implements ShouldQueue
     private function getPath(UploadedFile $file): string
     {
         return Path::assemble(config('shopify.asset.path').'/', $file->getClientOriginalName());
+    }
+
+    /**
+     * Parse metafields and hand off to our metafield handler
+     */
+    private function parseMetafields(array $fields, string $context): array
+    {
+        return app(config('shopify.metafields_parser'))->execute($fields, $context) ?? [];
     }
 }
