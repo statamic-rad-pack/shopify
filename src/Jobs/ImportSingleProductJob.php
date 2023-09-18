@@ -11,7 +11,9 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use PHPShopify\ShopifySDK;
 use Statamic\Facades\Entry;
+use Statamic\Facades\Term;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
+use Statamic\Support\Str;
 
 class ImportSingleProductJob implements ShouldQueue
 {
@@ -44,9 +46,9 @@ class ImportSingleProductJob implements ShouldQueue
             ->first();
 
         // Clean up data whilst checking if product exists
-        $tags = $this->cleanArrayData($this->data['tags']);
-        $vendors = $this->cleanArrayData($this->data['vendor']);
-        $type = $this->cleanArrayData($this->data['product_type']);
+        $tags = $this->importTaxonomy($this->data['tags'], config('shopify.taxonomies.tags'));
+        $vendors = $this->importTaxonomy($this->data['vendor'], config('shopify.taxonomies.vendor'));
+        $type = $this->importTaxonomy($this->data['product_type'], config('shopify.taxonomies.type'));
 
         // Get option Names
         $options = [];
@@ -62,11 +64,20 @@ class ImportSingleProductJob implements ShouldQueue
             'published_at' => Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s'),
             'title' => (! $entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
             'content' => (! $entry || config('shopify.overwrite.content')) ? $this->data['body_html'] : $entry->content,
-            config('shopify.taxonomies.vendor') => (! $entry || config('shopify.overwrite.vendor')) ? $vendors : $entry->vendor,
-            config('shopify.taxonomies.type') => (! $entry || config('shopify.overwrite.type')) ? $type : $entry->product_type,
-            config('shopify.taxonomies.tags') => (! $entry || config('shopify.overwrite.tags')) ? $tags : $entry->product_tags,
             'options' => $options,
         ];
+
+        if (! $entry || config('shopify.overwrite.vendor')) {
+            $data[config('shopify.taxonomies.vendor')] = $vendors;
+        }
+
+        if (! $entry || config('shopify.overwrite.type')) {
+            $data[config('shopify.taxonomies.type')] = $type;
+        }
+
+        if (! $entry || config('shopify.overwrite.tags')) {
+            $data[config('shopify.taxonomies.tags')] = $tags;
+        }
 
         if (! $entry) {
             $entry = Entry::make()
@@ -90,10 +101,7 @@ class ImportSingleProductJob implements ShouldQueue
             }
         }
 
-        // Recursively loop over the products and set the data as needed.
-        foreach ($data as $key => $prop) {
-            $entry->set($key, $prop);
-        }
+        $entry->merge($data);
 
         try {
             $productMetafields = (new ShopifySDK())->Product($this->data['id'])->Metafield()->get();
@@ -112,6 +120,39 @@ class ImportSingleProductJob implements ShouldQueue
         FetchCollectionsForProductJob::dispatch($entry)->onQueue(config('shopify.queue'));
     }
 
+    private function importTaxonomy(string $tags, string $taxonomyHandle)
+    {
+        if (! $tags){
+            return null;
+        }
+
+        $tags = explode(', ', $tags);
+
+        // 'Tag foo, Tag bar' => ['tag-foo' => 'Tag foo', 'tag-bar' => 'Tag bar']
+        $tags = collect($tags)
+            ->mapWithKeys(fn ($tagTitle) => [Str::slug($tagTitle) => $tagTitle])
+            ->each(function($tagTitle, $tagSlug) use ($taxonomyHandle) {
+                $term = Term::query()
+                    ->where('taxonomy', $taxonomyHandle)
+                    ->where('slug', $tagSlug)
+                    ->first();
+
+                if (! $term) {
+                    $term = Term::make()
+                        ->taxonomy($taxonomyHandle)
+                        ->slug($tagSlug);
+
+                    $term->data([
+                        'title' => $tagTitle,
+                    ]);
+
+                    $term->save();
+                }
+            });
+
+        return $tags->keys()->toArray();
+    }
+
     private function importVariants(array $variants, string $product_slug)
     {
         $this->removeOldVariants($variants, $product_slug);
@@ -128,21 +169,34 @@ class ImportSingleProductJob implements ShouldQueue
                     ->slug($variant['id']);
             }
 
-            $entry->set('variant_id', $variant['id']);
-            $entry->set('product_slug', $product_slug);
-            $entry->set('title', $variant['title'] === 'Default Title' ? 'Default' : $variant['title']);
-            $entry->set('inventory_quantity', $variant['inventory_quantity']);
-            $entry->set('inventory_policy', $variant['inventory_policy']);
-            $entry->set('inventory_management', $variant['inventory_management']);
-            $entry->set('price', $variant['price']);
-            $entry->set('compare_at_price', $variant['compare_at_price']);
-            $entry->set('sku', $variant['sku']);
-            $entry->set('grams', $variant['grams']);
-            $entry->set('requires_shipping', $variant['requires_shipping']);
-            $entry->set('option1', $variant['option1']);
-            $entry->set('option2', $variant['option2']);
-            $entry->set('option3', $variant['option3']);
-            $entry->set('storefront_id', base64_encode($variant['admin_graphql_api_id']));
+            $data = [
+                'variant_id' => $variant['id'],
+                'product_slug' => $product_slug,
+                'title' => $variant['title'] === 'Default Title' ? 'Default' : $variant['title'],
+                'inventory_quantity' => $variant['inventory_quantity'],
+                'inventory_policy' => $variant['inventory_policy'],
+                'inventory_management' => $variant['inventory_management'],
+                'price' => $variant['price'],
+                'compare_at_price' => $variant['compare_at_price'],
+                'sku' => $variant['sku'],
+                'grams' => $variant['grams'],
+                'requires_shipping' => $variant['requires_shipping'],
+                'option1' => $variant['option1'],
+                'option2' => $variant['option2'],
+                'option3' => $variant['option3'],
+                'storefront_id' => base64_encode($variant['admin_graphql_api_id'])
+            ];
+
+            if ($variant['image_id']) {
+                foreach (($this->data['images'] ?? []) as $image) {
+                    if ($image['id'] == $variant['image_id']) {
+                        $asset = $this->importImages($image);
+                        $data['image'] = $asset->path();
+                    }
+                }
+            }
+
+            $entry->merge($data);
 
             try {
                 $variantMetafields = (new ShopifySDK())->ProductVariant($variant['id'])->Metafield()->get();
@@ -162,37 +216,18 @@ class ImportSingleProductJob implements ShouldQueue
     /**
      * Remove old variants that are no longer used on a single product.
      */
-    private function removeOldVariants(array $variants, string $product_slug)
+    private function removeOldVariants(array $variants, string $productSlug)
     {
         $allVariants = Entry::query()
             ->where('collection', 'variants')
-            ->where('product_slug', $product_slug)
-            ->get();
+            ->where('product_slug', $productSlug)
+            ->get()
+            ->each(function ($variant) use ($variants) {
+                $item = array_search($variant->slug(), array_column($variants, 'id'));
 
-        foreach ($allVariants as $variant) {
-            $item = array_search($variant->slug(), array_column($variants, 'id'));
-
-            if ($item === false) {
-                $variant->delete();
-            }
-        }
-    }
-
-    /**
-     * TODO: Look into this one.
-     * Not implemented due to issues with stack and saving images.
-     * Currently images are all stored on the defalt product as a gallery.
-     */
-    private function importImagesToVariant($variant)
-    {
-        $images = collect($this->data['images']);
-
-        $variant_image = $images->filter(function ($item) use ($variant) {
-            return in_array($variant['id'], $item['variant_ids']);
-        })->first();
-
-        if ($variant_image) {
-            $asset = $this->importImages($variant_image);
-        }
+                if ($item === false) {
+                    $variant->delete();
+                }
+            });
     }
 }
