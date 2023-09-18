@@ -1,6 +1,5 @@
 {
   "title": "Statamic Shopify",
-  "url": "https://statamic.com/addons/jackabox/shopify",
-  "github": "jackabox/statamic-shopify",
-  "twitter": "@jackabox"
+  "url": "https://statamic.com/addons/rad-pack/shopify",
+  "github": "statamic-rad-pack/shopify"
 }
