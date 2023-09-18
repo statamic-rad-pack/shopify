@@ -47,4 +47,4 @@ jobs:
       - name: Vercel deploy
         working-directory: ${{env.working-directory}}
         id: deploy
-        run: yarn vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        run: yarn vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
