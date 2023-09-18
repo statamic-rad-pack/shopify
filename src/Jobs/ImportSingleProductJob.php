@@ -66,18 +66,18 @@ class ImportSingleProductJob implements ShouldQueue
             'content' => (! $entry || config('shopify.overwrite.content')) ? $this->data['body_html'] : $entry->content,
             'options' => $options,
         ];
-        
+
         if (! $entry || config('shopify.overwrite.vendor')) {
             $data[config('shopify.taxonomies.vendor')] = $vendors;
         }
-        
+
         if (! $entry || config('shopify.overwrite.type')) {
             $data[config('shopify.taxonomies.type')] = $type;
         }
-        
+
         if (! $entry || config('shopify.overwrite.tags')) {
             $data[config('shopify.taxonomies.tags')] = $tags;
-        }  
+        }
 
         if (! $entry) {
             $entry = Entry::make()
@@ -107,41 +107,38 @@ class ImportSingleProductJob implements ShouldQueue
         // Get the collections
         FetchCollectionsForProductJob::dispatch($entry)->onQueue(config('shopify.queue'));
     }
-    
+
     private function importTaxonomy(string $tags, string $taxonomyHandle)
     {
         if (! $tags){
             return null;
         }
-        
+
         $tags = explode(', ', $tags);
-        
+
         // 'Tag foo, Tag bar' => ['tag-foo' => 'Tag foo', 'tag-bar' => 'Tag bar']
         $tags = collect($tags)
-            ->mapWithKeys(function ($tagTitle) {
-                return [Str::slug($tagTitle) => $tagTitle];
+            ->mapWithKeys(fn ($tagTitle) => [Str::slug($tagTitle) => $tagTitle])
+            ->each(function($tagTitle, $tagSlug) use ($taxonomyHandle) {
+                $term = Term::query()
+                    ->where('taxonomy', $taxonomyHandle)
+                    ->where('slug', $tagSlug)
+                    ->first();
+
+                if (! $term) {
+                    $term = Term::make()
+                        ->taxonomy($taxonomyHandle)
+                        ->slug($tagSlug);
+
+                    $term->data([
+                        'title' => $tagTitle,
+                    ]);
+
+                    $term->save();
+                }
             });
 
-        foreach ($tags as $tagSlug => $tagTitle) {
-            $term = Term::query()
-                ->where('taxonomy', $taxonomyHandle)
-                ->where('slug', $tagSlug)
-                ->first();
-
-            if (!$term) {
-                $term = Term::make()
-                    ->taxonomy($taxonomyHandle)
-                    ->slug($tagSlug);
-                    
-                $term->data([
-                    'title' => $tagTitle,
-                ]);
-                
-                $term->save();                    
-            }
-        }
-
-        return $tags->keys()->toArray();   
+        return $tags->keys()->toArray();
     }
 
     private function importVariants(array $variants, string $product_slug)
@@ -159,7 +156,7 @@ class ImportSingleProductJob implements ShouldQueue
                     ->collection('variants')
                     ->slug($variant['id']);
             }
-            
+
             $data = [
                 'variant_id' => $variant['id'],
                 'product_slug' => $product_slug,
@@ -195,20 +192,19 @@ class ImportSingleProductJob implements ShouldQueue
     /**
      * Remove old variants that are no longer used on a single product.
      */
-    private function removeOldVariants(array $variants, string $product_slug)
+    private function removeOldVariants(array $variants, string $productSlug)
     {
         $allVariants = Entry::query()
             ->where('collection', 'variants')
-            ->where('product_slug', $product_slug)
-            ->get();
+            ->where('product_slug', $productSlug)
+            ->get()
+            ->each(function ($variant) use ($variants) {
+                $item = array_search($variant->slug(), array_column($variants, 'id'));
 
-        foreach ($allVariants as $variant) {
-            $item = array_search($variant->slug(), array_column($variants, 'id'));
-
-            if ($item === false) {
-                $variant->delete();
-            }
-        }
+                if ($item === false) {
+                    $variant->delete();
+                }
+            });
     }
 
     /**
@@ -236,7 +232,7 @@ class ImportSingleProductJob implements ShouldQueue
         $asset = Asset::make()
             ->container(config('shopify.asset.container'))
             ->path($this->getPath($file));
-            
+
         $asset->merge([
             'alt' => $image['alt'] ?? '',
         ]);
@@ -249,7 +245,7 @@ class ImportSingleProductJob implements ShouldQueue
     }
 
     /**
-     * Clean up any query params ont he end of the URL.
+     * Clean up any query params on the end of the URL.
      */
     private function cleanImageURL(string $url): string
     {
@@ -265,7 +261,7 @@ class ImportSingleProductJob implements ShouldQueue
     }
 
     /**
-     * Make a fake file so Statamic can interpert the data we need.
+     * Make a fake file so Statamic can interpret the data we need.
      */
     public function uploadFakeFileFromUrl(string $name, string $url): UploadedFile
     {
