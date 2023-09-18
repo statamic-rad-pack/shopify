@@ -150,7 +150,9 @@ window.shopifyToken = '1234';
 
         $variant->save();
 
-        $this->assertEquals('<input type="hidden" name="ss-product-variant" id="ss-product-variant" value="abc">', $this->tag('{{ shopify:variants:generate show_price="true" show_out_of_stock="true" }}', ['slug' => 'obi-wan']));
+        $tagOutput = (string) $this->tag('{{ shopify:variants:generate show_price="true" show_out_of_stock="true" }}', ['slug' => 'obi-wan']);
+
+        $this->assertEquals('<input type="hidden" name="ss-product-variant" id="ss-product-variant" value="abc">', trim($tagOutput));
 
         $variant2 = Facades\Entry::make()->data([
             'title' => 'Another T-shirt',
@@ -167,13 +169,21 @@ window.shopifyToken = '1234';
 
         $variant2->save();
 
-        $this->assertEquals('<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select "><option value="abc" data-in-stock="true">T-shirt - £9.99</option><option value="def" data-in-stock="true">Another T-shirt - £10.99</option></select>', $this->tag('{{ shopify:variants:generate show_price="true" show_out_of_stock="false" }}', ['slug' => 'obi-wan']));
+        $tagOutput = $this->tag('{{ shopify:variants:generate show_price="true" show_out_of_stock="false" }}', ['slug' => 'obi-wan']);
+        $tagOutput = str_replace(["\r", "\n", "\t"], '', $tagOutput);
+        $tagOutput = preg_replace('/\>\s+\</m', '><', trim($tagOutput));
+
+        $this->assertEquals('<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select "><option value="abc" data-in-stock="true">T-shirt - £9.99</option><option value="def" data-in-stock="true">Another T-shirt - £10.99</option></select>', $tagOutput);
 
         $variant->merge([
             'inventory_quantity' => 0
         ])->save();
 
-        $this->assertEquals('<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select "><option value="abc" data-in-stock="false" disabled>T-shirt - £9.99</option><option value="def" data-in-stock="true">Another T-shirt - £10.99</option></select>', $this->tag('{{ shopify:variants:generate show_price="true" show_out_of_stock="false" }}', ['slug' => 'obi-wan']));
+        $tagOutput = $this->tag('{{ shopify:variants:generate show_price="true" show_out_of_stock="false" }}', ['slug' => 'obi-wan']);
+        $tagOutput = str_replace(["\r", "\n", "\t"], '', $tagOutput);
+        $tagOutput = preg_replace('/\>\s+\</m', '><', trim($tagOutput));
+
+        $this->assertEquals('<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select "><option value="abc" data-in-stock="false" disabled>T-shirt - £9.99</option><option value="def" data-in-stock="true">Another T-shirt - £10.99</option></select>', $tagOutput);
 
     }
 

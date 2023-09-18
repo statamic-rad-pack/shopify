@@ -111,15 +111,42 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
             return;
         }
 
-        if ($variants->count() > 1) {
-            $html = '<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select '.$this->params->get('class').'">';
-            $html .= $this->variantSelectOptions($variants);
-            $html .= '</select>';
-        } else {
-            $html = '<input type="hidden" name="ss-product-variant" id="ss-product-variant" value="'.$variants[0]['storefront_id'].'">';
-        }
+        return view('shopify::fields.variant_form', [
+            'params' => [
+                'class' => $this->params->get('class'),
+                'show_out_of_stock' => $this->params->bool('show_out_of_stock') ?? false,
+                'show_price' => $this->params->bool('show_price') ?? false,
+            ],
+            'variants' => $variants->map(function ($variant) {
+                $out_of_stock = false;
 
-        return $html;
+                if (isset($variant['inventory_policy']) && isset($variant['inventory_management'])) {
+                    if (
+                        $variant['inventory_policy'] === 'deny' &&
+                        $variant['inventory_management'] === 'shopify' &&
+                        $variant['inventory_quantity'] <= 0
+                    ) {
+                        $out_of_stock = true;
+                    }
+                }
+
+                $langKey = 'shopify::messages.option_title';
+                $langParams = ['title' => $variant['title']];
+
+                if ($this->params->bool('show_price')) {
+                    $langKey .= '_price';
+                    $langParams['price'] = __('shopify::messages.display_price', ['currency' => config('shopify.currency'), 'price' => $variant['price']]);
+                }
+
+                if ($this->params->bool('show_out_of_stock') && $out_of_stock) {
+                    $langKey .= '_nostock';
+                }
+
+                $variant['__out_of_stock'] = $out_of_stock;
+                $variant['__translated_string'] = __($langKey, $langParams);
+                return $variant;
+            }),
+        ]);
     }
 
     /**
