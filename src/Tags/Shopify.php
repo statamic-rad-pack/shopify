@@ -114,8 +114,8 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
         return view('shopify::fields.variant_form', [
             'params' => [
                 'class' => $this->params->get('class'),
-                'show_out_of_stock' => $this->params->get('show_out_of_stock') ?? false,
-                'show_price' => $this->params->get('show_price') ?? false,
+                'show_out_of_stock' => $this->params->bool('show_out_of_stock') ?? false,
+                'show_price' => $this->params->bool('show_price') ?? false,
             ],
             'variants' => $variants,
         ]);
