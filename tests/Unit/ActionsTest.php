@@ -7,11 +7,6 @@ use StatamicRadPack\Shopify\Tests\TestCase;
 
 class ActionsTest extends TestCase
 {
-    private function tag($tag)
-    {
-        return Facades\Parse::template($tag, []);
-    }
-
     /** @test */
     public function gets_correct_data_from_action_url()
     {
