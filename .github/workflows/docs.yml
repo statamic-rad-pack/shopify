@@ -28,15 +28,20 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: yarn
 
+      # Generate the docs
+      - name: Generate dist folder
+        working-directory: ${{env.working-directory}}
+        run: yarn nuxt generate
+
       # Pull vercel project info
       - name: Vercel pull
         working-directory: ${{env.working-directory}}
         run: yarn vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       # Build for vercel output
-      - name: Vercel build
-        working-directory: ${{env.working-directory}}
-        run: yarn vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      #- name: Vercel build
+      #  working-directory: ${{env.working-directory}}
+      #  run: yarn vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
       # Deploy to vercel
       - name: Vercel deploy
