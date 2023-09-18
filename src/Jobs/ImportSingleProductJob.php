@@ -11,7 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use PHPShopify\ShopifySDK;
 use Statamic\Facades\Entry;
-use Statamic\Shopify\Traits\SavesImagesAndMetafields;
+use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
 
 class ImportSingleProductJob implements ShouldQueue
 {
