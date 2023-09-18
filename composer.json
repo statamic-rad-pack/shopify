@@ -18,9 +18,22 @@
         "pixelfear/composer-dist-plugin": "^0.1",
         "statamic/cms": "^4.0"
     },
+    "require-dev": {
+        "jasonmccreary/laravel-test-assertions": "^2.0",
+        "mockery/mockery": "^1.3.1",
+        "nunomaduro/collision": "^6.0 || ^7.0",
+        "orchestra/testbench": "^7.0 || ^8.0",
+        "phpunit/phpunit": "^9.0 || ^10.0",
+        "spatie/laravel-ray": "*"
+    },
     "autoload": {
         "psr-4": {
             "StatamicRadPack\\Shopify\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "StatamicRadPack\\Shopify\\Tests\\": "tests"
         }
     },
     "config": {
