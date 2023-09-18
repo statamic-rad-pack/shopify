@@ -50,7 +50,7 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->loadViewsFrom(__DIR__.'/../resources/views/', 'shopify');
         $this->mergeConfigFrom(__DIR__.'/../config/shopify.php', 'shopify');
-        $this->loadJsonTranslationsFrom(__DIR__.'/../resources/lang', 'shopify');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'shopify');
 
         Statamic::booted(function () {
             $this->setShopifyApiConfig();
