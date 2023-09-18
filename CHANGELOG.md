@@ -10,6 +10,7 @@
 
 - Products now re-import off the `product_id` rather than the slug. This is to prevent duplications and changes whenever the product is changed in the Shopify Admin. **NOTE: we do not overwrite the slug again in Statamic in case it has been changed here for SEO purposes.** (#135)
 - 
+
 # 1.7.6
 
 ### Changed
@@ -26,7 +27,6 @@
 ### Fixed
 
 - Fixed admin dashboard no longer showing with new admin token update. Fixes #115. Fixes #118.
-
 
 # 1.7.4
 
@@ -57,12 +57,12 @@
 
 - Added the option to define a queue for the Shopify jobs. Defaults to `default`. If you'd like to set a unique process you can set a env variable of `SHOPIFY_JOB_QUEUE`. (See #95).
 
-
 # 1.6.0
 
 ### New
 
 - **Potentially Breaking:**: Now imports `inventory_management` option for each variant to check if the product is out of stock. This allows for sale of products which aren't out of stock and only denies if the "track inventory" option is checked within Shopify. If, it's unchecked the system will believe that there is either "unlimited stock" or "you have manually adjusted". (See #89)
+
 # 1.5.2
 
 ### Fixed
@@ -104,7 +104,9 @@
 ### Fixed
 
 - Removing left over debug with `ray()`
+
 # 1.4.0
+
 ### New
 
 - Collections can now be imported (#24). Note: You'll need to publish the assets or create a new taxonomy for them in the admin panel. Once set up you can either run the 'Import All Products' again or you can use the new 'Import Collections' (`php artisan shopify:import:collections`).
@@ -143,11 +145,12 @@
 
 ### New
 
-- **ProductVariant** tag has been updated to give you multiple ways to interact with them.
-    - `product_variant:generate` - outputs the html prerendered (default)
-    - `product_variant:loop` - gives you access to variant data to use however you wish.
-    - `product_variant:by_title` - lets you grab one variant by it's title.
-    - `product_variant:by_index` - lets you grab one variant by index.
+- **ProductVariant** tag has been updated to give you multiple ways to interact with them.   
+  - `product_variant:generate` - outputs the html prerendered (default)   
+  - `product_variant:loop` - gives you access to variant data to use however you wish.   
+  - `product_variant:by_title` - lets you grab one variant by it's title.   
+  - `product_variant:by_index` - lets you grab one variant by index.   
+  
 
 ### Updated
 
@@ -176,15 +179,15 @@ If you want to display options/handle them on the site you need to update your `
       type: array
       icon: array
       listable: hidden
-```
 
+```
 # 1.2.0
 
 - [New] All webhooks have been given a name.
 - [New] Added a webhook for when a product is created in Shopify.
 - [New] Added a webhook for when a product is updated in Shopify
 
->  these two webhooks if utilised, should mean you don't have to run full imports after the first one.
+> these two webhooks if utilised, should mean you don't have to run full imports after the first one.
 
 - [Fix] Incorrect name on Product Delete Webhook.
 - [Update] Product delete webhook now has a new path. See potentially breaking below.
@@ -288,3 +291,35 @@ Public Release!
 # 0.1
 
 - Initial Release
+
+## v2.0.0-beta1 - 2023-09-18
+
+- Hide unnecessary stuff from the Marketplace, update Github links [@jackmcdade](https://github.com/jackmcdade) (#165)
+- Add GH Action [@edalzell](https://github.com/edalzell) (#149)
+
+### 🚀 New
+
+- Attach variant images and add alt tags on initial asset creation [@ryanmitchell](https://github.com/ryanmitchell) (#158)
+- Save metafields and images for collections [@ryanmitchell](https://github.com/ryanmitchell) (#172)
+- Render form fields with a view not hardcoded HTML [@ryanmitchell](https://github.com/ryanmitchell) (#173)
+- Create `deploy demo store` workflow [@ryanmitchell](https://github.com/ryanmitchell) (#169)
+- Get metafields for products and variants [@ryanmitchell](https://github.com/ryanmitchell) (#163)
+- Add test coverage [@ryanmitchell](https://github.com/ryanmitchell) (#170)
+- Namespace tags behind `shopify:` [@ryanmitchell](https://github.com/ryanmitchell) (#157)
+- Create docs to vercel action [@ryanmitchell](https://github.com/ryanmitchell) (#168)
+- Change namespace [@edalzell](https://github.com/edalzell) (#150)
+
+### 🐛 Fixed
+
+- Allow lang strings to be translated [@ryanmitchell](https://github.com/ryanmitchell) (#171)
+- Use checkoutId instead of localstorage [@ryanmitchell](https://github.com/ryanmitchell) (#162)
+- Fix bug in storefront_url definition and usage [@ryanmitchell](https://github.com/ryanmitchell) (#166)
+- Publish views according to conventions [@ryanmitchell](https://github.com/ryanmitchell) (#159)
+- Allow a custom storefront url to be specified [@ryanmitchell](https://github.com/ryanmitchell) (#161)
+- Add statamic/cms .editorconfig [@ryanmitchell](https://github.com/ryanmitchell) (#160)
+- Change composer package name to statamic-rad-pack/shopify, and fix bug introduced with duplicate route name [@ryanmitchell](https://github.com/ryanmitchell) (#156)
+- Upload assets on release [@edalzell](https://github.com/edalzell) (#155)
+- Cleanup files [@edalzell](https://github.com/edalzell) (#154)
+- Use term query builder instead of findBySlug [@ryanmitchell](https://github.com/ryanmitchell) (#152)
+- Don't clear cache after import [@ryanmitchell](https://github.com/ryanmitchell) (#153)
+- Use Laravel 10 conventions for routes [@ryanmitchell](https://github.com/ryanmitchell) (#151)
