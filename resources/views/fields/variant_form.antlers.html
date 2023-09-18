@@ -1,32 +1,7 @@
 {{ if (variants | count) > 1 }}
     <select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select {{ params.class }}">
     {{ variants }}
-        {{?
-            $out_of_stock = false;
-
-            if (isset($inventory_policy) && isset($inventory_management)) {
-                if (
-                    $inventory_policy === 'deny' &&
-                    $inventory_management === 'shopify' &&
-                    $inventory_quantity <= 0
-                ) {
-                    $out_of_stock = true;
-                }
-            }
-
-            $langKey = 'shopify::messages.option_title';
-            $langParams = ['title' => $title];
-
-            if ($params['show_price']) {
-                $langKey .= '_price';
-                $langParams['price'] = __('shopify::messages.display_price', ['currency' => config('shopify.currency'), 'price' => $price]);
-            }
-
-            if ($params['show_out_of_stock'] && $out_of_stock) {
-                $langKey .= '_nostock';
-            }
-        ?}}
-        <option value="{{ storefront_id }}" data-in-stock="{{ if $out_of_stock }}false{{ else }}true{{ /if }}"{{ if $out_of_stock }} disabled{{ /if }}>{{$ __($langKey, $langParams) $}}</option>
+        <option value="{{ storefront_id }}" data-in-stock="{{ if __out_of_stock }}false{{ else }}true{{ /if }}"{{ if __out_of_stock }} disabled{{ /if }}>{{ __translated_string $}}</option>
     {{ /variants }}
     </select>
 {{ else }}

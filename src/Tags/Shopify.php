@@ -117,7 +117,35 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
                 'show_out_of_stock' => $this->params->bool('show_out_of_stock') ?? false,
                 'show_price' => $this->params->bool('show_price') ?? false,
             ],
-            'variants' => $variants,
+            'variants' => $variants->map(function ($variant) {
+                $out_of_stock = false;
+
+                if (isset($variant['inventory_policy']) && isset($variant['inventory_management'])) {
+                    if (
+                        $variant['inventory_policy'] === 'deny' &&
+                        $variant['inventory_management'] === 'shopify' &&
+                        $variant['inventory_quantity'] <= 0
+                    ) {
+                        $out_of_stock = true;
+                    }
+                }
+
+                $langKey = 'shopify::messages.option_title';
+                $langParams = ['title' => $variant['title']];
+
+                if ($this->params->bool('show_price')) {
+                    $langKey .= '_price';
+                    $langParams['price'] = __('shopify::messages.display_price', ['currency' => config('shopify.currency'), 'price' => $variant['price']]);
+                }
+
+                if ($this->params->bool('show_out_of_stock') && $out_of_stock) {
+                    $langKey .= '_nostock';
+                }
+
+                $variant['__out_of_stock'] = $out_of_stock;
+                $variant['__translated_string'] = __($langKey, $langParams);
+                return $variant;
+            }),
         ]);
     }
 
