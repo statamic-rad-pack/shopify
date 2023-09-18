@@ -111,15 +111,14 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
             return;
         }
 
-        if ($variants->count() > 1) {
-            $html = '<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select '.$this->params->get('class').'">';
-            $html .= $this->variantSelectOptions($variants);
-            $html .= '</select>';
-        } else {
-            $html = '<input type="hidden" name="ss-product-variant" id="ss-product-variant" value="'.$variants[0]['storefront_id'].'">';
-        }
-
-        return $html;
+        return view('shopify::fields.variant_form', [
+            'params' => [
+                'class' => $this->params->get('class'),
+                'show_out_of_stock' => $this->params->get('show_out_of_stock') ?? false,
+                'show_price' => $this->params->get('show_price') ?? false,
+            ],
+            'variants' => $variants,
+        ]);
     }
 
     /**
