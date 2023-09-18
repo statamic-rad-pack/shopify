@@ -26,15 +26,16 @@ const checkout = () => {
   if (! shopifyCheckout) {
     initNewCheckout()
   } else {
-    client.checkout.fetch(shopifyCheckout).then(checkout => {
-      console.log(checkout)
-
-      if (checkout.completedAt !== null) {
-        localStorage.removeItem('statamic.shopify.cart.id')
-      }
-
-      initNewCheckout()
-    })
+    client.checkout
+      .fetch(shopifyCheckout).then(checkout => {
+        if (checkout.completedAt !== null) {
+          localStorage.removeItem('statamic.shopify.cart.id');
+          initNewCheckout()
+        }
+      })
+      .catch(err => {
+         initNewCheckout() 
+      });
   }
 
   return shopifyCheckout;
