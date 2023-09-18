@@ -69,7 +69,7 @@ class Shopify extends Tags
      */
     public function scripts()
     {
-        return '<script src="'.url('/vendor/statamic-shopify/js/statamic-shopify-front.js').'"></script>';
+        return '<script src="'.url('/vendor/shopify/js/statamic-shopify-front.js').'"></script>';
     }
 
     /**

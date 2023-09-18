@@ -79,7 +79,7 @@ class ServiceProvider extends AddonServiceProvider
             ], 'shopify-config');
 
             $this->publishes([
-                __DIR__.'/../dist/js' => public_path('vendor/statamic-shopify/js'),
+                __DIR__.'/../dist/js' => public_path('vendor/shopify/js'),
             ], 'shopify-resources');
 
             $this->publishes([
