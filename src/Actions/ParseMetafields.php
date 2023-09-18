@@ -12,9 +12,7 @@ class ParseMetafields
     public function execute(array $metafields, string $context)
     {
         return collect($metafields)
-            ->mapWithKeys(function ($field) {
-                return [$field['key'] => $field['value']];
-            })
+            ->mapWithKeys(fn ($field) => [$field['key'] => $field['value']])
             ->all();
     }
 }
