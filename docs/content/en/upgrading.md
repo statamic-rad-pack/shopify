@@ -31,3 +31,6 @@ An overview of the changes is as follows:
 
 
 
+### Changes to urls
+
+Any action URLs, webhook URLs or publish URLs have been changed from `statamic-shopify` to `shopify` e.g. the Product Create webhook is now `https://YOURSITE/!/shopify/webhook/product/create`
