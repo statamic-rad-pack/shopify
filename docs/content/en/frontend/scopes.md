@@ -19,8 +19,10 @@ Allows you to filter the Variants Collection to items that are on sale. This is 
    {{ variants group_by="product_slug" }}
       {{ groups }}
           {{ collection:products :slug:is="product_slug" limit="1" as="product" }}
-		      {{ product:title }}		
-	          {{ sku }} - Price: £{{ price }} (was: £{{ compare_at_price }})
+		      {{ product:title }}
+              {{ items }}		
+	             {{ sku }} - Price: £{{ price }} (was: £{{ compare_at_price }})
+              {{ /items }}
 		  {{ /collection:products }}
       {{ /groups }}
    {{ /variants }}
