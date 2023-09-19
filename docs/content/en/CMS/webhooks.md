@@ -66,10 +66,10 @@ Each webhook listener also fires an event you can use to hook into with your own
 
 The available events are:
 
-`StatamicRadPack\Events\ProductCreate`
-`StatamicRadPack\Events\ProductDelete`
-`StatamicRadPack\Events\ProductUpdate`
-`StatamicRadPack\Events\OrderCreate`
+`StatamicRadPack\Shopify\Events\ProductCreate`
+`StatamicRadPack\Shopify\Events\ProductDelete`
+`StatamicRadPack\Shopify\Events\ProductUpdate`
+`StatamicRadPack\Shopify\Events\OrderCreate`
 
 Each event has one property `$data` with the payload data decoded to a `stdClass`.
 
