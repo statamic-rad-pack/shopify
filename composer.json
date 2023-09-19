@@ -13,7 +13,7 @@
     "require": {
         "phpclassic/php-shopify": "^1.1",
         "pixelfear/composer-dist-plugin": "^0.1",
-        "statamic/cms": "^4.0"
+        "statamic/cms": "^4.22"
     },
     "require-dev": {
         "jasonmccreary/laravel-test-assertions": "^2.0",
