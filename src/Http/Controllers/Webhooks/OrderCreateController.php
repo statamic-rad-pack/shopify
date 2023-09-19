@@ -4,6 +4,7 @@ namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 
 use Illuminate\Http\Request;
 use PHPShopify\ShopifySDK;
+use StatamicRadPack\Shopify\Events;
 use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 
 class OrderCreateController extends WebhooksController
@@ -28,6 +29,8 @@ class OrderCreateController extends WebhooksController
             $product = $shopify->Product($item->product_id)->get();
             ImportSingleProductJob::dispatch($product)->onQueue(config('shopify.queue'));
         }
+
+        Events\OrderCreate::dispatch($data);
 
         return response()->json([], 200);
     }

@@ -4,6 +4,7 @@ namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 
 use Illuminate\Http\Request;
 use Statamic\Facades\Entry;
+use StatamicRadPack\Shopify\Events;
 
 class ProductDeleteController extends WebhooksController
 {
@@ -23,6 +24,8 @@ class ProductDeleteController extends WebhooksController
         if (! is_object($data) && ! $data->id) {
             return;
         }
+
+        Events\ProductDelete::dispatch($data);
 
         $productEntry = Entry::query()
             ->where('collection', 'products')
