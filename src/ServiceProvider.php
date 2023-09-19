@@ -128,33 +128,31 @@ class ServiceProvider extends AddonServiceProvider
                 ->section('Shopify')
                 ->icon($shopifySvg)
                 ->route('collections.show', 'products')
-                ->children(function () use ($nav) {
-                    $children[] = $nav->create(__('Products'))
+                ->children([
+                    $nav->create(__('Products'))
                         ->route('collections.show', 'products')
-                        ->can('view', Collection::find('products'));
+                        ->can('view', Collection::find('products')),
 
-                    $children[] = $nav->create(__('Collections'))
+                    $nav->create(__('Collections'))
                         ->route('taxonomies.show', 'collections')
-                        ->can('view', Taxonomy::find('collections'));
+                        ->can('view', Taxonomy::find('collections')),
 
-                    $children[] = $nav->create(__('Tags'))
+                    $nav->create(__('Tags'))
                         ->route('taxonomies.show', 'tags')
-                        ->can('view', Taxonomy::find('tags'));
+                        ->can('view', Taxonomy::find('tags')),
 
-                    $children[] = $nav->create(__('Product Types'))
+                    $nav->create(__('Product Types'))
                         ->route('taxonomies.show', 'type')
-                        ->can('view', Taxonomy::find('type'));
+                        ->can('view', Taxonomy::find('type')),
 
-                    $children[] = $nav->create(__('Vendors'))
+                    $nav->create(__('Vendors'))
                         ->route('taxonomies.show', 'vendor')
-                        ->can('view', Taxonomy::find('vendor'));
+                        ->can('view', Taxonomy::find('vendor')),
 
-                    $children[] = $nav->create(__('Settings'))
-                        ->can(auth()->user()->can('access shopify'))
-                        ->route('shopify.index');
-
-                    return $children;
-                });
+                    $nav->create(__('Settings'))
+                        ->route('shopify.index')
+                        ->can('access shopify'),
+                ]);
         });
     }
 
