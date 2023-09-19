@@ -52,7 +52,7 @@ class ImportCollectionsForProductJob implements ShouldQueue
             ];
 
             // Import Images
-            if ($collection['image']) {
+            if (isset($collection['image'])) {
                 $asset = $this->importImages($collection['image']);
                 $data['featured_image'] = $asset->path();
             }
