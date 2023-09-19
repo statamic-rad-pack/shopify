@@ -59,3 +59,17 @@ Your URL should point to the following endpoint:
 ```bash
 https://YOURSITE/!/shopify/webhook/order
 ```
+
+## Events
+
+Each webhook listener also fires an event you can use to hook into with your own logic based on the payload received.
+
+The available events are:
+
+`StatamicRadPack\Events\ProductCreate`
+`StatamicRadPack\Events\ProductDelete`
+`StatamicRadPack\Events\ProductUpdate`
+`StatamicRadPack\Events\OrderCreate`
+
+Each event has one property `$data` with the payload data decoded to an array.
+
