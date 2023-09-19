@@ -25,7 +25,7 @@ class ProductDeleteController extends WebhooksController
             return;
         }
 
-        Events\ProductDelete::dispatch($data)
+        Events\ProductDelete::dispatch($data);
 
         $productEntry = Entry::query()
             ->where('collection', 'products')
