@@ -41,8 +41,8 @@ jobs:
       # Build for vercel output
       - name: Vercel build
         working-directory: ${{env.working-directory}}
-        run: yarn vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
+        run: yarn vercel build --token=${{ secrets.VERCEL_TOKEN }} --prod
+ 
       # Deploy to vercel
       - name: Vercel deploy
         working-directory: ${{env.working-directory}}
