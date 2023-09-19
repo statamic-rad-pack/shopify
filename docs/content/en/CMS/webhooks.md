@@ -71,5 +71,5 @@ The available events are:
 `StatamicRadPack\Events\ProductUpdate`
 `StatamicRadPack\Events\OrderCreate`
 
-Each event has one property `$data` with the payload data decoded to an array.
+Each event has one property `$data` with the payload data decoded to a `stdClass`.
 

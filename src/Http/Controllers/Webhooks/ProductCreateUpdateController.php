@@ -11,12 +11,12 @@ class ProductCreateUpdateController extends WebhooksController
 {
     public function create(Request $request)
     {
-        $this->processWebhook($request, fn($data) => Events\ProductCreate::dispatch($data));
+        return $this->processWebhook($request, fn($data) => Events\ProductCreate::dispatch($data));
     }
 
     public function update(Request $request)
     {
-        $this->processWebhook($request, fn($data) => Events\ProductUpdate::dispatch($data));
+        return $this->processWebhook($request, fn($data) => Events\ProductUpdate::dispatch($data));
     }
 
     private function processWebhook(Request $request, Closure $eventCallback)
@@ -30,10 +30,11 @@ class ProductCreateUpdateController extends WebhooksController
         }
 
         // Decode data
-        $data = json_decode($data, true);
+        $dataArray = json_decode($data, true);
+        $data = json_decode($data);
 
         // Dispatch job
-        ImportSingleProductJob::dispatch($data)->onQueue(config('shopify.queue'));
+        ImportSingleProductJob::dispatch($dataArray)->onQueue(config('shopify.queue'));
 
         $eventCallback($data);
 
