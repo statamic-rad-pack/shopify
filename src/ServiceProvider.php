@@ -34,6 +34,7 @@ class ServiceProvider extends AddonServiceProvider
 
     protected $scopes = [
         \StatamicRadPack\Shopify\Scopes\VariantByProduct::class,
+        \StatamicRadPack\Shopify\Scopes\VariantIsOnSale::class,
     ];
 
     protected $commands = [
