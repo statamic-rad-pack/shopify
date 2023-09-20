@@ -1,6 +1,7 @@
 name: Deploy demo store
 on:
   release:
+    types: [released]
   workflow_dispatch:
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
