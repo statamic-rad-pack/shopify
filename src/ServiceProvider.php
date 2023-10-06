@@ -3,7 +3,10 @@
 namespace StatamicRadPack\Shopify;
 
 use Illuminate\Support\Facades\Artisan;
-use PHPShopify\ShopifySDK;
+use Shopify\Auth\FileSessionStorage;
+use Shopify\Auth\Session;
+use Shopify\Clients\Rest;
+use Shopify\Context;
 use Statamic\Facades\Collection;
 use Statamic\Facades\CP\Nav;
 use Statamic\Facades\Permission;
@@ -159,17 +162,20 @@ class ServiceProvider extends AddonServiceProvider
 
     private function setShopifyApiConfig(): void
     {
-        $config = [];
-        $config['ShopUrl'] = config('shopify.url');
+        Context::initialize(
+            apiKey: config('shopify.auth_key'),
+            apiSecretKey: config('shopify.auth_password'),
+            scopes: ['read_metaobjects', 'read_products'],
+            hostName: config('shopify.url'),
+            sessionStorage: new FileSessionStorage('/tmp/php_sessions'),
+            apiVersion: '2023-04',
+            isEmbeddedApp: false,
+            isPrivateApp: true,
+        );
 
-        if (config('shopify.admin_token')) {
-            $config['AccessToken'] = config('shopify.admin_token');
-        } else {
-            $config['ApiKey'] = config('shopify.auth_key');
-            $config['Password'] = config('shopify.auth_password');
-        }
-
-        ShopifySDK::config($config);
+        $this->app->bind(Rest::class, function ($app) {
+            return new Rest(config('shopify.url'), config('shopify.auth_password'));
+        });
     }
 
     private function publishAssets(): void

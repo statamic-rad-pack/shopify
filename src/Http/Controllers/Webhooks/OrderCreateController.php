@@ -3,7 +3,8 @@
 namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 
 use Illuminate\Http\Request;
-use PHPShopify\ShopifySDK;
+use Shopify\Clients\Rest;
+use Statamic\Support\Arr;
 use StatamicRadPack\Shopify\Events;
 use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 
@@ -23,7 +24,7 @@ class OrderCreateController extends WebhooksController
         $data = json_decode($data);
 
         // Fetch Single Product
-        $shopify = new ShopifySDK();
+        $shopify = app(Rest::class);
 
         foreach ($data->line_items as $item) {
             $product = $shopify->Product($item->product_id)->get();

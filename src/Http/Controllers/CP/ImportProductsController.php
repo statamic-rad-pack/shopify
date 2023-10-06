@@ -4,7 +4,8 @@ namespace StatamicRadPack\Shopify\Http\Controllers\CP;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use PHPShopify\ShopifySDK;
+use Shopify\Clients\Rest;
+use Statamic\Support\Arr;
 use Statamic\Http\Controllers\CP\CpController;
 use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 use StatamicRadPack\Shopify\Traits\FetchAllProducts;
@@ -25,8 +26,22 @@ class ImportProductsController extends CpController
     public function fetchSingleProduct(Request $request): JsonResponse
     {
         // Fetch Single Product
-        $shopify = new ShopifySDK();
-        $product = $shopify->Product($request->get('product'))->get();
+        $client = app(Rest::class);
+        $response = $client->get(path: 'products/'.$request->get('product'));
+
+        if ($response->getStatusCode() != 200) {
+            return response()->json([
+                'message' => 'Failed to retrieve product',
+            ]);
+        }
+
+        $product = Arr::get($response->getDecodedBody(), 'product', []);
+
+        if (!$product) {
+            return response()->json([
+                'message' => 'Failed to retrieve product',
+            ]);
+        }
 
         // Pass to import Job.
         ImportSingleProductJob::dispatch($product)->onQueue(config('shopify.queue'));
