@@ -3,7 +3,11 @@
 namespace StatamicRadPack\Shopify;
 
 use Illuminate\Support\Facades\Artisan;
-use PHPShopify\ShopifySDK;
+use Shopify\Auth\FileSessionStorage;
+use Shopify\Auth\Session;
+use Shopify\Clients\Graphql;
+use Shopify\Clients\Rest;
+use Shopify\Context;
 use Statamic\Facades\Collection;
 use Statamic\Facades\CP\Nav;
 use Statamic\Facades\Permission;
@@ -159,17 +163,13 @@ class ServiceProvider extends AddonServiceProvider
 
     private function setShopifyApiConfig(): void
     {
-        $config = [];
-        $config['ShopUrl'] = config('shopify.url');
+        $this->app->bind(Rest::class, function ($app) {
+            return new Rest(config('shopify.url'), config('shopify.auth_password'));
+        });
 
-        if (config('shopify.admin_token')) {
-            $config['AccessToken'] = config('shopify.admin_token');
-        } else {
-            $config['ApiKey'] = config('shopify.auth_key');
-            $config['Password'] = config('shopify.auth_password');
-        }
-
-        ShopifySDK::config($config);
+        $this->app->bind(Graphql::class, function ($app) {
+            return new Graphql(config('shopify.url'), config('shopify.auth_password'));
+        });
     }
 
     private function publishAssets(): void

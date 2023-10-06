@@ -9,8 +9,10 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use PHPShopify\ShopifySDK;
+use Shopify\Clients\Graphql;
+use Shopify\Clients\Rest;
 use Statamic\Facades\Entry;
+use Statamic\Facades\Site;
 use Statamic\Facades\Term;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
 use Statamic\Support\Str;
@@ -42,6 +44,7 @@ class ImportSingleProductJob implements ShouldQueue
     {
         $entry = Entry::query()
             ->where('collection', 'products')
+            ->where('site', Site::default()->handle())
             ->where('product_id', $this->data['id'])
             ->first();
 
@@ -82,6 +85,7 @@ class ImportSingleProductJob implements ShouldQueue
         if (! $entry) {
             $entry = Entry::make()
                 ->collection('products')
+                ->site(Site::default()->handle())
                 ->slug($this->data['handle']);
         }
 
@@ -115,6 +119,49 @@ class ImportSingleProductJob implements ShouldQueue
         }
 
         $entry->save();
+
+        // if we are multisite, get translations
+        if (Site::hasMultiple()) {
+            $collectionSites = $entry->collection()->sites();
+
+            Site::all()->each(function ($site) use ($collectionSites, $entry) {
+                if (Site::default()->handle() == $site->handle()) {
+                    return;
+                }
+
+                if (! $collectionSites->contains($site->handle())) {
+                    return;
+                }
+
+                $query = <<<QUERY
+                  query {
+                    translatableResource(resourceId: "gid://shopify/Product/{$this->data['id']}") {
+                      resourceId
+                      translations(locale: "{$site->locale()}") {
+                        key
+                        value
+                      }
+                    }
+                  }
+                QUERY;
+
+                $response = app(Graphql::class)->query(['query' => $query]);
+
+                $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
+
+                if ($translations) {
+                    $localizedEntry = $entry->in($site);
+
+                    if (! $localizedEntry) {
+                        $localizedEntry = $entry->makeLocalization($site);
+                    }
+
+                    $data = collect($translations)->mapWithKeys(fn ($row) => [$row['key'] => $row['value']]);
+
+                    $localizedEntry->merge($data)->save();
+                }
+            });
+        }
 
         // Get the collections
         FetchCollectionsForProductJob::dispatch($entry)->onQueue(config('shopify.queue'));
@@ -210,6 +257,49 @@ class ImportSingleProductJob implements ShouldQueue
             }
 
             $entry->save();
+
+            // if we are multisite, get translations
+            if (Site::hasMultiple()) {
+                $collectionSites = $entry->collection()->sites();
+
+                Site::all()->each(function ($site) use ($collectionSites, $entry, $variant) {
+                    if (Site::default()->handle() == $site->handle()) {
+                        return;
+                    }
+
+                    if (! $collectionSites->contains($site->handle())) {
+                        return;
+                    }
+
+                    $query = <<<QUERY
+                      query {
+                        translatableResource(resourceId: "gid://shopify/ProductVariant/{$variant['id']}") {
+                          resourceId
+                          translations(locale: "{$site->locale()}") {
+                            key
+                            value
+                          }
+                        }
+                      }
+                    QUERY;
+
+                    $response = app(Graphql::class)->query(['query' => $query]);
+
+                    $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
+
+                    if ($translations) {
+                        $localizedEntry = $entry->in($site);
+
+                        if (! $localizedEntry) {
+                            $localizedEntry = $entry->makeLocalization($site);
+                        }
+
+                        $data = collect($translations)->mapWithKeys(fn ($row) => [$row['key'] => $row['value']]);
+
+                        $localizedEntry->merge($data)->save();
+                    }
+                });
+            }
         }
     }
 
