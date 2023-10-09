@@ -133,3 +133,48 @@ Check if a product is in stock or not.
 {{ if {shopify:in_stock} }}
 {{ /if }}
 ```
+
+## Customer
+
+Return any Shopify customer data associated with the current logged in user, or the `customer_id` passed as a parameter.
+
+#### Usage
+
+```twig
+{{ shopify:customer }} ... {{ /shopify:customer }}
+```
+
+```twig
+{{ shopify:customer customer_id="my_id" }} ... {{ /shopify:customer }}
+
+```
+
+## Customer Addresses
+
+Return any Shopify addresses associated with the current logged in user, or the `customer_id` passed as a parameter.
+
+#### Usage
+
+```twig
+{{ shopify:customer:addresses }} ... {{ /shopify:customer:addresses }}
+```
+
+```twig
+{{ shopify:customer:addresses customer_id="my_id" }} ... {{ /shopify:customer:addresses }}
+
+```
+
+## Customer Orders
+
+Return any Shopify addresses associated with the current logged in user, or the `customer_id` passed as a parameter.
+
+#### Usage
+
+```twig
+{{ shopify:customer:orders }} ... {{ /shopify:customer:orders }}
+```
+
+```twig
+{{ shopify:customer:orders customer_id="my_id" }} ... {{ /shopify:customer:orders }}
+
+```

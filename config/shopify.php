@@ -90,9 +90,25 @@ return [
      * Please note you having more than 1 process running at once on this queue may cause issues.
      */
     'queue' => env('SHOPIFY_JOB_QUEUE', 'default'),
-    
+
     /**
      * What class should we use to parse metafields
      */
     'metafields_parser' => \StatamicRadPack\Shopify\Actions\ParseMetafields::class,
+
+    /**
+     * If a new user is created by Shopify should the website create
+     * a matching user account for them?
+     */
+    'create_users_from_shopify' => false,
+
+    /**
+     * If a user is created or modified in Statamic, should we create/update that user in Shopify?
+     */
+    'update_users_in_shopify' => false,
+
+    /**
+     * What job should we use to update users in Shopify
+     */
+    'update_shopify_user_job' => \StatamicRadPack\Shopify\Jobs\CreateOrUpdateShopifyUser::class,
 ];

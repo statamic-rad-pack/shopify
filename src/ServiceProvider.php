@@ -4,28 +4,48 @@ namespace StatamicRadPack\Shopify;
 
 use Illuminate\Support\Facades\Artisan;
 use Shopify\Auth\FileSessionStorage;
-use Shopify\Auth\Session;
 use Shopify\Clients\Rest;
 use Shopify\Context;
+use Statamic\Events;
 use Statamic\Facades\Collection;
 use Statamic\Facades\CP\Nav;
 use Statamic\Facades\Permission;
 use Statamic\Facades\Taxonomy;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
+use StatamicRadPack\Shopify\Commands;
+use StatamicRadPack\Shopify\Fieldtypes;
+use StatamicRadPack\Shopify\Listeners;
+use StatamicRadPack\Shopify\Scopes;
+use StatamicRadPack\Shopify\Tags;
 
 class ServiceProvider extends AddonServiceProvider
 {
     protected $publishAfterInstall = false;
+
+    protected $commands = [
+        Commands\ShopifyImportProducts::class,
+        Commands\ShopifyImportSingleProduct::class,
+        Commands\ShopifyImportCollections::class,
+    ];
+
+    protected $fieldtypes = [
+        Fieldtypes\Variants::class,
+        Fieldtypes\DisabledText::class,
+    ];
+
+    protected $listen = [
+        Events\UserSaved::class => [Listeners\UserSavedListener::class],
+    ];
 
     protected $routes = [
         'actions' => __DIR__.'/../routes/actions.php',
         'cp' => __DIR__.'/../routes/cp.php',
     ];
 
-    protected $fieldtypes = [
-        \StatamicRadPack\Shopify\Fieldtypes\Variants::class,
-        \StatamicRadPack\Shopify\Fieldtypes\DisabledText::class,
+    protected $scopes = [
+        Scopes\VariantByProduct::class,
+        Scopes\VariantIsOnSale::class,
     ];
 
     protected $scripts = [
@@ -33,18 +53,7 @@ class ServiceProvider extends AddonServiceProvider
     ];
 
     protected $tags = [
-        \StatamicRadPack\Shopify\Tags\Shopify::class,
-    ];
-
-    protected $scopes = [
-        \StatamicRadPack\Shopify\Scopes\VariantByProduct::class,
-        \StatamicRadPack\Shopify\Scopes\VariantIsOnSale::class,
-    ];
-
-    protected $commands = [
-        \StatamicRadPack\Shopify\Commands\ShopifyImportProducts::class,
-        \StatamicRadPack\Shopify\Commands\ShopifyImportSingleProduct::class,
-        \StatamicRadPack\Shopify\Commands\ShopifyImportCollections::class,
+        Tags\Shopify::class,
     ];
 
     public function boot()
