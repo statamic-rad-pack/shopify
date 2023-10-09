@@ -4,7 +4,6 @@ category: CMS
 position: 5
 ---
 
-There is currently one method built into the addon that will let you look up variables.
 
 ## Fetch Product Variables
 
@@ -34,3 +33,97 @@ SITEURL/!/shopify/variants/{product}?option1=VALUE&option2=VALUE&option3=VALUE
 }]
 ```
 
+
+## Create a Customer Address
+
+If you want to create a Shopify Address for a customer you can POST to
+
+#### Usage
+
+```bash
+SITEURL/!/shopify/address
+```
+
+| Parameters             | Description   | Required  |
+| -------------------| ------------- | --------- |
+| `customer_id`          | customer_id in Shopify. Defaults to the logged in user's customer_id | N |
+| `first_name`          | Address first name | Y |
+| `last_name`          | Address last name | Y |
+| `company`          | Address company | N |
+| `address1`          | Address line 1 | Y |
+| `address2`          | Address line 2 | N |
+| `city`          | Address city | Y |
+| `province`          | Address province / state | Y |
+| `zip`          | Address zip / postal code | Y |
+| `country`          | Address country name | N |
+| `country_code`          | Address country code (length 2) | N |
+| `phone`          | Address phone number | N |
+| `name`          | Name or identifier for the address | N |
+| `default`          | Make this the default address (boolean) | N |
+
+#### Returned Data
+
+```json
+[{
+  message: 'Address created',
+  address: {...}
+}]
+```
+
+## Update a Customer Address
+
+If you want to create a Shopify Address for a customer you can POST to
+
+#### Usage
+
+```bash
+SITEURL/!/shopify/address/{id}
+```
+
+| Parameters             | Description   | Required  |
+| -------------------| ------------- | --------- |
+| `customer_id`          | customer_id in Shopify. Defaults to the logged in user's customer_id | N |
+| `first_name`          | Address first name | Y |
+| `last_name`          | Address last name | Y |
+| `company`          | Address company | N |
+| `address1`          | Address line 1 | Y |
+| `address2`          | Address line 2 | N |
+| `city`          | Address city | Y |
+| `province`          | Address province / state | Y |
+| `zip`          | Address zip / postal code | Y |
+| `country`          | Address country name | N |
+| `country_code`          | Address country code (length 2) | N |
+| `phone`          | Address phone number | N |
+| `name`          | Name or identifier for the address | N |
+| `default`          | Make this the default address (boolean) | N |
+
+#### Returned Data
+
+```json
+[{
+  message: 'Address updated',
+  address: {...}
+}]
+```
+
+## DElete a Customer Address
+
+If you want to delete a Shopify Address for a customer you can send a DELETE request to
+
+#### Usage
+
+```bash
+SITEURL/!/shopify/address/{id}
+```
+
+| Parameters             | Description   | Required  |
+| -------------------| ------------- | --------- |
+| `customer_id`          | customer_id in Shopify. Defaults to the logged in user's customer_id | N |
+
+#### Returned Data
+
+```json
+[{
+  message: 'Address deleted',
+}]
+```

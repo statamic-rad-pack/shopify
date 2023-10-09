@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
+use StatamicRadPack\Shopify\Http\Controllers\Actions\AddressController;
 use StatamicRadPack\Shopify\Http\Controllers\Actions\VariantsController;
 use StatamicRadPack\Shopify\Http\Controllers\Webhooks\CustomerCreateUpdateController;
 use StatamicRadPack\Shopify\Http\Controllers\Webhooks\CustomerDeleteController;
@@ -9,36 +10,47 @@ use StatamicRadPack\Shopify\Http\Controllers\Webhooks\OrderCreateController;
 use StatamicRadPack\Shopify\Http\Controllers\Webhooks\ProductCreateUpdateController;
 use StatamicRadPack\Shopify\Http\Controllers\Webhooks\ProductDeleteController;
 
-Route::name('shopify.')->group(function () {
-    Route::post('/webhook/order', OrderCreateController::class)
-        ->withoutMiddleware([VerifyCsrfToken::class])
-        ->name('webhook.order.created');
+Route::name('shopify.')
+    ->group(function () {
+        Route::prefix('/address')
+            ->group(function () {
+                Route::post('/', [AddressController::class, 'create'])
+                    ->name('address.create');
 
-    Route::post('/webhook/customer/create', [CustomerCreateUpdateController::class, 'create'])
-        ->withoutMiddleware([VerifyCsrfToken::class])
-        ->name('webhook.customer.create');
+                Route::post('/{id}', [AddressController::class, 'store'])
+                    ->name('address.store');
 
-    Route::post('/webhook/customer/delete', CustomerDeleteController::class)
-        ->withoutMiddleware([VerifyCsrfToken::class])
-        ->name('webhook.customer.delete');
+                Route::delete('/{id}', [AddressController::class, 'destroy'])
+                    ->name('address.destroy');
+            });
 
-    Route::post('/webhook/customer/update', [CustomerCreateUpdateController::class, 'update'])
-        ->withoutMiddleware([VerifyCsrfToken::class])
-        ->name('webhook.customer.update');
+        Route::get('/variants/{product}', [VariantsController::class, 'fetch'])
+            ->name('variants.fetch');
 
-    Route::post('/webhook/product/create', [ProductCreateUpdateController::class, 'create'])
-        ->withoutMiddleware([VerifyCsrfToken::class])
-        ->name('webhook.product.create');
+        Route::prefix('/webhook')
+            ->withoutMiddleware([VerifyCsrfToken::class])
+            ->group(function () {
 
-    Route::post('/webhook/product/delete', ProductDeleteController::class)
-        ->withoutMiddleware([VerifyCsrfToken::class])
-        ->name('webhook.product.delete');
+                Route::post('/order', OrderCreateController::class)
+                    ->name('webhook.order.created');
 
-    Route::post('/webhook/product/update', [ProductCreateUpdateController::class, 'update'])
-        ->withoutMiddleware([VerifyCsrfToken::class])
-        ->name('webhook.product.update');
+                Route::post('/customer/create', [CustomerCreateUpdateController::class, 'create'])
+                    ->name('webhook.customer.create');
 
-    Route::get('/variants/{product}', [VariantsController::class, 'fetch'])
-        ->name('variants.fetch');
-});
+                Route::post('/customer/delete', CustomerDeleteController::class)
+                    ->name('webhook.customer.delete');
+
+                Route::post('/customer/update', [CustomerCreateUpdateController::class, 'update'])
+                    ->name('webhook.customer.update');
+
+                Route::post('/product/create', [ProductCreateUpdateController::class, 'create'])
+                    ->name('webhook.product.create');
+
+                Route::post('/product/delete', ProductDeleteController::class)
+                    ->name('webhook.product.delete');
+
+                Route::post('/product/update', [ProductCreateUpdateController::class, 'update'])
+                    ->name('webhook.product.update');
+            });
+    });
 
