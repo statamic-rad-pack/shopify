@@ -7,13 +7,15 @@ use Statamic\Facades\Entry;
 use Statamic\Facades\User;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use Statamic\Tags\Concerns\GetsRedirects
 use Statamic\Tags\Concerns\QueriesConditions;
 use Statamic\Tags\Concerns\QueriesOrderBys;
+use Statamic\Tags\Concerns\RendersForms;
 use Statamic\Tags\Tags;
 
 class Shopify extends Tags
 {
-    use QueriesConditions, QueriesOrderBys;
+    use GetsRedirects, QueriesConditions, QueriesOrderBys, RendersForms;
 
     /**
      * @return string|array
@@ -292,6 +294,60 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
         }
 
         return true;
+    }
+
+    /**
+     * Get the data associated with the customer, or the current user
+     *
+     * @return \Illuminate\Support\Collection|null
+     */
+    public function addressForm()
+    {
+        $endpoint = '/!/shopify/address';
+
+        $id = $this->params->get('address_id');
+        if ($id) {
+            $endpoint .= '/'.$id;
+        }
+
+        $knownParams = ['redirect', 'error_redirect'];
+
+        $html = $this->formOpen($endpoint, 'POST', $knownParams);
+
+        $params = [];
+
+        if ($redirect = $this->getRedirectUrl()) {
+            $params['redirect'] = $this->parseRedirect($redirect);
+        }
+
+        if ($errorRedirect = $this->getErrorRedirectUrl()) {
+            $params['error_redirect'] = $this->parseRedirect($errorRedirect);
+        }
+
+        if (! $this->parser) {
+            return array_merge([
+                'attrs' => $this->formAttrs($action, $method, $knownParams),
+                'params' => $this->formMetaPrefix($this->formParams($method, $params)),
+            ], $data);
+        }
+
+        $id = $this->params->get('customer_id');
+
+        if (! $id) {
+            if ($user = User::current()) {
+                $id = $user->get('shopify_id');
+            }
+        }
+
+        if ($id) {
+            $html .= '<input type="hidden" name="customer_id" value="'.$id.'" />';
+        }
+
+        $html .= $this->formMetaFields($params);
+        $html .= $this->parse();
+        $html .= $this->formClose();
+
+        return $html;
     }
 
     /**
