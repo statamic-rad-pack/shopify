@@ -106,7 +106,7 @@ SITEURL/!/shopify/address/{id}
 }]
 ```
 
-## DElete a Customer Address
+## Delete a Customer Address
 
 If you want to delete a Shopify Address for a customer you can send a DELETE request to
 
