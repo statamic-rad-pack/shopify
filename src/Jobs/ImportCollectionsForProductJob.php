@@ -7,8 +7,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use PHPShopify\ShopifySDK;
+use Illuminate\Support\Facades\Log;
+use Shopify\Clients\Rest;
 use Statamic\Facades\Term;
+use Statamic\Support\Arr;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
 
 class ImportCollectionsForProductJob implements ShouldQueue
@@ -58,11 +60,18 @@ class ImportCollectionsForProductJob implements ShouldQueue
             }
 
             try {
-                $collectionMetafields = (new ShopifySDK())->Collection($collection['id'])->Metafield()->get();
-                $metafields = $this->parseMetafields($collectionMetafields, 'collection');
+                $response = app(Rest::class)->get(path: 'metafields', query: ['metafield' => ['owner_id' => $collection['id'], 'owner_resource' => 'collection']]);
 
-                if ($metafields) {
-                    $data = array_merge($metafields, $data);
+                if ($response->getStatusCode() == 200) {
+                    $metafields = Arr::get($response->getDecodedBody(), 'metafields', []);
+
+                    if ($metafields) {
+                        $metafields = $this->parseMetafields($collectionMetafields, 'collection');
+
+                        if ($metafields) {
+                            $data = array_merge($metafields, $data);
+                        }
+                    }
                 }
             } catch (\Throwable $e) {
                 Log::error('Could not retrieve metafields for product'.$this->data['id']);

@@ -90,7 +90,7 @@ return [
      * Please note you having more than 1 process running at once on this queue may cause issues.
      */
     'queue' => env('SHOPIFY_JOB_QUEUE', 'default'),
-    
+
     /**
      * What class should we use to parse metafields
      */

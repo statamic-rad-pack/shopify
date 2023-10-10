@@ -9,10 +9,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use PHPShopify\ShopifySDK;
+use Shopify\Clients\Rest;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Term;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
+use Statamic\Support\Arr;
 use Statamic\Support\Str;
 
 class ImportSingleProductJob implements ShouldQueue
@@ -104,11 +105,18 @@ class ImportSingleProductJob implements ShouldQueue
         $entry->merge($data);
 
         try {
-            $productMetafields = (new ShopifySDK())->Product($this->data['id'])->Metafield()->get();
-            $metafields = $this->parseMetafields($productMetafields, 'product');
+            $response = app(Rest::class)->get(path: 'metafields', query: ['metafield' => ['owner_id' => $this->data['id'], 'owner_resource' => 'product']]);
 
-            if ($metafields) {
-                $entry->merge($metafields);
+            if ($response->getStatusCode() == 200) {
+                $metafields = Arr::get($response->getDecodedBody(), 'metafields', []);
+
+                if ($metafields) {
+                    $metafields = $this->parseMetafields($metafields, 'product');
+
+                    if ($metafields) {
+                        $entry->merge($metafields);
+                    }
+                }
             }
         } catch (\Throwable $e) {
             Log::error('Could not retrieve metafields for product '.$this->data['id']);
@@ -199,11 +207,18 @@ class ImportSingleProductJob implements ShouldQueue
             $entry->merge($data);
 
             try {
-                $variantMetafields = (new ShopifySDK())->ProductVariant($variant['id'])->Metafield()->get();
-                $metafields = $this->parseMetafields($variantMetafields, 'product-variant');
+                $response = app(Rest::class)->get(path: 'metafields', query: ['metafield' => ['owner_id' => $variant['id'], 'owner_resource' => 'variants']]);
 
-                if ($metafields) {
-                    $entry->merge($metafields);
+                if ($response->getStatusCode() == 200) {
+                    $metafields = Arr::get($response->getDecodedBody(), 'metafields', []);
+
+                    if ($metafields) {
+                        $metafields = $this->parseMetafields($metafields, 'product-variant');
+
+                        if ($metafields) {
+                            $entry->merge($metafields);
+                        }
+                    }
                 }
             } catch (\Throwable $e) {
                 Log::error('Could not retrieve metafields for variant '.$this->data['id']);

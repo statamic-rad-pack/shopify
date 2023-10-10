@@ -2,30 +2,37 @@
 
 namespace StatamicRadPack\Shopify\Traits;
 
-use PHPShopify\ShopifySDK;
+use Shopify\Clients\Rest;
+use Statamic\Support\Arr;
 use StatamicRadPack\Shopify\Jobs\ImportAllProductsJob;
 
 trait FetchAllProducts
 {
     public function fetchProducts()
     {
-        $shopify = new ShopifySDK();
+        $client = app(Rest::class);
+        $response = $client->get(path: 'products', query: ['limit' => config('shopify.api_limit')]);
+        $nextPage = $response->getPageInfo();
 
-        $productResource = $shopify->Product();
-        $products = $productResource->get(['limit' => config('shopify.api_limit')]);
-        $next_page = $productResource->getNextPageParams();
+        if ($response->getStatusCode() == 200) {
 
-        // Initial Loop
-        ImportAllProductsJob::dispatch($products)
-            ->onQueue(config('shopify.queue'));
+            // Initial Loop
+            $this->callJob($response);
 
-        // Recursively loop.
-        while ($next_page) {
-            $products = $productResource->get($productResource->getNextPageParams());
-            $next_page = $productResource->getNextPageParams();
+            // Recursively loop.
+            while ($nextPage) {
+                $response = $client->get(path: 'products', query: $nextPage);
+                $nextPage = $response->getPageInfo();
 
-            ImportAllProductsJob::dispatch($products)
-                ->onQueue(config('shopify.queue'));
+                $this->callJob($response);
+            }
+
         }
+    }
+
+    private function callJob($response)
+    {
+        ImportAllProductsJob::dispatch(Arr::get($response->getDecodedBody(), 'products', []))
+            ->onQueue(config('shopify.queue'));
     }
 }

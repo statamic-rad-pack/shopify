@@ -17,6 +17,10 @@
     <env name="SESSION_DRIVER" value="array"/>
     <env name="QUEUE_DRIVER" value="sync"/>
     <env name="MAIL_DRIVER" value="array"/>
+    <env name="SHOPIFY_APP_URL" value="https://mystore.myshopify.app"/>
+    <env name="SHOPIFY_AUTH_KEY" value="some-key"/>
+    <env name="SHOPIFY_AUTH_PASSWORD" value="some-password"/>
+    <env name="SHOPIFY_ADMIN_TOKEN" value="admin-token"/>
   </php>
   <source>
     <include>
