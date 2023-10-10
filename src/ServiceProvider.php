@@ -4,7 +4,6 @@ namespace StatamicRadPack\Shopify;
 
 use Illuminate\Support\Facades\Artisan;
 use Shopify\Auth\FileSessionStorage;
-use Shopify\Auth\Session;
 use Shopify\Clients\Graphql;
 use Shopify\Clients\Rest;
 use Shopify\Context;
