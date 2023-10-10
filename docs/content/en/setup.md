@@ -31,9 +31,9 @@ Shopify recently updated the way apps work. The below method is how you should n
 3. Click "Create an app" in the top right to make a new one.
 4. Set a nice name to remember as well as your email.
 5. Click the "Configure" Tab.
-    5a. Click "Configure" next to Admin API Integration.
-    5b. Set read access to **"Product listings", "Read Inventory", "Read Product Listings" and "Products"**.
-    5c. Click "Save" in the top right.
+    1. Click "Configure" next to Admin API Integration.
+    2. Enable `read_product_listings`, `read_inventory` and `read_products`
+    3. Click "Save" in the top right.
 6. Click the "API Credentials" tab. If you've configured you're api integration properly you should see a button that says "Install App". Click this.
 7. You'll be presented with an Admin API access token. You can only access this once, so make sure you copy it down and make a note. Add this to your `.env` as `SHOPIFY_ADMIN_TOKEN`
 
