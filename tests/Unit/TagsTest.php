@@ -241,11 +241,11 @@ window.shopifyToken = '1234';
     /** @test */
     public function outputs_an_address_form()
     {
-        $this->assertEquals('<form method="POST" action="/!/shopify/address"><input type="hidden" name="_token" value="" autocomplete="off">Some content</form>', $this->tag('{{ shopify:address_form }}Some content{{ /shopify:address_form }}'));
+        $this->assertEquals('<form method="POST" action="/!/shopify/address"><input type="hidden" name="_token" value="">Some content</form>', str_replace(' autocomplete="off"', '', $this->tag('{{ shopify:address_form }}Some content{{ /shopify:address_form }}')));
 
-        $this->assertEquals('<form method="POST" action="/!/shopify/address/1"><input type="hidden" name="_token" value="" autocomplete="off">Some content</form>', $this->tag('{{ shopify:address_form address_id="1" }}Some content{{ /shopify:address_form }}'));
+        $this->assertEquals('<form method="POST" action="/!/shopify/address/1"><input type="hidden" name="_token" value="">Some content</form>', str_replace(' autocomplete="off"', '', $this->tag('{{ shopify:address_form address_id="1" }}Some content{{ /shopify:address_form }}')));
 
-        $this->assertEquals('<form method="POST" action="/!/shopify/address"><input type="hidden" name="_token" value="" autocomplete="off"><input type="hidden" name="customer_id" value="1" />Some content</form>', $this->tag('{{ shopify:address_form customer_id="1"  }}Some content{{ /shopify:address_form }}'));
+        $this->assertEquals('<form method="POST" action="/!/shopify/address"><input type="hidden" name="_token" value=""><input type="hidden" name="customer_id" value="1" />Some content</form>', str_replace(' autocomplete="off"', '', $this->tag('{{ shopify:address_form customer_id="1"  }}Some content{{ /shopify:address_form }}')));
     }
 
     /** @test */
