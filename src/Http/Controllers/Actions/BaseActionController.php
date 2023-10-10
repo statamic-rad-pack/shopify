@@ -1,6 +1,6 @@
 <?php
 
-namespace StatamicRadPack\Shopify\Http\Controllers\Action;
+namespace StatamicRadPack\Shopify\Http\Controllers\Actions;
 
 use Illuminate\Http\Request;
 use Statamic\Http\Controllers\Controller;
@@ -28,7 +28,7 @@ class BaseActionController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => $errorMessage,
-            ]);
+            ], 422);
         }
 
         return $request->_error_redirect

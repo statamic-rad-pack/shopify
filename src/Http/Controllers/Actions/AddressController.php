@@ -5,6 +5,7 @@ namespace StatamicRadPack\Shopify\Http\Controllers\Actions;
 use Illuminate\Http\Request;
 use Shopify\Clients\Rest;
 use Statamic\Facades\User;
+use Statamic\Support\Arr;
 
 class AddressController extends BaseActionController
 {
@@ -46,7 +47,7 @@ class AddressController extends BaseActionController
 
         try {
 
-            $response = app(Rest::class)->delete(path: 'customers/'.$customerId.'/addresses/'.$id, body: $validatedData);
+            $response = app(Rest::class)->delete(path: 'customers/'.$customerId.'/addresses/'.$id);
 
             if ($response->getStatusCode() == 200) {
 
@@ -84,6 +85,7 @@ class AddressController extends BaseActionController
             }
 
         } catch (\Exception $error) {
+            dd($error);
             return $this->withErrors($request, $error->getMessage());
         }
     }

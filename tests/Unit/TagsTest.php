@@ -2,7 +2,6 @@
 
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
-use Mockery;
 use Mockery\MockInterface;
 use Shopify\Clients\Rest;
 use Shopify\Clients\RestResponse;
