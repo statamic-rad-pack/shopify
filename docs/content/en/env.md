@@ -9,9 +9,9 @@ position: 3
 | Value             | Description  |
 | -------------------| ------------- |
 | `SHOPIFY_APP_URL`  | The url to your store (no https://)  |
-| `SHOPIFY_ADMIN_TOKEN`  | The Admin API access token you received when generating the private app (the new way) |
-| `SHOPIFY_AUTH_KEY`  | The Admin API key found when creating your private app (the old way) |
-| `SHOPIFY_AUTH_PASSWORD` | The Admin API password found when creating your private app (the old way) |
+| `SHOPIFY_ADMIN_TOKEN`  | The Admin API access token you received when generating your app |
+| `SHOPIFY_AUTH_KEY`  | The Admin API key found when creating your private app |
+| `SHOPIFY_AUTH_PASSWORD` | The Admin API password found when creating your private app |
 
 ## Required For Frontend
 
@@ -19,7 +19,8 @@ If you are using the JavaScript publishable in the addon you'll need to set the 
 
 | Value             | Description  |
 | -------------------| ------------- |
-| `SHOPIFY_APP_URL`  | The url to your store (no https://)  |
+| `SHOPIFY_APP_URL`  | The url to your myshopify.com store (no https://)  |
+| `SHOPIFY_STOREFRONT_URL`  | The custom url to your store if you have one (no https://)  |
 | `SHOPIFY_STOREFRONT_TOKEN`  | Found when enabling the Storefront API whilst creating your private app  |
 
 ## Required For Webhooks
@@ -28,7 +29,7 @@ If you are using the webhook handlers you'll need the following.
 
 | Value             | Description  |
 | -------------------| ------------- |
-| `SHOPIFY_WEBHOOK_SECRET`  | Found when creating your first notifcation. Read more about this [here](/CMS/webhooks)  |
+| `SHOPIFY_WEBHOOK_SECRET`  | Found when creating your first notification. Read more about this [here](/CMS/webhooks)  |
 
 ## Optional
 
