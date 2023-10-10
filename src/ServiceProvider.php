@@ -164,11 +164,11 @@ class ServiceProvider extends AddonServiceProvider
     private function setShopifyApiConfig(): void
     {
         $this->app->bind(Rest::class, function ($app) {
-            return new Rest(config('shopify.url'), config('shopify.auth_password'));
+            return new Rest(config('shopify.url'), config('shopify.admin_token'));
         });
 
         $this->app->bind(Graphql::class, function ($app) {
-            return new Graphql(config('shopify.url'), config('shopify.auth_password'));
+            return new Graphql(config('shopify.url'), config('shopify.admin_token'));
         });
     }
 
