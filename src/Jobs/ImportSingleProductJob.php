@@ -86,7 +86,7 @@ class ImportSingleProductJob implements ShouldQueue
         if (! $entry) {
             $entry = Entry::make()
                 ->collection('products')
-                ->site(Site::default()->handle())
+                ->locale(Site::default()->handle())
                 ->slug($this->data['handle']);
         }
 
@@ -155,10 +155,10 @@ class ImportSingleProductJob implements ShouldQueue
 
                 $response = app(Graphql::class)->query(['query' => $query]);
 
-                $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
+                $translations = Arr::get($response->getDecodedBody(), 'translatableResource.translatableContent', []);
 
                 if ($translations) {
-                    $localizedEntry = $entry->in($site);
+                    $localizedEntry = $entry->in($site->handle());
 
                     if (! $localizedEntry) {
                         $localizedEntry = $entry->makeLocalization($site);
@@ -237,8 +237,8 @@ class ImportSingleProductJob implements ShouldQueue
                 'grams' => $variant['grams'],
                 'requires_shipping' => $variant['requires_shipping'],
                 'option1' => $variant['option1'],
-                'option2' => $variant['option2'],
-                'option3' => $variant['option3'],
+                'option2' => $variant['option2'] ?? '',
+                'option3' => $variant['option3'] ?? '',
                 'storefront_id' => base64_encode($variant['admin_graphql_api_id'])
             ];
 
