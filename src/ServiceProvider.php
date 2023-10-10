@@ -174,7 +174,7 @@ class ServiceProvider extends AddonServiceProvider
         );
 
         $this->app->bind(Rest::class, function ($app) {
-            return new Rest(config('shopify.url'), config('shopify.auth_password'));
+            return new Rest(config('shopify.url'), config('shopify.admin_token'));
         });
     }
 
