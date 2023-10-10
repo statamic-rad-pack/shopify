@@ -163,6 +163,17 @@ class ServiceProvider extends AddonServiceProvider
 
     private function setShopifyApiConfig(): void
     {
+        Context::initialize(
+            apiKey: config('shopify.auth_key'),
+            apiSecretKey: config('shopify.auth_password'),
+            scopes: ['read_metaobjects', 'read_products'],
+            hostName: config('shopify.url'),
+            sessionStorage: new FileSessionStorage('/tmp/php_sessions'),
+            apiVersion: '2023-04',
+            isEmbeddedApp: false,
+            isPrivateApp: true,
+        );
+
         $this->app->bind(Rest::class, function ($app) {
             return new Rest(config('shopify.url'), config('shopify.admin_token'));
         });

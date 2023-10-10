@@ -11,8 +11,8 @@
         }
     ],
     "require": {
-        "phpclassic/php-shopify": "^1.1",
         "pixelfear/composer-dist-plugin": "^0.1",
+        "shopify/shopify-api": "dev-main",
         "statamic/cms": "^4.0"
     },
     "require-dev": {

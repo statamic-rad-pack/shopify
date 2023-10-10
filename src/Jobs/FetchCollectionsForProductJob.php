@@ -7,8 +7,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use PHPShopify\ShopifySDK;
+use Shopify\Clients\Rest;
 use Statamic\Facades\Taxonomy;
+use Statamic\Support\Arr;
 
 class FetchCollectionsForProductJob implements ShouldQueue
 {
@@ -33,7 +34,7 @@ class FetchCollectionsForProductJob implements ShouldQueue
             return;
         }
 
-        $this->shopify = new ShopifySDK();
+        $this->shopify = app(Rest::class);
 
         $collections = [];
 
@@ -46,36 +47,35 @@ class FetchCollectionsForProductJob implements ShouldQueue
 
     public function getManualCollections()
     {
-        $collectionResource = $this->shopify->CustomCollection();
-
-        return $this->loopCollections($collectionResource);
+        return $this->loopCollections('custom_collections');
     }
 
     public function getSmartCollections()
     {
-        $smartCollectionResource = $this->shopify->SmartCollection();
-
-        return $this->loopCollections($smartCollectionResource);
+        return $this->loopCollections('smart_collections');
     }
 
     private function loopCollections($resource)
     {
         $items = [];
 
-        $collections = $resource->get([
-            'limit' => config('shopify.api_limit'),
-            'product_id' => $this->product->data()['product_id'],
-        ]);
+        $response = $this->shopify->get(path: $resource, query: ['limit' => config('shopify.api_limit'), 'product_id' => $this->product->get('product_id')]);
+        $nextPage = $response->getPageInfo();
 
-        $next_page = $resource->getNextPageParams();
+        if ($response->getStatusCode() == 200) {
 
-        $items = array_merge($items, $collections);
-
-        while ($next_page) {
-            $collections = $resource->get($resource->getNextPageParams());
-            $next_page = $resource->getNextPageParams();
-
+            $collections = Arr::get($response->getDecodedBody(), $resource, []);
             $items = array_merge($items, $collections);
+
+            while ($nextPage) {
+                $response = $this->shopify->get(path: $resource, query: $nextPage);
+                $collections = Arr::get($response->getDecodedBody(), $resource, []);
+
+                $nextPage = $response->getPageInfo();
+
+                $items = array_merge($items, $collections);
+            }
+
         }
 
         return $items;
