@@ -7,7 +7,7 @@ use Statamic\Facades\Entry;
 use Statamic\Facades\User;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
-use Statamic\Tags\Concerns\GetsRedirects
+use Statamic\Tags\Concerns\GetsRedirects;
 use Statamic\Tags\Concerns\QueriesConditions;
 use Statamic\Tags\Concerns\QueriesOrderBys;
 use Statamic\Tags\Concerns\RendersForms;
@@ -310,7 +310,7 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
             $endpoint .= '/'.$id;
         }
 
-        $knownParams = ['redirect', 'error_redirect'];
+        $knownParams = ['redirect', 'error_redirect', 'address_id', 'customer_id'];
 
         $html = $this->formOpen($endpoint, 'POST', $knownParams);
 
@@ -401,7 +401,7 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
             $user = User::current();
 
             if (! $user) {
-                return ['not_found' => true];
+                return ['addresses' => [], 'addresses_count' => 0];
             }
         }
 
@@ -411,7 +411,7 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
                 ->first();
 
             if (! $user) {
-                return ['not_found' => true];
+                return ['addresses' => [], 'addresses_count' => 0];
             }
         }
 
@@ -438,7 +438,7 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
             $user = User::current();
 
             if (! $user) {
-                return ['not_found' => true];
+                return ['orders' => [], 'orders_count' => 0];
             }
         }
 
@@ -448,7 +448,7 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
                 ->first();
 
             if (! $user) {
-                return ['not_found' => true];
+                return ['orders' => [], 'orders_count' => 0];
             }
         }
 
@@ -460,7 +460,7 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
         $response = app(Rest::class)->get(path: 'customers/'.($user->get('shopify_id') ?? 'none').'/orders', query: ['status' => $status]);
 
         if ($response->getStatusCode() == 200) {
-            $data = Arr::get($response->getDecodedBody(), 'customer', []);
+            $data = Arr::get($response->getDecodedBody(), 'orders', []);
         }
 
         return ['orders' => $data ?? [], 'orders_count' => count($data ?? [])];
