@@ -59,8 +59,7 @@ class CustomerCreateUpdateController extends WebhooksController
             }
 
             if ($customerEntry) {
-                $customerEntry->set('shopify_id', $data->id);
-                $customerEntry->save();
+                $customerEntry->set('shopify_id', $data->id)->save();
             }
         }
 

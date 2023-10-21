@@ -32,8 +32,7 @@ class CustomerDeleteController extends WebhooksController
             ->first();
 
         if ($customerEntry) {
-            $customerEntry->remove('shopify_id');
-            $customerEntry->save();
+            $customerEntry->remove('shopify_id')->save();
         }
 
         return response()->json([

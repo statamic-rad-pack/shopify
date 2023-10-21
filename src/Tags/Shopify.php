@@ -303,11 +303,11 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
      */
     public function addressForm()
     {
-        $endpoint = '/!/shopify/address';
+        $endpoint = route('statamic.shopify.address.create');
 
         $id = $this->params->get('address_id');
         if ($id) {
-            $endpoint .= '/'.$id;
+            $endpoint = route('statamic.shopify.address.store', ['id' => $id]);
         }
 
         $knownParams = ['redirect', 'error_redirect', 'address_id', 'customer_id'];

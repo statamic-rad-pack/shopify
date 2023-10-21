@@ -14,7 +14,7 @@ class AddressController extends BaseActionController
         $customerId = request()->input('customer_id') ?? User::current()?->get('shopify_id') ?? false;
 
         if (! $customerId) {
-            return $this->withErrors($request, __("No customer_id to associate the address with"));
+            return $this->withErrors($request, __('No customer_id to associate the address with'));
         }
 
         $validatedData = $request->validate($this->rules());
@@ -42,7 +42,7 @@ class AddressController extends BaseActionController
         $customerId = request()->input('customer_id') ?? User::current()?->get('shopify_id') ?? false;
 
         if (! $customerId) {
-            return $this->withErrors($request, __("No customer_id to associate the address with"));
+            return $this->withErrors($request, __('No customer_id to associate the address with'));
         }
 
         try {
@@ -66,7 +66,7 @@ class AddressController extends BaseActionController
         $customerId = request()->input('customer_id') ?? User::current()?->get('shopify_id') ?? false;
 
         if (! $customerId) {
-            return $this->withErrors($request, __("No customer_id to associate the address with"));
+            return $this->withErrors($request, __('No customer_id to associate the address with'));
         }
 
         $validatedData = $request->validate($this->rules());

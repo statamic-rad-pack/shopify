@@ -12,15 +12,15 @@ use StatamicRadPack\Shopify\Http\Controllers\Webhooks\ProductDeleteController;
 
 Route::name('shopify.')
     ->group(function () {
-        Route::prefix('/address')
+        Route::prefix('address')
             ->group(function () {
                 Route::post('/', [AddressController::class, 'create'])
                     ->name('address.create');
 
-                Route::post('/{id}', [AddressController::class, 'store'])
+                Route::post('{id}', [AddressController::class, 'store'])
                     ->name('address.store');
 
-                Route::delete('/{id}', [AddressController::class, 'destroy'])
+                Route::delete('{id}', [AddressController::class, 'destroy'])
                     ->name('address.destroy');
             });
 

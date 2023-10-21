@@ -8,6 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Shopify\Clients\Rest;
+use Statamic\Contracts\Auth\User;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
 
@@ -18,7 +19,7 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public $user)
+    public function __construct(public User $user)
     {
     }
 

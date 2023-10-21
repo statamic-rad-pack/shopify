@@ -69,7 +69,7 @@ The available events are:
 
 `StatamicRadPack\Shopify\Events\CustomerCreate`
 `StatamicRadPack\Shopify\Events\CustomerDelete`
-`StatamicRadPack\Shopify\Events\CustmoerUpdate`
+`StatamicRadPack\Shopify\Events\CustomerUpdate`
 `StatamicRadPack\Shopify\Events\ProductCreate`
 `StatamicRadPack\Shopify\Events\ProductDelete`
 `StatamicRadPack\Shopify\Events\ProductUpdate`
