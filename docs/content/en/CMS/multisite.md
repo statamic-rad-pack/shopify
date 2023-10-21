@@ -4,7 +4,7 @@ category: CMS
 position: 8
 ---
 
-You can make use of Statamic's inbuilt multi-site features to bring your Shopify translations to your products, variants and collections.
+You can make use of Statamic's multi-site features to bring your Shopify translations to your products, variants and collections.
 
 ## Setting Up Your API Key
 
