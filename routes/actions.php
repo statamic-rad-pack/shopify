@@ -24,33 +24,32 @@ Route::name('shopify.')
                     ->name('address.destroy');
             });
 
-        Route::get('/variants/{product}', [VariantsController::class, 'fetch'])
+        Route::get('variants/{product}', [VariantsController::class, 'fetch'])
             ->name('variants.fetch');
 
-        Route::prefix('/webhook')
+        Route::prefix('webhook')
             ->withoutMiddleware([VerifyCsrfToken::class])
             ->group(function () {
 
-                Route::post('/order', OrderCreateController::class)
+                Route::post('order', OrderCreateController::class)
                     ->name('webhook.order.created');
 
-                Route::post('/customer/create', [CustomerCreateUpdateController::class, 'create'])
+                Route::post('customer/create', [CustomerCreateUpdateController::class, 'create'])
                     ->name('webhook.customer.create');
 
-                Route::post('/customer/delete', CustomerDeleteController::class)
+                Route::post('customer/delete', CustomerDeleteController::class)
                     ->name('webhook.customer.delete');
 
-                Route::post('/customer/update', [CustomerCreateUpdateController::class, 'update'])
+                Route::post('customer/update', [CustomerCreateUpdateController::class, 'update'])
                     ->name('webhook.customer.update');
 
-                Route::post('/product/create', [ProductCreateUpdateController::class, 'create'])
+                Route::post('product/create', [ProductCreateUpdateController::class, 'create'])
                     ->name('webhook.product.create');
 
-                Route::post('/product/delete', ProductDeleteController::class)
+                Route::post('product/delete', ProductDeleteController::class)
                     ->name('webhook.product.delete');
 
-                Route::post('/product/update', [ProductCreateUpdateController::class, 'update'])
+                Route::post('product/update', [ProductCreateUpdateController::class, 'update'])
                     ->name('webhook.product.update');
             });
     });
-
