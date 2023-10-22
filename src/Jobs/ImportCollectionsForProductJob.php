@@ -8,7 +8,9 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Shopify\Clients\Graphql;
 use Shopify\Clients\Rest;
+use Statamic\Facades\Site;
 use Statamic\Facades\Term;
 use Statamic\Support\Arr;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
@@ -33,7 +35,7 @@ class ImportCollectionsForProductJob implements ShouldQueue
 
     public function handle()
     {
-        $product_collections = collect();
+        $productCollections = collect();
 
         foreach ($this->collections as $collection) {
             $term = Term::query()
@@ -66,7 +68,7 @@ class ImportCollectionsForProductJob implements ShouldQueue
                     $metafields = Arr::get($response->getDecodedBody(), 'metafields', []);
 
                     if ($metafields) {
-                        $metafields = $this->parseMetafields($collectionMetafields, 'collection');
+                        $metafields = $this->parseMetafields($metafields, 'collection');
 
                         if ($metafields) {
                             $data = array_merge($metafields, $data);
@@ -74,15 +76,54 @@ class ImportCollectionsForProductJob implements ShouldQueue
                     }
                 }
             } catch (\Throwable $e) {
-                Log::error('Could not retrieve metafields for product'.$this->data['id']);
+                Log::error('Could not retrieve metafields for collection '.$collection['id']);
+            }
+
+            // if we are multisite, get translations
+            if (Site::hasMultiple()) {
+                $taxonomySites = $term->taxonomy()->sites();
+
+                Site::all()->each(function ($site) use ($collection, $taxonomySites, $term) {
+                    if (Site::default()->handle() == $site->handle()) {
+                        return;
+                    }
+
+                    if (! $taxonomySites->contains($site->handle())) {
+                        return;
+                    }
+
+                    $query = <<<QUERY
+                      query {
+                        translatableResource(resourceId: "gid://shopify/Collection/{$collection['id']}") {
+                          resourceId
+                          translations(locale: "{$site->locale()}") {
+                            key
+                            value
+                          }
+                        }
+                      }
+                    QUERY;
+
+                    $response = app(Graphql::class)->query(['query' => $query]);
+
+                    $translations = Arr::get($response->getDecodedBody(), 'translatableResource.translatableContent', []);
+
+                    if ($translations) {
+                        $localizedEntry = $term->in($site);
+
+                        $data = collect($translations)->mapWithKeys(fn ($row) => [$row['key'] => $row['value']]);
+
+                        $term->dataForLocale($site->handle(), $data->filter()->all());
+                    }
+                });
             }
 
             $term->merge($data)->save();
 
-            $product_collections->push($collection['handle']);
+            $productCollections->push($collection['handle']);
         }
 
-        $this->product->set(config('shopify.taxonomies.collections'), $product_collections->toArray());
+        $this->product->set(config('shopify.taxonomies.collections'), $productCollections->toArray());
         $this->product->save();
     }
 }

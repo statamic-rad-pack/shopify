@@ -4,6 +4,7 @@ namespace StatamicRadPack\Shopify;
 
 use Illuminate\Support\Facades\Artisan;
 use Shopify\Auth\FileSessionStorage;
+use Shopify\Clients\Graphql;
 use Shopify\Clients\Rest;
 use Shopify\Context;
 use Statamic\Events;
@@ -184,6 +185,10 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->app->bind(Rest::class, function ($app) {
             return new Rest(config('shopify.url'), config('shopify.admin_token'));
+        });
+
+        $this->app->bind(Graphql::class, function ($app) {
+            return new Graphql(config('shopify.url'), config('shopify.admin_token'));
         });
     }
 
