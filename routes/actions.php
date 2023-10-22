@@ -9,6 +9,7 @@ use StatamicRadPack\Shopify\Http\Controllers\Webhooks\CustomerDeleteController;
 use StatamicRadPack\Shopify\Http\Controllers\Webhooks\OrderCreateController;
 use StatamicRadPack\Shopify\Http\Controllers\Webhooks\ProductCreateUpdateController;
 use StatamicRadPack\Shopify\Http\Controllers\Webhooks\ProductDeleteController;
+use StatamicRadPack\Shopify\Http\Middleware\VerifyShopifyHeaders;
 
 Route::name('shopify.')
     ->group(function () {
@@ -29,6 +30,7 @@ Route::name('shopify.')
 
         Route::prefix('webhook')
             ->withoutMiddleware([VerifyCsrfToken::class])
+            ->middleware([VerifyShopifyHeaders::class])
             ->group(function () {
 
                 Route::post('order', OrderCreateController::class)
