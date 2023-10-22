@@ -2,15 +2,20 @@
 
 namespace StatamicRadPack\Shopify\Tags;
 
+use Shopify\Clients\Rest;
 use Statamic\Facades\Entry;
+use Statamic\Facades\User;
+use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use Statamic\Tags\Concerns\GetsRedirects;
 use Statamic\Tags\Concerns\QueriesConditions;
 use Statamic\Tags\Concerns\QueriesOrderBys;
+use Statamic\Tags\Concerns\RendersForms;
 use Statamic\Tags\Tags;
 
 class Shopify extends Tags
 {
-    use QueriesConditions, QueriesOrderBys;
+    use GetsRedirects, QueriesConditions, QueriesOrderBys, RendersForms;
 
     /**
      * @return string|array
@@ -84,14 +89,22 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
     }
 
     /**
-     * handle any shopify:variants:x tags
+     * handle any shopify:variants:x, shopify:customer:x tags
      */
     public function wildcard($tag)
     {
-        if (str_contains($tag, ':') && Str::before($tag, ':') == 'variants') {
-            $method = 'variant'.Str::studly(Str::after($tag, ':'));
+        if (str_contains($tag, ':')) {
+            $method = false;
 
-            if (method_exists($this, $method)) {
+            if (Str::before($tag, ':') == 'variants') {
+                $method = 'variant'.Str::studly(Str::after($tag, ':'));
+            }
+
+            if (Str::before($tag, ':') == 'customer') {
+                $method = 'customer'.Str::studly(Str::after($tag, ':'));
+            }
+
+            if ($method && method_exists($this, $method)) {
                 return $this->{$method}();
             }
         }
@@ -281,5 +294,175 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
         }
 
         return true;
+    }
+
+    /**
+     * Get the data associated with the customer, or the current user
+     *
+     * @return \Illuminate\Support\Collection|null
+     */
+    public function addressForm()
+    {
+        $endpoint = route('statamic.shopify.address.create');
+
+        $id = $this->params->get('address_id');
+        if ($id) {
+            $endpoint = route('statamic.shopify.address.store', ['id' => $id]);
+        }
+
+        $knownParams = ['redirect', 'error_redirect', 'address_id', 'customer_id'];
+
+        $html = $this->formOpen($endpoint, 'POST', $knownParams);
+
+        $params = [];
+
+        if ($redirect = $this->getRedirectUrl()) {
+            $params['redirect'] = $this->parseRedirect($redirect);
+        }
+
+        if ($errorRedirect = $this->getErrorRedirectUrl()) {
+            $params['error_redirect'] = $this->parseRedirect($errorRedirect);
+        }
+
+        if (! $this->parser) {
+            return array_merge([
+                'attrs' => $this->formAttrs($action, $method, $knownParams),
+                'params' => $this->formMetaPrefix($this->formParams($method, $params)),
+            ], $data);
+        }
+
+        $id = $this->params->get('customer_id');
+
+        if (! $id) {
+            if ($user = User::current()) {
+                $id = $user->get('shopify_id');
+            }
+        }
+
+        if ($id) {
+            $html .= '<input type="hidden" name="customer_id" value="'.$id.'" />';
+        }
+
+        $html .= $this->formMetaFields($params);
+        $html .= $this->parse();
+        $html .= $this->formClose();
+
+        return $html;
+    }
+
+    /**
+     * Get the data associated with the customer, or the current user
+     *
+     * @return \Illuminate\Support\Collection|null
+     */
+    public function customer()
+    {
+        $id = $this->params->get('customer_id');
+        $user = false;
+
+        if (! $id) {
+            $user = User::current();
+
+            if (! $user) {
+                return ['not_found' => true];
+            }
+        }
+
+        if (! $user) {
+            $user = User::query()
+                ->where('shopify_id', $id)
+                ->first();
+
+            if (! $user) {
+                return ['not_found' => true];
+            }
+        }
+
+        $response = app(Rest::class)->get(path: 'customers/'.($user->get('shopify_id') ?? 'none'));
+
+        if ($response->getStatusCode() == 200) {
+            $data = Arr::get($response->getDecodedBody(), 'customer', []);
+        }
+
+        return array_merge($data, $user?->data()->all() ?? []);
+    }
+
+    /**
+     * Get the customer addresses
+     *
+     * @return \Illuminate\Support\Collection|null
+     */
+    public function customerAddresses()
+    {
+        $id = $this->params->get('customer_id');
+        $user = false;
+
+        if (! $id) {
+            $user = User::current();
+
+            if (! $user) {
+                return ['addresses' => [], 'addresses_count' => 0];
+            }
+        }
+
+        if (! $user) {
+            $user = User::query()
+                ->where('shopify_id', $id)
+                ->first();
+
+            if (! $user) {
+                return ['addresses' => [], 'addresses_count' => 0];
+            }
+        }
+
+        $response = app(Rest::class)->get(path: 'customers/'.($user->get('shopify_id') ?? 'none').'/addresses.json');
+
+        if ($response->getStatusCode() == 200) {
+            $data = Arr::get($response->getDecodedBody(), 'addresses', []);
+        }
+
+        return ['addresses' => $data ?? [], 'addresses_count' => count($data ?? [])];
+    }
+
+    /**
+     * Get the customer orders
+     *
+     * @return \Illuminate\Support\Collection|null
+     */
+    public function customerOrders()
+    {
+        $id = $this->params->get('customer_id');
+        $user = false;
+
+        if (! $id) {
+            $user = User::current();
+
+            if (! $user) {
+                return ['orders' => [], 'orders_count' => 0];
+            }
+        }
+
+        if (! $user) {
+            $user = User::query()
+                ->where('shopify_id', $id)
+                ->first();
+
+            if (! $user) {
+                return ['orders' => [], 'orders_count' => 0];
+            }
+        }
+
+        $status = $this->context->get('status');
+        if (! in_array($status, ['any', 'open', 'closed', 'cancelled'])) {
+            $status = 'any';
+        }
+
+        $response = app(Rest::class)->get(path: 'customers/'.($user->get('shopify_id') ?? 'none').'/orders', query: ['status' => $status]);
+
+        if ($response->getStatusCode() == 200) {
+            $data = Arr::get($response->getDecodedBody(), 'orders', []);
+        }
+
+        return ['orders' => $data ?? [], 'orders_count' => count($data ?? [])];
     }
 }

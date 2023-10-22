@@ -20,6 +20,7 @@ If you are trying to test any webhooks locally you'll need to use a service like
 
 </alert>
 
+
 ## Product Create
 
 Rather than running the full import continuously you can add a webhook on **Product Creation** that sends the data to Statamic and queues the import of that one product.
@@ -66,6 +67,9 @@ Each webhook listener also fires an event you can use to hook into with your own
 
 The available events are:
 
+`StatamicRadPack\Shopify\Events\CustomerCreate`
+`StatamicRadPack\Shopify\Events\CustomerDelete`
+`StatamicRadPack\Shopify\Events\CustomerUpdate`
 `StatamicRadPack\Shopify\Events\ProductCreate`
 `StatamicRadPack\Shopify\Events\ProductDelete`
 `StatamicRadPack\Shopify\Events\ProductUpdate`

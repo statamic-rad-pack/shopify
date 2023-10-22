@@ -50,4 +50,44 @@ class WebhooksTest extends TestCase
 
         $this->assertSame('{"message":"Product has been deleted"}', $response->getContent());
     }
+
+    /** @test */
+    public function creates_a_customer()
+    {
+        config()->set('shopify.ignore_webhook_integrity_check', true);
+
+        $payload = '{"id": 706405506930370000,"email": "bob@biller.com","accepts_marketing": true,"created_at": "2021-12-31T19:00:00-05:00","updated_at": "2021-12-31T19:00:00-05:00","first_name": "Bob","last_name": "Biller","orders_count": 0,"state": "disabled","total_spent": "0.00","last_order_id": null,"note": "This customer loves ice cream","verified_email": true,"multipass_identifier": null,"tax_exempt": false,"tags": "","last_order_name": null,"currency": "USD","phone": null,"addresses": [],"accepts_marketing_updated_at": "2021-12-31T19:00:00-05:00","marketing_opt_in_level": null,"tax_exemptions": [],"email_marketing_consent": null,"sms_marketing_consent": null,"admin_graphql_api_id": "gid://shopify/Customer/706405506930370084"}';
+
+        $response = $this->postJson('/!/shopify/webhook/customer/create', json_decode($payload, true));
+
+        $this->assertSame('{"message":"Customer has been updated"}', $response->getContent());
+    }
+
+    /** @test */
+    public function updates_a_customer()
+    {
+        config()->set('shopify.ignore_webhook_integrity_check', true);
+
+        Facades\Taxonomy::make()->handle('tags')->save();
+        Facades\Taxonomy::make()->handle('vendor')->save();
+        Facades\Taxonomy::make()->handle('type')->save();
+
+        $payload = '{"id": 706405506930370000,"email": "bob@biller.com","accepts_marketing": true,"created_at": "2021-12-31T19:00:00-05:00","updated_at": "2021-12-31T19:00:00-05:00","first_name": "Bob","last_name": "Biller","orders_count": 0,"state": "disabled","total_spent": "0.00","last_order_id": null,"note": "This customer loves ice cream","verified_email": true,"multipass_identifier": null,"tax_exempt": false,"tags": "","last_order_name": null,"currency": "USD","phone": null,"addresses": [],"accepts_marketing_updated_at": "2021-12-31T19:00:00-05:00","marketing_opt_in_level": null,"tax_exemptions": [],"email_marketing_consent": null,"sms_marketing_consent": null,"admin_graphql_api_id": "gid://shopify/Customer/706405506930370084"}';
+
+        $response = $this->postJson('/!/shopify/webhook/customer/update', json_decode($payload, true));
+
+        $this->assertSame('{"message":"Customer has been updated"}', $response->getContent());
+    }
+
+    /** @test */
+    public function deletes_a_customer()
+    {
+        config()->set('shopify.ignore_webhook_integrity_check', true);
+
+        $payload = '{"id":788032119674292922}';
+
+        $response = $this->postJson('/!/shopify/webhook/customer/delete', json_decode($payload, true));
+
+        $this->assertSame('{"message":"Customer has been deleted"}', $response->getContent());
+    }
 }
