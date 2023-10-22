@@ -22,35 +22,23 @@ Add `statamic-rad-pack/shopify` as a dependency to your project:
 composer require statamic-rad-pack/shopify
 ```
 
-## Creating a Shopify App (New)
+## Creating a Shopify App
 
-Shopify recently updated the way apps work. The below method is how you should now set up and use the apps.
+To set up a private app on Shopify for this add-on to use, use the following steps:
 
-1. Visit the "Apps" section in your Shopify admin, the URL should be similar to https://MY-SITE.myshopify.com/admin/apps.
+1. Visit the "Apps" section in your Shopify admin by clicking on the sidebar menu link, then in the modal that appears "App and sales channel settings".
 2. Click "Develop Apps" in the top right.
 3. Click "Create an app" in the top right to make a new one.
 4. Set a nice name to remember as well as your email.
-5. Click the "Configure" Tab.
-    5a. Click "Configure" next to Admin API Integration.
-    5b. Set read access to **"Product listings", "Read Inventory", "Read Product Listings" and "Products"**.
-    5c. Click "Save" in the top right.
-6. Click the "API Credentials" tab. If you've configured you're api integration properly you should see a button that says "Install App". Click this.
-7. You'll be presented with an Admin API access token. You can only access this once, so make sure you copy it down and make a note. Add this to your `.env` as `SHOPIFY_ADMIN_TOKEN`
+5. Click the "Configuration" Tab.
+    1. Click "Configure" next to Admin API Integration.
+    2. Enable `read_product_listings`, `read_inventory`, `read_products`, `read_orders`, `read_translations` and `write_customers`
+    3. Click "Configure" next to Storefront API Integration.
+    4. Enable `unauthenticated_read_product_listings`, `unauthenticated_read_product_tags`, `unauthenticated_read_product_inventory`, `unauthenticated_write_customers`, `unauthenticated_write_checkouts`, `unauthenticated_read_customers`, `unauthenticated_read_checkouts`, `unauthenticated_read_metaobjects`
+    5. Click "Save" in the top right.
+6. Click the "API Credentials" tab. Add the `Admin API access token` to your `.env` as `SHOPIFY_ADMIN_TOKEN`, add `API key` as `SHOPIFY_AUTH_KEY`, add `API secret key` as both `SHOPIFY_AUTH_PASSWORD` and `SHOPIFY_WEBHOOK_SECRET`, and add `Storefront API access token` as `SHOPIFY_STOREFRONT_TOKEN`.
+7. If you've configured the app properly you should see a button that says "Install App". Click this.
 
-## Creating A Shopify App (Old)
-
-Before we can get anything working, we need to ensure we have a private app setup in our Shopify Admin.
-
-1. Visit the "Apps" section in your Shopify admin, the URL should be similar to https://MY-SITE.myshopify.com/admin/apps.
-2. Scroll down and click "Manage private apps"
-3. Click **"Create new private app"**
-4. Set a nice name to remember as well as your email.
-5. Toggle **"Show inactive admin API permissions"**
-6. Set read access to **"Orders", "Product listings", and "Products"**.
-7. Grant access to the Storefront API by checking **"allow this app to access your storefront data using the Storefront API"**.
-8. Save.
-
-Once saved you'll be presented with the details of your private app. We'll use these to populate our `.env` file and get everything set up correctly.
 
 ## Environment Variables
 

@@ -10,7 +10,7 @@ return [
      * If you use a different customer facing url (eg store.mycustomdomain.com)
      * please enter that here
      */
-    'storefront_url' => null,
+    'storefront_url' => env('SHOPIFY_STOREFRONT_URL'),
 
     /**
      * Front-end storefront token
