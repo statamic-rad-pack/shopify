@@ -32,10 +32,6 @@ jobs:
       - name: Vercel pull
         run: yarn vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
-      # Build for vercel output
-      - name: Vercel build
-        run: yarn vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
       # Deploy to vercel
-      - name: Vercel deploy
-        run: yarn vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Vercel build and deploy
+        run: yarn vercel --prod --token=${{ secrets.VERCEL_TOKEN }}

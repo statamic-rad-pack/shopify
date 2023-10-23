@@ -5,6 +5,20 @@ position: 3
 category: Installation
 ---
 
+## Upgrading from 2.x to 3.x
+
+Due to the migration to the offical Shopify PHP library this update is being treated as a breaking change. 
+
+The following .env variables are now required:
+
+`SHOPIFY_ADMIN_TOKEN`
+`SHOPIFY_AUTH_KEY`
+`SHOPIFY_AUTH_PASSWORD`
+`SHOPIFY_WEBHOOK_SECRET`
+
+If all of these are not defined please follow [instructions in setup](/setup).
+
+
 ## Upgrading from 1.x to 2.x
 
 There are a number of **breaking changes** in the 2.x update:
