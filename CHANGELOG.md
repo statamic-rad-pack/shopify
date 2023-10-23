@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.0.1 - 2023-10-23
+
+Bundle assets
+
 ## v2.0.0-beta1 - 2023-09-18
 
 - Hide unnecessary stuff from the Marketplace, update Github links [@jackmcdade](https://github.com/jackmcdade) (#165)
@@ -43,7 +47,7 @@
 ### Changed
 
 - Products now re-import off the `product_id` rather than the slug. This is to prevent duplications and changes whenever the product is changed in the Shopify Admin. **NOTE: we do not overwrite the slug again in Statamic in case it has been changed here for SEO purposes.** (#135)
--
+- 
 
 # 1.7.6
 
@@ -179,11 +183,12 @@
 
 ### New
 
-- **ProductVariant** tag has been updated to give you multiple ways to interact with them.
-  - `product_variant:generate` - outputs the html prerendered (default)
-  - `product_variant:loop` - gives you access to variant data to use however you wish.
-  - `product_variant:by_title` - lets you grab one variant by it's title.
-  - `product_variant:by_index` - lets you grab one variant by index.
+- **ProductVariant** tag has been updated to give you multiple ways to interact with them.   
+  - `product_variant:generate` - outputs the html prerendered (default)   
+  - `product_variant:loop` - gives you access to variant data to use however you wish.   
+  - `product_variant:by_title` - lets you grab one variant by it's title.   
+  - `product_variant:by_index` - lets you grab one variant by index.   
+  
 
 ### Updated
 
@@ -211,8 +216,8 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
-```
 
+```
 # 1.2.0
 
 - [New] All webhooks have been given a name.
