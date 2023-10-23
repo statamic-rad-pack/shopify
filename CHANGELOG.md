@@ -2,7 +2,19 @@
 
 ## v3.0.1 - 2023-10-23
 
-Bundle assets
+- Update setup.md [@JonKaric](https://github.com/JonKaric) (#186)
+
+### 🚀 New
+
+- Get customer information from Shopify [@ryanmitchell](https://github.com/ryanmitchell)  (#185)
+- Support multi-site / Shopify translated fields [@ryanmitchell](https://github.com/ryanmitchell)  (#184)
+
+### 🧰 Maintenance
+
+- Add 2.x -> 3.x upgrading docs [@ryanmitchell](https://github.com/ryanmitchell)  (#190)
+- Target Shopify PHP 5.1+ [@ryanmitchell](https://github.com/ryanmitchell)  (#189)
+- Move webhook validation to middleware [@ryanmitchell](https://github.com/ryanmitchell)  (#188)
+- Use Shopify's official PHP library [@ryanmitchell](https://github.com/ryanmitchell)  (#183)
 
 ## v2.0.0-beta1 - 2023-09-18
 
