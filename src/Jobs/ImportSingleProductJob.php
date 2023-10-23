@@ -26,19 +26,19 @@ class ImportSingleProductJob implements ShouldQueue
     use SerializesModels;
     use SavesImagesAndMetafields;
 
-    /** @var int */
-    public $slug;
-
     /** @var array */
     public $data;
+
+    /** @var array */
+    public $orderData;
 
     /**
      * ImportSingleProductJob constructor.
      */
-    public function __construct(array $data, string $handle = null)
+    public function __construct(array $data, array $orderData = [])
     {
         $this->data = $data;
-        $this->slug = $handle ? $handle : $data['handle'];
+        $this->orderData = $orderData;
     }
 
     public function handle()
@@ -104,6 +104,10 @@ class ImportSingleProductJob implements ShouldQueue
                 $asset = $this->importImages($image);
                 $data['gallery'][] = $asset->path();
             }
+        }
+
+        if ($this->orderData) {
+            $data['last_purchased'] = $this->orderData['date']->format('Y-m-d H:i:s');
         }
 
         $entry->merge($data);
@@ -249,6 +253,11 @@ class ImportSingleProductJob implements ShouldQueue
                         $data['image'] = $asset->path();
                     }
                 }
+            }
+
+            if ($this->orderData && ($qty = Arr::get($this->orderData, 'quantity.'.$variant['sku']))) {
+                $data['last_purchased'] = $this->orderData['date']->format('Y-m-d H:i:s');
+                $data['total_purchased'] = ($entry->get('total_purchased') ?? 0) + $qty;
             }
 
             $entry->merge($data);
