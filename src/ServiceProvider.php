@@ -178,9 +178,9 @@ class ServiceProvider extends AddonServiceProvider
             scopes: ['read_metaobjects', 'read_products'],
             hostName: config('shopify.url'),
             sessionStorage: new FileSessionStorage('/tmp/php_sessions'),
-            apiVersion: '2023-04',
+            apiVersion: config('shopify.api_version') ?? '2023-07',
             isEmbeddedApp: false,
-            isPrivateApp: true,
+            isPrivateApp: config('shopify.api_private_app') ?? false,
         );
 
         $this->app->bind(Rest::class, function ($app) {
