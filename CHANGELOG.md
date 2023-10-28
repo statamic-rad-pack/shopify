@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.0.2 - 2023-10-28
+
+### 🐛 Fixed
+
+- Fix connection defaulting to private app and make it configurable [@ryanmitchell](https://github.com/ryanmitchell) (#192)
+
 ## v3.0.1 - 2023-10-23
 
 - Update setup.md [@JonKaric](https://github.com/JonKaric) (#186)
@@ -228,6 +234,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 ```
 # 1.2.0
