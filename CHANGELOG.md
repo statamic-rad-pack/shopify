@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.0.3 - 2023-11-10
+
+### 🐛 Fixed
+
+- Fix user creation job always throwing an error [@ryanmitchell](https://github.com/ryanmitchell) (#195)
+
 ## v3.0.2 - 2023-10-28
 
 ### 🐛 Fixed
@@ -234,6 +240,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 ```
