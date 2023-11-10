@@ -42,6 +42,7 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
             if (count($data)) {
                 $this->user->set('shopify_id', $data[0]['id']);
                 $this->user->saveQuietly();
+
                 return;
             }
 
@@ -55,6 +56,8 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
             if ($id) {
                 $this->user->set('shopify_id', $id);
                 $this->user->saveQuietly();
+
+                return;
             }
         }
 
