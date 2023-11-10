@@ -72,7 +72,7 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
 
     private function updateUser($id)
     {
-        return app(Rest::class)->put(path: 'customers/'.$this->user->get($id), body: $this->generatePayloadBody());
+        return app(Rest::class)->put(path: 'customers/'.$id, body: $this->generatePayloadBody());
     }
 
     private function generatePayloadBody()
