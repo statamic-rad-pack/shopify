@@ -25,11 +25,13 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
 
     public function handle()
     {
-        if (! $this->user->get('shopify_id')) {
-            $shopifyUser = $this->createOrAssociateUser();
+        if (! $id = $this->user->get('shopify_id')) {
+            $this->createOrAssociateUser();
+
+            return;
         }
 
-        $response = app(Rest::class)->put(path: 'customers/'.$this->user->get('shopify_id'), body: $this->generatePayloadBody());
+        $this->updateUser($id);
     }
 
     private function createOrAssociateUser()
@@ -40,8 +42,13 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
             $data = Arr::get($response->getDecodedBody(), 'customers', []);
 
             if (count($data)) {
-                $this->user->set('shopify_id', $data[0]['id']);
+                $id = $data[0]['id'];
+
+                $this->user->set('shopify_id', $id);
                 $this->user->saveQuietly();
+
+                $this->updateUser($id);
+
                 return;
             }
 
@@ -55,19 +62,28 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
             if ($id) {
                 $this->user->set('shopify_id', $id);
                 $this->user->saveQuietly();
+
+                return;
             }
         }
 
         throw new \Exception('Could not create user in Shopify');
     }
 
+    private function updateUser($id)
+    {
+        return app(Rest::class)->put(path: 'customers/'.$id, body: $this->generatePayloadBody());
+    }
+
     private function generatePayloadBody()
     {
         return [
-            'first_name' => Str::before($this->user->name(), ' '),
-            'last_name' => Str::after($this->user->name(), ' '),
-            'email' => $this->user->email(),
-            'verified_email' => true,
+            'customer' => [
+                'first_name' => Str::before($this->user->name(), ' '),
+                'last_name' => Str::after($this->user->name(), ' '),
+                'email' => $this->user->email(),
+                'verified_email' => true,
+            ],
         ];
     }
 }

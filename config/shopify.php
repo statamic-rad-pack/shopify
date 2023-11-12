@@ -54,6 +54,16 @@ return [
     'api_limit' => 30,
 
     /**
+     * Admin API version - Set this to a fixed value (eg 2023-07) or null to let the library decide
+     */
+    'api_version' => null,
+
+    /**
+     * Admin connection is a private app, defaults to false
+     */
+    'api_private_app' => false,
+
+    /**
      * Shop Currency
      */
     'currency' => '£',
