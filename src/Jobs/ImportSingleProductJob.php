@@ -107,7 +107,7 @@ class ImportSingleProductJob implements ShouldQueue
         }
 
         if ($this->orderData) {
-            $data['last_purchased'] = $this->orderData['date']->format('Y-m-d H:i:s');
+            $data = $this->updatePurchaseHistory($data);
         }
 
         $entry->merge($data);
@@ -256,8 +256,7 @@ class ImportSingleProductJob implements ShouldQueue
             }
 
             if ($this->orderData && ($qty = Arr::get($this->orderData, 'quantity.'.$variant['sku']))) {
-                $data['last_purchased'] = $this->orderData['date']->format('Y-m-d H:i:s');
-                $data['total_purchased'] = ($entry->get('total_purchased') ?? 0) + $qty;
+                $data = $this->updatePurchaseHistory($data);
             }
 
             $entry->merge($data);
@@ -343,5 +342,22 @@ class ImportSingleProductJob implements ShouldQueue
                     $variant->delete();
                 }
             });
+    }
+
+    /**
+     * Update the purchase history for this item
+     */
+    private function updatePurchaseHistory(array $data) : array
+    {
+        $data['last_purchased'] = $this->orderData['date']->format('Y-m-d H:i:s');
+
+        $orderYearKey = 'total_purchased.'.$this->orderData['date']->format('Y').'.total';
+        $orderMonthKey = 'total_purchased.'.$this->orderData['date']->format('Y').'.'.$this->orderData['date']->format('m');
+
+        Arr::set($data, 'total_purchased.lifetime', Arr::get($data, 'total_purchased.lifetime', 0) + $qty);
+        Arr::set($data, $orderYearKey, Arr::get($data, $orderYearKey, 0) + $qty);
+        Arr::set($data, $orderMonthKey, Arr::get($data, $orderMonthKey, 0) + $qty);
+
+        return $data;
     }
 }
