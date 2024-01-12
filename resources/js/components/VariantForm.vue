@@ -1,23 +1,28 @@
 <template>
     <stack name="Form Stack" :narrow="narrow" @closed="close">
-        <div class="h-full bg-grey-30 p-4 overflow-auto">
-            <header class="pb-3 py-1 border-b border-grey-30 text-lg font-medium flex items-center justify-between">
-                {{ title }}
+        <div class="h-full overflow-auto p-6 bg-gray-300">
+            <header class="-mt-2 mb-3 flex justify-end">
                 <button type="button" class="btn-close" @click="close">×</button>
             </header>
-
-            <div>
-                <publish-form
-                    name="Form Stack publish form"
-                    :title="title"
-                    :action="action"
-                    :method="method"
-                    :blueprint="blueprint"
-                    :meta="meta"
-                    :values="values"
-                    @saved="saved"
-                ></publish-form>
-            </div>
+            <publish-form
+                name="Form Stack publish form"
+                :title="title"
+                :action="action"
+                :method="method"
+                :blueprint="blueprint"
+                :meta="meta"
+                :values="values"
+                @saved="saved"
+                class="max-w-3xl mx-auto"
+            >
+                <template slot="action-buttons-right">
+                    <button
+                        type="button"
+                        class="btn-close"
+                        @click="close"
+                        v-html="'&times'" />
+                </template>
+            </publish-form>
         </div>
     </stack>
 </template>
