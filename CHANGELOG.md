@@ -1,5 +1,15 @@
 # Changelog
 
+## v3.1.0 - 2024-01-12
+
+### 🚀 New
+
+- Use new nav methods to build custom navigation [@ryanmitchell](https://github.com/ryanmitchell) (#193)
+
+### 🐛 Fixed
+
+- Fix variant form styling [@ryanmitchell](https://github.com/ryanmitchell) (#197)
+
 ## v3.0.3 - 2023-11-10
 
 ### 🐛 Fixed
@@ -207,11 +217,11 @@
 
 ### New
 
-- **ProductVariant** tag has been updated to give you multiple ways to interact with them.   
-  - `product_variant:generate` - outputs the html prerendered (default)   
-  - `product_variant:loop` - gives you access to variant data to use however you wish.   
-  - `product_variant:by_title` - lets you grab one variant by it's title.   
-  - `product_variant:by_index` - lets you grab one variant by index.   
+- **ProductVariant** tag has been updated to give you multiple ways to interact with them.
+  - `product_variant:generate` - outputs the html prerendered (default)
+  - `product_variant:loop` - gives you access to variant data to use however you wish.
+  - `product_variant:by_title` - lets you grab one variant by it's title.
+  - `product_variant:by_index` - lets you grab one variant by index.
   
 
 ### Updated
@@ -240,6 +250,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
