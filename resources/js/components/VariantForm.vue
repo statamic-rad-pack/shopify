@@ -15,13 +15,6 @@
                 @saved="saved"
                 class="max-w-3xl mx-auto"
             >
-                <template slot="action-buttons-right">
-                    <button
-                        type="button"
-                        class="btn-close"
-                        @click="close"
-                        v-html="'&times'" />
-                </template>
             </publish-form>
         </div>
     </stack>
