@@ -21,7 +21,7 @@ trait FetchAllProducts
 
             // Recursively loop.
             while ($nextPage) {
-                $response = $client->get(path: 'products', query: $nextPage);
+                $response = $client->get(path: 'products', query: $nextPage->getNextPageQuery());
                 $nextPage = $response->getPageInfo();
 
                 $this->callJob($response);
