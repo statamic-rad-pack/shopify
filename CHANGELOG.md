@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.1.1 - 2024-01-17
+
+### 🐛 Fixed
+
+- Use getNextPageQuery correctly [@ryanmitchell](https://github.com/ryanmitchell) (#200)
+
 ## v3.1.0 - 2024-01-12
 
 ### 🚀 New
@@ -250,6 +256,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
