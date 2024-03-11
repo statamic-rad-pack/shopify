@@ -1,5 +1,15 @@
 # Changelog
 
+## v3.2.0 - 2024-03-11
+
+### 🚀 New
+
+- Add `last_purchased` and `total_purchased` to product variants [@ryanmitchell](https://github.com/ryanmitchell) (#191)
+
+### 🐛 Fixed
+
+- Default all Shopify managed fields to readonly [@ryanmitchell](https://github.com/ryanmitchell) (#204)
+
 ## v3.1.1 - 2024-01-17
 
 ### 🐛 Fixed
@@ -256,6 +266,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
