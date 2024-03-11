@@ -1,122 +1,214 @@
 title: Product
-sections:
+tabs:
   main:
     display: Main
-    fields:
+    sections:
       -
-        handle: title
-        field:
-          type: text
-          required: true
-          validate:
-            - required
+        fields:
+          -
+            handle: title
+            field:
+              type: text
+              required: true
+              validate:
+                - required
+              instructions_position: above
+              listable: true
+              visibility: read_only
+              replicator_preview: true
+              input_type: text
+              antlers: false
+              hide_display: false
+          -
+            handle: content
+            field:
+              always_show_set_button: false
+              buttons:
+                - h2
+                - h3
+                - bold
+                - italic
+                - unorderedlist
+                - orderedlist
+                - removeformat
+                - quote
+                - anchor
+                - image
+                - table
+              save_html: true
+              toolbar_mode: fixed
+              link_noopener: false
+              link_noreferrer: false
+              target_blank: false
+              reading_time: false
+              fullscreen: true
+              allow_source: true
+              display: Content
+              type: bard
+              icon: bard
+              listable: hidden
+              instructions_position: above
+              visibility: read_only
+              replicator_preview: true
+              smart_typography: false
+              inline: false
+              word_count: false
+              enable_input_rules: true
+              enable_paste_rules: true
+              remove_empty_nodes: false
+              antlers: false
+              collapse: false
+              previews: true
+              hide_display: false
+          -
+            handle: options
+            field:
+              mode: dynamic
+              display: Options
+              type: array
+              icon: array
+              listable: hidden
+              instructions_position: above
+              visibility: read_only
+              replicator_preview: true
+              hide_display: false
+          -
+            handle: variants
+            field:
+              display: Variants
+              type: variants
+              icon: tags
+              listable: hidden
+              instructions_position: above
+              visibility: read_only
+              replicator_preview: true
+              hide_display: false
+  media:
+    display: Media
+    sections:
       -
-        handle: content
-        field:
-          always_show_set_button: false
-          buttons:
-            - h2
-            - h3
-            - bold
-            - italic
-            - unorderedlist
-            - orderedlist
-            - removeformat
-            - quote
-            - anchor
-            - image
-            - table
-          save_html: true
-          toolbar_mode: fixed
-          link_noopener: false
-          link_noreferrer: false
-          target_blank: false
-          reading_time: false
-          fullscreen: true
-          allow_source: true
-          display: Content
-          type: bard
-          icon: bard
-          listable: hidden
-      - handle: options
-        field:
-          mode: dynamic
-          display: Options
-          type: array
-          icon: array
-          listable: hidden
-      -
-        handle: variants
-        field:
-          display: Variants
-          type: variants
-          icon: tags
-          listable: hidden
-      -
-        handle: gallery
-        field:
-          mode: grid
-          restrict: false
-          allow_uploads: true
-          display: Gallery
-          type: assets
-          icon: assets
-          listable: hidden
-          container: shopify
-      -
-        handle: vendor
-        field:
-          type: terms
-          taxonomies:
-            - vendor
-          display: Vendor
-          mode: select
+        fields:
+          -
+            handle: featured_image
+            field:
+              mode: grid
+              restrict: false
+              allow_uploads: true
+              display: 'Featured Image'
+              type: assets
+              icon: assets
+              listable: hidden
+              container: shopify
+              max_files: 1
+              instructions_position: above
+              visibility: read_only
+              replicator_preview: true
+              show_filename: true
+              show_set_alt: true
+              hide_display: false
+          -
+            handle: gallery
+            field:
+              mode: grid
+              restrict: false
+              allow_uploads: true
+              display: Gallery
+              type: assets
+              icon: assets
+              listable: hidden
+              container: shopify
+              instructions_position: above
+              visibility: read_only
+              replicator_preview: true
+              show_filename: true
+              show_set_alt: true
+              hide_display: false
   sidebar:
     display: Sidebar
-    fields:
+    sections:
       -
-        handle: slug
-        field:
-          type: slug
-          required: true
-          localizable: true
-          validate:
-            - required
-          display: Slug
-          listable: hidden
-          generate: true
-      -
-        handle: published_at
-        field:
-          mode: single
-          time_enabled: true
-          time_required: true
-          earliest_date: '1900-01-01'
-          full_width: false
-          inline: false
-          columns: 1
-          rows: 1
-          display: 'Published At'
-          type: date
-          icon: date
-          listable: true
-          format: 'Y-m-d H:i:s'
-      -
-        handle: featured_image
-        field:
-          mode: grid
-          restrict: false
-          allow_uploads: true
-          display: 'Featured Image'
-          type: assets
-          icon: assets
-          listable: hidden
-          container: shopify
-          max_files: 1
-      -
-        handle: product_id
-        field:
-          display: 'Product ID'
-          type: disabled_text
-          icon: disabled_text
-          listable: hidden
+        fields:
+          -
+            handle: slug
+            field:
+              type: slug
+              localizable: true
+              validate:
+                - required
+              display: Slug
+              listable: hidden
+              generate: true
+          -
+            handle: published_at
+            field:
+              mode: single
+              time_enabled: true
+              time_required: true
+              earliest_date: '1900-01-01'
+              full_width: false
+              inline: false
+              columns: 1
+              rows: 1
+              display: 'Published At'
+              type: date
+              icon: date
+              listable: true
+              format: 'Y-m-d H:i:s'
+              instructions_position: above
+              visibility: read_only
+              replicator_preview: true
+              time_seconds_enabled: false
+              hide_display: false
+          -
+            handle: product_id
+            field:
+              display: 'Product ID'
+              type: disabled_text
+              icon: disabled_text
+              listable: hidden
+              instructions_position: above
+              visibility: read_only
+              replicator_preview: true
+              hide_display: false
+          -
+            handle: type
+            field:
+              type: terms
+              taxonomies:
+                - type
+              display: Types
+              mode: select
+              instructions_position: above
+              listable: hidden
+              visibility: read_only
+              replicator_preview: true
+              create: true
+              hide_display: false
+          -
+            handle: tags
+            field:
+              type: terms
+              taxonomies:
+                - tags
+              display: Tags
+              mode: select
+              instructions_position: above
+              listable: hidden
+              visibility: read_only
+              replicator_preview: true
+              create: true
+              hide_display: false
+          -
+            handle: vendor
+            field:
+              type: terms
+              taxonomies:
+                - vendor
+              display: Vendor
+              mode: select
+              instructions_position: above
+              listable: hidden
+              visibility: read_only
+              replicator_preview: true
+              create: true
+              hide_display: false
