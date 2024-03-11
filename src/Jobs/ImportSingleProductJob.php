@@ -26,19 +26,19 @@ class ImportSingleProductJob implements ShouldQueue
     use SerializesModels;
     use SavesImagesAndMetafields;
 
-    /** @var int */
-    public $slug;
-
     /** @var array */
     public $data;
+
+    /** @var array */
+    public $orderData;
 
     /**
      * ImportSingleProductJob constructor.
      */
-    public function __construct(array $data, string $handle = null)
+    public function __construct(array $data, array $orderData = [])
     {
         $this->data = $data;
-        $this->slug = $handle ? $handle : $data['handle'];
+        $this->orderData = $orderData;
     }
 
     public function handle()
@@ -104,6 +104,10 @@ class ImportSingleProductJob implements ShouldQueue
                 $asset = $this->importImages($image);
                 $data['gallery'][] = $asset->path();
             }
+        }
+
+        if ($this->orderData) {
+            $data = $this->updatePurchaseHistory($data);
         }
 
         $entry->merge($data);
@@ -251,6 +255,10 @@ class ImportSingleProductJob implements ShouldQueue
                 }
             }
 
+            if ($this->orderData && ($qty = Arr::get($this->orderData, 'quantity.'.$variant['sku']))) {
+                $data = $this->updatePurchaseHistory($data);
+            }
+
             $entry->merge($data);
 
             try {
@@ -334,5 +342,22 @@ class ImportSingleProductJob implements ShouldQueue
                     $variant->delete();
                 }
             });
+    }
+
+    /**
+     * Update the purchase history for this item
+     */
+    private function updatePurchaseHistory(array $data) : array
+    {
+        $data['last_purchased'] = $this->orderData['date']->format('Y-m-d H:i:s');
+
+        $orderYearKey = 'total_purchased.'.$this->orderData['date']->format('Y').'.total';
+        $orderMonthKey = 'total_purchased.'.$this->orderData['date']->format('Y').'.'.$this->orderData['date']->format('m');
+
+        Arr::set($data, 'total_purchased.lifetime', Arr::get($data, 'total_purchased.lifetime', 0) + $qty);
+        Arr::set($data, $orderYearKey, Arr::get($data, $orderYearKey, 0) + $qty);
+        Arr::set($data, $orderMonthKey, Arr::get($data, $orderMonthKey, 0) + $qty);
+
+        return $data;
     }
 }

@@ -3,6 +3,7 @@
 namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Shopify\Clients\Rest;
 use Statamic\Support\Arr;
 use StatamicRadPack\Shopify\Events;
@@ -19,15 +20,16 @@ class OrderCreateController extends WebhooksController
         $shopify = app(Rest::class);
 
         foreach ($data->line_items as $item) {
-            $product = $shopify->Product($item->product_id)->get();
-
             $response = $client->get(path: 'products/'.$item->product_id);
 
             if ($response->getStatusCode() == 200) {
                 $product = Arr::get($response->getDecodedBody(), 'product', []);
 
                 if ($product) {
-                    ImportSingleProductJob::dispatch($product)->onQueue(config('shopify.queue'));
+                    ImportSingleProductJob::dispatch($product, [
+                        'quantity' => [$item->sku => $item->quantity ?? 1],
+                        'date' => Carbon::parse($data['created_at'])
+                    ])->onQueue(config('shopify.queue'));
                 }
             }
         }
