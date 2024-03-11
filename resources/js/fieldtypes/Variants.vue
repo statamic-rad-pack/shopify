@@ -77,12 +77,10 @@ export default {
             axios.get(this.variantIndexRoute)
                 .then(res => this.variants = res.data)
                 .catch(error => this.$toast.error(error))
-
         },
 
         openEditVariantStack(variant) {
             this.stackValues = variant
-            console.table(this.stackValues)
             this.stackAction = `${this.action}/${variant.id}`
             this.stackMethod = 'patch'
             this.showVariantStack = true

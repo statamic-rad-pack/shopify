@@ -68,7 +68,7 @@ class FetchCollectionsForProductJob implements ShouldQueue
             $items = array_merge($items, $collections);
 
             while ($nextPage) {
-                $response = $this->shopify->get(path: $resource, query: $nextPage);
+                $response = $this->shopify->get(path: $resource, query: $nextPage->getNextPageQuery());
                 $collections = Arr::get($response->getDecodedBody(), $resource, []);
 
                 $nextPage = $response->getPageInfo();

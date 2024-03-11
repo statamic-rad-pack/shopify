@@ -1,6 +1,6 @@
 <template>
     <div>
-        <input type="text" :value="value" class="input-text bg-grey-30" disabled />
+        <input type="text" :value="value" class="input-text" disabled />
     </div>
 </template>
 
