@@ -159,7 +159,7 @@ class ImportSingleProductJob implements ShouldQueue
 
                 $response = app(Graphql::class)->query(['query' => $query]);
 
-                $translations = Arr::get($response->getDecodedBody(), 'translatableResource.translatableContent', []);
+                $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
 
                 if ($translations) {
                     $localizedEntry = $entry->in($site->handle());
@@ -168,7 +168,7 @@ class ImportSingleProductJob implements ShouldQueue
                         $localizedEntry = $entry->makeLocalization($site);
                     }
 
-                    $data = collect($translations)->mapWithKeys(fn ($row) => [$row['key'] => $row['value']]);
+                    $data = collect($translations)->mapWithKeys(fn ($row) => [$row['key'] == 'body_html' ? 'content' : $row['key'] => $row['value']]);
 
                     $localizedEntry->merge($data)->save();
                 }
