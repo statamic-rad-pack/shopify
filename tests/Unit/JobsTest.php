@@ -444,35 +444,29 @@ class JobsTest extends TestCase
                 ->andReturn(new HttpResponse(
                     status: 200,
                     body: '{
+                    "data": {
                       "translatableResource": {
                         "resourceId": "gid://shopify/Product/1007901140",
-                        "translatableContent": [
+                        "translations": [
                           {
                             "key": "title",
-                            "value": "Featured items",
-                            "digest": "a18b34037fda5b1afd720d4b85b86a8a75b5e389452f84f5b6d2b8e210869fd7",
-                            "locale": "en"
+                            "value": "Featured items"
                           },
                           {
                             "key": "body_html",
-                            "value": null,
-                            "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-                            "locale": "en"
+                            "value": null
                           },
                           {
                             "key": "meta_title",
-                            "value": null,
-                            "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-                            "locale": "en"
+                            "value": null
                           },
                           {
                             "key": "meta_description",
-                            "value": null,
-                            "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-                            "locale": "en"
+                            "value": null
                           }
                         ]
                       }
+                    }
                     }'
                 ));
         });
