@@ -1,5 +1,17 @@
 # Changelog
 
+## v3.2.1 - 2024-03-17
+
+### What's Changed
+
+* Update ImportSingleProductJob.php by @dwainscheeren in https://github.com/statamic-rad-pack/shopify/pull/205
+
+### New Contributors
+
+* @dwainscheeren made their first contribution in https://github.com/statamic-rad-pack/shopify/pull/205
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v3.2.0...v3.2.1
+
 ## v3.2.0 - 2024-03-11
 
 ### 🚀 New
@@ -266,6 +278,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
