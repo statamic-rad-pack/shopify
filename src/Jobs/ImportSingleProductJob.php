@@ -168,7 +168,7 @@ class ImportSingleProductJob implements ShouldQueue
                         $localizedEntry = $entry->makeLocalization($site);
                     }
 
-                    $data = collect($translations)->mapWithKeys(fn ($row) => [$row['key'] => $row['value']]);
+                    $data = collect($translations)->mapWithKeys(fn ($row) => [$row['key'] == 'body_html' ? 'content' : $row['key'] => $row['value']]);
 
                     $localizedEntry->merge($data)->save();
                 }
