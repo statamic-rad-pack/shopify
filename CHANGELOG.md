@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.2.2 - 2024-04-10
+
+### 🐛 Fixed
+
+- Hide blueprints so they cant be added through CP [@ryanmitchell](https://github.com/ryanmitchell) (#207)
+
 ## v3.2.1 - 2024-03-17
 
 ### What's Changed
@@ -278,6 +284,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
