@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Artisan;
 use Shopify\Auth\FileSessionStorage;
 use Shopify\Clients\Graphql;
 use Shopify\Clients\Rest;
+use Shopify\Clients\Storefront;
 use Shopify\Context;
 use Statamic\Events;
 use Statamic\Facades\Collection;
@@ -173,6 +174,10 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->app->bind(Graphql::class, function ($app) {
             return new Graphql(config('shopify.url'), config('shopify.admin_token'));
+        });
+
+        $this->app->bind(Storefront::class, function ($app) {
+            return new Graphql(config('shopify.url'), config('shopify.storefront_token'));
         });
     }
 
