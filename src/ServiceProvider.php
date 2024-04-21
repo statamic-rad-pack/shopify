@@ -177,7 +177,7 @@ class ServiceProvider extends AddonServiceProvider
         });
 
         $this->app->bind(Storefront::class, function ($app) {
-            return new Graphql(config('shopify.url'), config('shopify.storefront_token'));
+            return new Storefront(config('shopify.url'), config('shopify.storefront_token'));
         });
     }
 
