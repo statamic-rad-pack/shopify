@@ -311,7 +311,7 @@ class ImportSingleProductJob implements ShouldQueue
                     $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
 
                     if ($translations) {
-                        $localizedEntry = $entry->in($site);
+                        $localizedEntry = $entry->in($site->handle());
 
                         if (! $localizedEntry) {
                             $localizedEntry = $entry->makeLocalization($site);
