@@ -220,11 +220,13 @@ class ImportSingleProductJob implements ShouldQueue
             $entry = Entry::query()
                 ->where('collection', 'variants')
                 ->where('slug', $variant['id'])
+                ->where('site', Site::default()->handle())
                 ->first();
 
             if (! $entry) {
                 $entry = Entry::make()
                     ->collection('variants')
+                    ->locale(Site::default()->handle())
                     ->slug($variant['id']);
             }
 
