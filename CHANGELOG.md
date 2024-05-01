@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.2.3 - 2024-05-01
+
+- Add correct site handle for translations [@JonKaric](https://github.com/JonKaric) (#212)
+
+### 🐛 Fixed
+
+- Select default site for variants [@ryanmitchell](https://github.com/ryanmitchell) (#214)
+
 ## v3.2.2 - 2024-04-10
 
 ### 🐛 Fixed
@@ -284,6 +292,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
