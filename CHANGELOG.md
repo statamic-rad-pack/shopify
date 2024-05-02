@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.3.0 - 2024-05-02
+
+- Support Statamic 5 [@ryanmitchell](https://github.com/ryanmitchell) (#208)
+
+### 🚀 New
+
+- Add helper for parsing Shopify Rich Text metafields [@ryanmitchell](https://github.com/ryanmitchell) (#215)
+
 ## v3.2.3 - 2024-05-01
 
 - Add correct site handle for translations [@JonKaric](https://github.com/JonKaric) (#212)
@@ -292,6 +300,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
