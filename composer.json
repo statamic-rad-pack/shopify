@@ -54,5 +54,6 @@
             "description": "Shopify Addon for Statamic",
             "name": "Shopify"
         }
-    }
+    },
+    "minimum-stability": "alpha"
 }
