@@ -45,7 +45,7 @@ return [
         'content' => true,
         'vendor' => true,
         'type' => true,
-        'tags' => true
+        'tags' => true,
     ],
 
     /**
@@ -73,7 +73,7 @@ return [
      */
     'lang' => [
         'out_of_stock' => 'Out of Stock',
-        'from' => 'From'
+        'from' => 'From',
     ],
 
     /**

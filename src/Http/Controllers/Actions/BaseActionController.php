@@ -17,6 +17,7 @@ class BaseActionController extends Controller
 
             return response()->json($data);
         }
+
         return $request->_redirect ?
             redirect($request->_redirect)->with($data)
             : back()->with($data);

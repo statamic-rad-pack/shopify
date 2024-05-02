@@ -30,13 +30,15 @@ class ShopifyImportSingleProduct extends Command
 
         if ($response->getStatusCode() != 200) {
             $this->error('Failed to retrieve product');
+
             return;
         }
 
         $product = Arr::get($response->getDecodedBody(), 'product', []);
 
-        if (!$product) {
+        if (! $product) {
             $this->error('Failed to retrieve product');
+
             return;
         }
 

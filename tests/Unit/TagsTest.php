@@ -32,7 +32,7 @@ window.shopifyToken = '1234';
     /** @test */
     public function outputs_shopify_scripts()
     {
-        $this->assertStringStartsWith("<script", $this->tag('{{ shopify:scripts }}'));
+        $this->assertStringStartsWith('<script', $this->tag('{{ shopify:scripts }}'));
     }
 
     /** @test */
@@ -60,14 +60,12 @@ window.shopifyToken = '1234';
         ])
             ->collection('variants');
 
-
-
         $variant->save();
 
         $this->assertEquals('£9.99', $this->tag('{{ shopify:product_price }}', ['slug' => 'obi-wan']));
 
         $variant->merge([
-            'inventory_quantity' => 0
+            'inventory_quantity' => 0,
         ])->save();
 
         $this->assertEquals('Out of Stock', $this->tag('{{ shopify:product_price }}', ['slug' => 'obi-wan']));
@@ -79,7 +77,7 @@ window.shopifyToken = '1234';
             'product_slug' => 'obi-wan',
             'price' => 10.99,
             'inventory_quantity' => 5,
-            'storefront_id' => 'def'
+            'storefront_id' => 'def',
         ])
             ->collection('variants');
 
@@ -119,7 +117,7 @@ window.shopifyToken = '1234';
         $this->assertEquals('Yes', $this->tag('{{ if {shopify:in_stock} }}Yes{{ /if }}', ['slug' => 'obi-wan']));
 
         $variant->merge([
-            'inventory_quantity' => 0
+            'inventory_quantity' => 0,
         ])->save();
 
         $this->assertEquals('', $this->tag('{{ if {shopify:in_stock} }}Yes{{ /if }}', ['slug' => 'obi-wan']));
@@ -179,7 +177,7 @@ window.shopifyToken = '1234';
         $this->assertEquals('<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select "><option value="abc" data-in-stock="true">T-shirt - £9.99</option><option value="def" data-in-stock="true">Another T-shirt - £10.99</option></select>', $tagOutput);
 
         $variant->merge([
-            'inventory_quantity' => 0
+            'inventory_quantity' => 0,
         ])->save();
 
         $tagOutput = $this->tag('{{ shopify:variants:generate show_price="true" show_out_of_stock="false" }}', ['slug' => 'obi-wan']);

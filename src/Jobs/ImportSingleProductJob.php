@@ -14,17 +14,17 @@ use Shopify\Clients\Rest;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
 use Statamic\Facades\Term;
-use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
 
 class ImportSingleProductJob implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
-    use SerializesModels;
     use SavesImagesAndMetafields;
+    use SerializesModels;
 
     /** @var array */
     public $data;
@@ -181,7 +181,7 @@ class ImportSingleProductJob implements ShouldQueue
 
     private function importTaxonomy(string $tags, string $taxonomyHandle)
     {
-        if (! $tags){
+        if (! $tags) {
             return null;
         }
 
@@ -190,7 +190,7 @@ class ImportSingleProductJob implements ShouldQueue
         // 'Tag foo, Tag bar' => ['tag-foo' => 'Tag foo', 'tag-bar' => 'Tag bar']
         $tags = collect($tags)
             ->mapWithKeys(fn ($tagTitle) => [Str::slug($tagTitle) => $tagTitle])
-            ->each(function($tagTitle, $tagSlug) use ($taxonomyHandle) {
+            ->each(function ($tagTitle, $tagSlug) use ($taxonomyHandle) {
                 $term = Term::query()
                     ->where('taxonomy', $taxonomyHandle)
                     ->where('slug', $tagSlug)
@@ -245,7 +245,7 @@ class ImportSingleProductJob implements ShouldQueue
                 'option1' => $variant['option1'],
                 'option2' => $variant['option2'] ?? '',
                 'option3' => $variant['option3'] ?? '',
-                'storefront_id' => base64_encode($variant['admin_graphql_api_id'])
+                'storefront_id' => base64_encode($variant['admin_graphql_api_id']),
             ];
 
             if ($variant['image_id']) {
@@ -349,7 +349,7 @@ class ImportSingleProductJob implements ShouldQueue
     /**
      * Update the purchase history for this item
      */
-    private function updatePurchaseHistory(array $data) : array
+    private function updatePurchaseHistory(array $data): array
     {
         $data['last_purchased'] = $this->orderData['date']->format('Y-m-d H:i:s');
 

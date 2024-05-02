@@ -11,12 +11,12 @@ class CustomerCreateUpdateController extends WebhooksController
 {
     public function create(Request $request)
     {
-        return $this->processWebhook($request, fn($data) => Events\CustomerCreate::dispatch($data));
+        return $this->processWebhook($request, fn ($data) => Events\CustomerCreate::dispatch($data));
     }
 
     public function update(Request $request)
     {
-        return $this->processWebhook($request, fn($data) => Events\CustomerUpdate::dispatch($data));
+        return $this->processWebhook($request, fn ($data) => Events\CustomerUpdate::dispatch($data));
     }
 
     private function processWebhook(Request $request, Closure $eventCallback)
