@@ -72,4 +72,17 @@ class MyMetafieldParser
         return ['key' => 'value', 'another_key' => 'another_value'];
     }
 }
+```
 
+We have provided a helper to convert Shopify's Rich Text meta field type to either HTML or Bard, which you can use as follows:
+
+```php
+
+// html
+$html = (new StatamicRadPack\Shopify\Support\RichTextConverter)->convert($metafield['value']);
+
+// bard
+$bard = (new StatamicRadPack\Shopify\Support\RichTextConverter)->convert($metafield['value'], true);
+
+
+```
