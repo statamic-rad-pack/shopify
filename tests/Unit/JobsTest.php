@@ -67,10 +67,10 @@ class JobsTest extends TestCase
     /** @test */
     public function imports_collections_translations_for_product()
     {
-        Facades\Site::setConfig(['sites' => [
+        Facades\Site::setSites([
             'en' => ['url' => '/', 'locale' => 'en_US'],
             'fr' => ['url' => '/fr/', 'locale' => 'fr_FR'],
-        ]]);
+        ]);
 
         Facades\Taxonomy::make()->handle('collections')->sites(['en', 'fr'])->save();
 
