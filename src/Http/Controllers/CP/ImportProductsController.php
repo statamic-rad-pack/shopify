@@ -5,8 +5,8 @@ namespace StatamicRadPack\Shopify\Http\Controllers\CP;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Shopify\Clients\Rest;
-use Statamic\Support\Arr;
 use Statamic\Http\Controllers\CP\CpController;
+use Statamic\Support\Arr;
 use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 use StatamicRadPack\Shopify\Traits\FetchAllProducts;
 
@@ -37,7 +37,7 @@ class ImportProductsController extends CpController
 
         $product = Arr::get($response->getDecodedBody(), 'product', []);
 
-        if (!$product) {
+        if (! $product) {
             return response()->json([
                 'message' => 'Failed to retrieve product',
             ]);

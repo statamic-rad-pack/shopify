@@ -6,15 +6,15 @@ use StatamicRadPack\Shopify\Http\Controllers\CP\ImportProductsController;
 use StatamicRadPack\Shopify\Http\Controllers\CP\ProductsController;
 use StatamicRadPack\Shopify\Http\Controllers\CP\VariantsController;
 
-Route::get('/shopify',[DashboardController::class, 'index'])
+Route::get('/shopify', [DashboardController::class, 'index'])
     ->name('shopify.index');
 
 // Dashboard Imports
 Route::get('/shopify/import/collections/all', [ImportCollectionsController::class, 'fetchAll'])
     ->name('shopify.collections.fetchAll');
-    
+
 Route::get('/shopify/import/products/all', [ImportProductsController::class, 'fetchAll'])
-    ->name('shopify.products.fetchAll');
+        ->name('shopify.products.fetchAll');
 
 Route::get('/shopify/import/products/single', [ImportProductsController::class, 'fetchSingleProduct'])
     ->name('shopify.products.fetch');
@@ -31,5 +31,3 @@ Route::post('/shopify/variants', [VariantsController::class, 'store'])
 
 Route::patch('/shopify/variants/{id}', [VariantsController::class, 'update'])
     ->name('shopify.variants.edit');
-
-

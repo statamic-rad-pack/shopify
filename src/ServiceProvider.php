@@ -14,11 +14,6 @@ use Statamic\Facades\Permission;
 use Statamic\Facades\Taxonomy;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
-use StatamicRadPack\Shopify\Commands;
-use StatamicRadPack\Shopify\Fieldtypes;
-use StatamicRadPack\Shopify\Listeners;
-use StatamicRadPack\Shopify\Scopes;
-use StatamicRadPack\Shopify\Tags;
 
 class ServiceProvider extends AddonServiceProvider
 {

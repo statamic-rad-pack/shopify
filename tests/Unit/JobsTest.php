@@ -307,7 +307,7 @@ class JobsTest extends TestCase
             'fr' => ['url' => '/fr/', 'locale' => 'fr_FR'],
         ]]);
 
-       $data = json_decode('{
+        $data = json_decode('{
             "id": 1072481042,
             "title": "Burton Custom Freestyle 151",
             "body_html": "<strong>Good snowboard!</strong>",

@@ -20,8 +20,8 @@ class ImportCollectionsForProductJob implements ShouldQueue
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
-    use SerializesModels;
     use SavesImagesAndMetafields;
+    use SerializesModels;
 
     public $product;
 

@@ -157,6 +157,7 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
 
                 $variant['__out_of_stock'] = $out_of_stock;
                 $variant['__translated_string'] = __($langKey, $langParams);
+
                 return $variant;
             }),
         ]);

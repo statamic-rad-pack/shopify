@@ -3,7 +3,6 @@
 namespace StatamicRadPack\Shopify\Listeners;
 
 use Statamic\Events\UserSaved;
-use StatamicRadPack\Shopify\Jobs\CreateOrUpdateShopifyUser;
 
 class UserSavedListener
 {
