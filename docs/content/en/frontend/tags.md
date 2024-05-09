@@ -202,3 +202,9 @@ Return any Shopify addresses associated with the current logged in user, or the 
 {{ shopify:customer:orders customer_id="my_id" }} ... {{ /shopify:customer:orders }}
 
 ```
+
+This tag also supports pagination:
+
+```twig
+{{ shopify:customer:orders paginate="10" }} ... {{ /shopify:customer:orders }}
+```

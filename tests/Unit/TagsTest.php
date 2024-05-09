@@ -1349,5 +1349,8 @@ window.shopifyToken = '1234';
 
         $this->actingAs($user);
         $this->assertEquals('450789469', $this->tag('{{ shopify:customer:orders }}{{ orders }}{{ id }}{{ /orders }}{{ /shopify:customer:orders }}'));
+
+        $this->assertEquals('450789469', $this->tag('{{ shopify:customer:orders paginate="1" }}{{ orders }}{{ id }}{{ /orders }}{{ /shopify:customer:orders }}'));
+        $this->assertEquals('1', $this->tag('{{ shopify:customer:orders paginate="1" }}{{ paginate:total_items }}{{ /shopify:customer:orders }}'));
     }
 }

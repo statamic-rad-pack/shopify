@@ -2,12 +2,15 @@
 
 namespace StatamicRadPack\Shopify\Tags;
 
+use Illuminate\Pagination\Paginator;
 use Shopify\Clients\Rest;
+use Statamic\Extensions\Pagination\LengthAwarePaginator;
 use Statamic\Facades\Entry;
 use Statamic\Facades\User;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
 use Statamic\Tags\Concerns\GetsRedirects;
+use Statamic\Tags\Concerns\OutputsItems;
 use Statamic\Tags\Concerns\QueriesConditions;
 use Statamic\Tags\Concerns\QueriesOrderBys;
 use Statamic\Tags\Concerns\RendersForms;
@@ -15,7 +18,7 @@ use Statamic\Tags\Tags;
 
 class Shopify extends Tags
 {
-    use GetsRedirects, QueriesConditions, QueriesOrderBys, RendersForms;
+    use GetsRedirects, OutputsItems, QueriesConditions, QueriesOrderBys, RendersForms;
 
     /**
      * @return string|array
@@ -464,6 +467,41 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
             $data = Arr::get($response->getDecodedBody(), 'orders', []);
         }
 
-        return ['orders' => $data ?? [], 'orders_count' => count($data ?? [])];
+        if (! $this->params->get('as')) {
+            $this->params->put('as', 'orders');
+        }
+
+        $data = collect($data);
+
+        if ($paginate = $this->params->int('paginate')) {
+            $data = new LengthAwarePaginator(
+                $data,
+                count($data),
+                $paginate
+            );
+        }
+
+        return array_merge($this->output($data), ['orders_count' => count($data ?? [])]);
+    }
+
+    protected function paginatedOutput($paginator)
+    {
+        $paginator->withQueryString();
+
+        if ($window = $this->params->int('on_each_side')) {
+            $paginator->onEachSide($window);
+        }
+
+        $as = $this->getPaginationResultsKey();
+        $items = $paginator->getCollection()->map(function ($item) use ($paginator) {
+            $item['total_results'] =  $paginator->total();
+
+            return $item;
+        });
+
+        return array_merge([
+            $as => $items,
+            'paginate' => $this->getPaginationData($paginator),
+        ], $this->extraOutput($items));
     }
 }
