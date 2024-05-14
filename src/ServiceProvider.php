@@ -151,8 +151,12 @@ class ServiceProvider extends AddonServiceProvider
 
     private function setShopifyApiConfig(): void
     {
+        if (! $key = config('shopify.auth_key')) {
+            return;
+        }
+
         Context::initialize(
-            apiKey: config('shopify.auth_key'),
+            apiKey: $key,
             apiSecretKey: config('shopify.auth_password'),
             scopes: ['read_metaobjects', 'read_products'],
             hostName: config('shopify.url'),
