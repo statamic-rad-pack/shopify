@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.3.1 - 2024-05-14
+
+- Support pagination on customer orders tag [@ryanmitchell](https://github.com/ryanmitchell) (#216)
+
+### 🐛 Fixed
+
+- Don't set shopify context if a key isnt set [@ryanmitchell](https://github.com/ryanmitchell) (#218)
+
 ## v3.3.0 - 2024-05-02
 
 - Support Statamic 5 [@ryanmitchell](https://github.com/ryanmitchell) (#208)
@@ -300,6 +308,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
