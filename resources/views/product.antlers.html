@@ -44,12 +44,12 @@
                 </div>
             {{ /if }}
 
-            {{ if {in_stock} }}
+            {{ if {shopify:in_stock} }}
             <form action="" name="" id="ss-product-add-form" class="mt-5">
                 <input type="hidden" name="product_id" id="ss-product-id" value="{{ product_id }}" />
 
                 <div class="flex mb-3">
-                    {{ product_variants show_price="true" show_out_of_stock="true" class="block w-1/2 px-2 py-3 mr-4 border" }}
+                    {{ shopify:variants:generate show_price="true" show_out_of_stock="true" class="block w-1/2 px-2 py-3 mr-4 border" }}
 
                     <input type="number" min="1" value="1" id="ss-product-qty" class="w-20 p-2 border" />
                 </div>
