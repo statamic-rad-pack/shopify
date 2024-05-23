@@ -121,4 +121,9 @@ return [
      * What job should we use to update users in Shopify
      */
     'update_shopify_user_job' => \StatamicRadPack\Shopify\Jobs\CreateOrUpdateShopifyUser::class,
+
+    /**
+     * Where should the Shopify API client store its session data
+     */
+    'session_storage_path' => env('SHOPIFY_SESSION_STORAGE_PATH', '/tmp/php_sessions'),
 ];
