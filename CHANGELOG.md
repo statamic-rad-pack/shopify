@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.4.0 - 2024-05-24
+
+- [fix] Add shopify prefix to tags requiring it [@haugen86](https://github.com/haugen86) (#219)
+
+### 🚀 New
+
+- Add session_storage_path config [@ryanmitchell](https://github.com/ryanmitchell) (#221)
+
 ## v3.3.1 - 2024-05-14
 
 - Support pagination on customer orders tag [@ryanmitchell](https://github.com/ryanmitchell) (#216)
@@ -308,6 +316,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
