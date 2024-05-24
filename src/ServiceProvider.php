@@ -160,7 +160,7 @@ class ServiceProvider extends AddonServiceProvider
             apiSecretKey: config('shopify.auth_password'),
             scopes: ['read_metaobjects', 'read_products'],
             hostName: config('shopify.url'),
-            sessionStorage: new FileSessionStorage('/tmp/php_sessions'),
+            sessionStorage: new FileSessionStorage(config('shopify.session_storage_path', '/tmp/php_sessions')),
             apiVersion: config('shopify.api_version') ?? '2023-07',
             isEmbeddedApp: false,
             isPrivateApp: config('shopify.api_private_app') ?? false,
