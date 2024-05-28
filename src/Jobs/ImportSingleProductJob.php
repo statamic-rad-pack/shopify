@@ -341,8 +341,10 @@ class ImportSingleProductJob implements ShouldQueue
                 $item = array_search($variant->slug(), array_column($variants, 'id'));
 
                 if ($item === false) {
-                    $variant->delete();
+                    return;
                 }
+
+                $variant->delete();
             });
     }
 
