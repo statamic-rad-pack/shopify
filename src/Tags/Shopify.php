@@ -471,7 +471,7 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
             $this->params->put('as', 'orders');
         }
 
-        $data = collect($data);
+        $data = collect($data ?? []);
 
         if ($paginate = $this->params->int('paginate')) {
             $data = new LengthAwarePaginator(
