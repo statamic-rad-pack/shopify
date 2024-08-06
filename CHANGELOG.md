@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.4.2 - 2024-08-06
+
+- Fix bug in customer orders tag when no customer exists [@ryanmitchell](https://github.com/ryanmitchell) (#223)
+
+### 🐛 Fixed
+
+- Fix icon in dark mode [@ryanmitchell](https://github.com/ryanmitchell) (#224)
+
 ## v3.4.1 - 2024-07-25
 
 - Fix bugs in product webhook update [@ryanmitchell](https://github.com/ryanmitchell) (#222)
@@ -320,6 +328,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
