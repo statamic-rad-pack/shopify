@@ -28,12 +28,6 @@ A more detailed breakdown of our scripts can be found on the [Storefront API](/f
 
 If you are looking to spin something up quickly and test things you can follow the example templates step below.
 
-<alert type="warning">
-
-  I'll be building a complete starter theme to get off the ground running with this add-on. Once released, the below will be removed and placed in the starter theme.
-
-</alert>
-
 ### Example Templates
 
 There are example templates for the `cart`, `product` and `products` page in the addon folder. To get them on the frontend you can run the following command:
