@@ -17,7 +17,7 @@ A [Statamic](https://statamic.com) addon that allows you to integrate [Shopify](
 
 ## Purpose
 
-Shopify is world-class for ecommerce and it provides one of the best systems for handling orders, products, and users. However, the templating engine is frankly _shit_. This plugin aims to marry the wonderful CMS of Statamic with the ecommerce tools of Shopify.
+Shopify is world-class for ecommerce and it provides one of the best systems for handling orders, products, and users. However, the templating engine is no Antlers. This plugin aims to marry the wonderful CMS of Statamic with the ecommerce tools of Shopify.
 
 It utilises the Admin API to fetch products and listen to webhooks, and then allows for customisation on the front using either the Storefront API or the Buy Buttons.
 

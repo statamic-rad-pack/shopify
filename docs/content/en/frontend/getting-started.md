@@ -14,7 +14,7 @@ This addon only takes into account the Storefront API as we want more control ov
 
 ## Demo
 
-To see the front-end in action, you can view a demo at [https://shopify.jackwhiting.dev](https://shopify.jackwhiting.dev).
+To see the front-end in action, you can view a demo at [https://statamic-shopify-demostore.vercel.app](https://statamic-shopify-demostore.vercel.app).
 
 ## Storefront API
 
