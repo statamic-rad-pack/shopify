@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.5.0 - 2024-09-04
+
+### Whats new
+
+- Set default roles and groups from Statamic when making users [@ryanmitchell](https://github.com/ryanmitchell) (#225)
+
 ## v3.4.2 - 2024-08-06
 
 - Fix bug in customer orders tag when no customer exists [@ryanmitchell](https://github.com/ryanmitchell) (#223)
@@ -328,6 +334,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
