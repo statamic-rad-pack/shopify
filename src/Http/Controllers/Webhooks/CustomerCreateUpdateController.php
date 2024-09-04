@@ -30,6 +30,12 @@ class CustomerCreateUpdateController extends WebhooksController
 
         if (! $customerEntry) {
 
+            if (! $data->email) {
+                return response()->json([
+                    'message' => 'Customer cannot be created as no email was provided',
+                ], 200);
+            }
+
             $customerEntry = User::query()
                 ->where('email', $data->email)
                 ->first();
@@ -47,6 +53,14 @@ class CustomerCreateUpdateController extends WebhooksController
                     $customerEntry->merge([
                         'name' => collect([$data->first_name, $data->last_name])->filter()->join(' '),
                     ]);
+                }
+
+                if ($roles = config('statamic.users.new_user_roles')) {
+                    $customerEntry->explicitRoles($roles);
+                }
+
+                if ($groups = config('statamic.users.new_user_groups')) {
+                    $customerEntry->groups($groups);
                 }
             }
 
