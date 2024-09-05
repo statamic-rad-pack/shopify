@@ -17,7 +17,6 @@ trait SavesImagesAndMetafields
     {
         $url = $this->cleanImageURL($image['src']);
         $name = $this->getImageNameFromUrl($url);
-        $file = $this->uploadFakeFileFromUrl($name, $url);
 
         // Check if it exists first - no point double importing.
         $asset = Asset::query()
@@ -28,6 +27,8 @@ trait SavesImagesAndMetafields
         if ($asset) {
             return $asset;
         }
+
+        $file = $this->uploadFakeFileFromUrl($name, $url);
 
         // If it doesn't exists, let's make it exist.
         $asset = Asset::make()
