@@ -157,7 +157,6 @@ class ImportSingleProductJob implements ShouldQueue
                     }
                 }
             } catch (\Throwable $e) {
-                dd($e);
                 Log::error('Could not retrieve metafields for product '.$this->data['id']);
                 Log::error($e->getMessage());
             }
