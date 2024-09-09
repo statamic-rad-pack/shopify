@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.5.1 - 2024-09-05
+
+### 🐛 Fixed
+
+- Don't download an image unless we need it [@ryanmitchell](https://github.com/ryanmitchell) (#226)
+
 ## v3.5.0 - 2024-09-04
 
 ### Whats new
@@ -334,6 +340,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
