@@ -14,7 +14,7 @@ Route::get('/shopify/import/collections/all', [ImportCollectionsController::clas
     ->name('shopify.collections.fetchAll');
 
 Route::get('/shopify/import/products/all', [ImportProductsController::class, 'fetchAll'])
-        ->name('shopify.products.fetchAll');
+    ->name('shopify.products.fetchAll');
 
 Route::get('/shopify/import/products/single', [ImportProductsController::class, 'fetchSingleProduct'])
     ->name('shopify.products.fetch');

@@ -3,10 +3,7 @@
 namespace StatamicRadPack\Shopify\Tests;
 
 use JMac\Testing\Traits\AdditionalAssertions;
-use Orchestra\Testbench\TestCase as OrchestraTestCase;
-use Statamic\Extend\Manifest;
 use Statamic\Facades;
-use Statamic\Providers\StatamicServiceProvider;
 use Statamic\Statamic;
 use Statamic\Testing\AddonTestCase;
 use Statamic\Testing\Concerns\PreventsSavingStacheItemsToDisk;

@@ -506,7 +506,7 @@ class ImportIndividualProductJobTest extends TestCase
     }
 
     /** @test */
-    public function updates_publish_status_based_on_shopify_resource_publications ()
+    public function updates_publish_status_based_on_shopify_resource_publications()
     {
         $data = json_decode('{
             "id": 1072481042,
