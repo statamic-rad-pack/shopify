@@ -126,4 +126,10 @@ return [
      * Where should the Shopify API client store its session data
      */
     'session_storage_path' => env('SHOPIFY_SESSION_STORAGE_PATH', '/tmp/php_sessions'),
+
+    /**
+     * Should publish status and date be determined by Shopify's settings
+     * (this config is for backwards compatablity; this will not be configurable in the next major version)
+     */
+    'honour_publish_status_and_dates' => true,
 ];

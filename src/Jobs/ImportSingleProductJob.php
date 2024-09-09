@@ -164,24 +164,26 @@ class ImportSingleProductJob implements ShouldQueue
 
             // publication state
             try {
+                // @deprecated: config will be removed in next major version
+                if (config('shopify.honour_publish_status_and_dates', false)) {
+                    $publicationStatus = collect(Arr::get($response->getDecodedBody(), 'data.product.resourcePublications.edges', []))
+                        ->where('node.publication.name', 'Online Store')
+                        ->map(function ($channel) {
+                            if (! $node = $channel['node'] ?? []) {
+                                return [];
+                            }
 
-                $publicationStatus = collect(Arr::get($response->getDecodedBody(), 'data.product.resourcePublications.edges', []))
-                    ->where('node.publication.name', 'Online Store')
-                    ->map(function ($channel) {
-                        if (! $node = $channel['node'] ?? []) {
-                            return [];
+                            return $node;
+                        })
+                        ->filter()
+                        ->first();
+
+                    if ($publicationStatus) {
+                        $entry->published($publicationStatus['isPublished'] ?? false);
+
+                        if ($entry->collection()->dated() && $publicationStatus['publishDate']) {
+                            $entry->date(Carbon::parse($publicationStatus['publishDate']));
                         }
-
-                        return $node;
-                    })
-                    ->filter()
-                    ->first();
-
-                if ($publicationStatus) {
-                    $entry->published($publicationStatus['isPublished'] ?? false);
-
-                    if ($entry->collection()->dated() && $publicationStatus['publishDate']) {
-                        $entry->date(Carbon::parse($publicationStatus['publishDate']));
                     }
                 }
             } catch (\Throwable $e) {
