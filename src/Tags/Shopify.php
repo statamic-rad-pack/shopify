@@ -2,7 +2,6 @@
 
 namespace StatamicRadPack\Shopify\Tags;
 
-use Illuminate\Pagination\Paginator;
 use Shopify\Clients\Rest;
 use Statamic\Extensions\Pagination\LengthAwarePaginator;
 use Statamic\Facades\Entry;
@@ -494,7 +493,7 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
 
         $as = $this->getPaginationResultsKey();
         $items = $paginator->getCollection()->map(function ($item) use ($paginator) {
-            $item['total_results'] =  $paginator->total();
+            $item['total_results'] = $paginator->total();
 
             return $item;
         });

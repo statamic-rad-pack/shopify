@@ -10,7 +10,5 @@ class ProductDelete
 {
     use Dispatchable, SerializesModels;
 
-    public function __construct(public stdClass $data)
-    {
-    }
+    public function __construct(public stdClass $data) {}
 }

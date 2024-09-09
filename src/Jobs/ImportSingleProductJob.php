@@ -112,11 +112,42 @@ class ImportSingleProductJob implements ShouldQueue
 
         $entry->merge($data);
 
+        // this is to make testing easier
+        // means we can just test individual parts of the job
         try {
-            $response = app(Rest::class)->get(path: 'metafields', query: ['metafield' => ['owner_id' => $this->data['id'], 'owner_resource' => 'product']]);
+            $query = <<<QUERY
+              query {
+                product(id: "gid://shopify/Product/{$this->data['id']}") {
+                  metafields(first: 100) {
+                    edges {
+                       node {
+                        id
+                        jsonValue
+                        key
+                        value
+                      }
+                    }
+                  }
+                  resourcePublications(onlyPublished: false, first:100) {
+                    edges {
+                      node {
+                        isPublished
+                        publication {
+                            id
+                        }
+                        publishDate
+                      }
+                    }
+                  }
+                }
+              }
+            QUERY;
 
-            if ($response->getStatusCode() == 200) {
-                $metafields = Arr::get($response->getDecodedBody(), 'metafields', []);
+            $response = app(Graphql::class)->query(['query' => $query]);
+
+            // meta fields
+            try {
+                $metafields = collect(Arr::get($response->getDecodedBody(), 'data.product.metafields.edges', []))->map(fn ($metafield) => $metafield['node'] ?? [])->filter()->all();
 
                 if ($metafields) {
                     $metafields = $this->parseMetafields($metafields, 'product');
@@ -125,9 +156,42 @@ class ImportSingleProductJob implements ShouldQueue
                         $entry->merge($metafields);
                     }
                 }
+            } catch (\Throwable $e) {
+                Log::error('Could not retrieve metafields for product '.$this->data['id']);
+                Log::error($e->getMessage());
             }
+
+            // publication state
+            try {
+                // @deprecated: config will be removed in next major version
+                if (config('shopify.respect_shopify_publish_status_and_dates', false)) {
+                    $publicationStatus = collect(Arr::get($response->getDecodedBody(), 'data.product.resourcePublications.edges', []))
+                        ->where('node.publication.name', 'Online Store')
+                        ->map(function ($channel) {
+                            if (! $node = $channel['node'] ?? []) {
+                                return [];
+                            }
+
+                            return $node;
+                        })
+                        ->filter()
+                        ->first();
+
+                    if ($publicationStatus) {
+                        $entry->published($publicationStatus['isPublished'] ?? false);
+
+                        if ($entry->collection()->dated() && $publicationStatus['publishDate']) {
+                            $entry->date(Carbon::parse($publicationStatus['publishDate']));
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::error('Could not manage publications status for product '.$this->data['id']);
+                Log::error($e->getMessage());
+            }
+
         } catch (\Throwable $e) {
-            Log::error('Could not retrieve metafields for product '.$this->data['id']);
+            Log::error($e->getMessage());
         }
 
         $entry->save();

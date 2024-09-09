@@ -19,7 +19,7 @@ class Variants extends Fieldtype
             return;
         }
 
-        $variantBlueprint = new VariantBlueprint();
+        $variantBlueprint = new VariantBlueprint;
         $variantFields = $variantBlueprint()->fields()->preProcess();
 
         return [

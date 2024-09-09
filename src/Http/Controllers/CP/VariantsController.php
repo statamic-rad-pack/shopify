@@ -29,9 +29,7 @@ class VariantsController extends CpController
             });
     }
 
-    public function store()
-    {
-    }
+    public function store() {}
 
     public function update(Request $request)
     {
@@ -41,7 +39,7 @@ class VariantsController extends CpController
         }
 
         // Match the values to the blueprint, validate.
-        $blueprint = new VariantBlueprint();
+        $blueprint = new VariantBlueprint;
         $fields = $blueprint()->fields()->addValues($request->all());
         $fields->validate();
         $values = $fields->process()->values()->toArray();
