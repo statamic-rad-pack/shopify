@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.6.0 - 2024-09-09
+
+### What's new
+
+- https://github.com/statamic-rad-pack/shopify/pull/227 [@ryanmitchell](https://github.com/ryanmitchell) (#227)
+
 ## v3.5.1 - 2024-09-05
 
 ### 🐛 Fixed
@@ -340,6 +346,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
