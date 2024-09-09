@@ -181,17 +181,15 @@ class ImportSingleProductJob implements ShouldQueue
                     $entry->published($publicationStatus['isPublished'] ?? false);
 
                     if ($entry->collection()->dated() && $publicationStatus['publishDate']) {
-                        $entry->date(Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s'));
+                        $entry->date(Carbon::parse($publicationStatus['publishDate']));
                     }
                 }
             } catch (\Throwable $e) {
-                dd($e);
                 Log::error('Could not manage publications status for product ' . $this->data['id']);
                 Log::error($e->getMessage());
             }
 
         } catch (\Throwable $e) {
-            ray($e);
             Log::error($e->getMessage());
         }
 
