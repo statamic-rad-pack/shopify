@@ -129,7 +129,7 @@ return [
 
     /**
      * Should publish status and date be determined by Shopify's settings
-     * (this config is for backwards compatablity; this will not be configurable in the next major version)
+     * (this config is for backwards compatibility; this will not be configurable in the next major version)
      */
     'respect_shopify_publish_status_and_dates' => true,
 ];
