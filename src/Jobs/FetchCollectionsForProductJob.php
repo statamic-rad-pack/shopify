@@ -9,6 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Shopify\Clients\Rest;
 use Statamic\Facades\Taxonomy;
+use Statamic\Facades\Term;
 use Statamic\Support\Arr;
 
 class FetchCollectionsForProductJob implements ShouldQueue
@@ -18,14 +19,9 @@ class FetchCollectionsForProductJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public $product;
-
     public $shopify;
 
-    public function __construct($product)
-    {
-        $this->product = $product;
-    }
+    public function __construct(public $product) {}
 
     public function handle()
     {
@@ -36,13 +32,25 @@ class FetchCollectionsForProductJob implements ShouldQueue
 
         $this->shopify = app(Rest::class);
 
-        $collections = [];
+        $collections = collect([])
+            ->merge($this->getManualCollections())
+            ->merge($this->getSmartCollections())
+            ->map(function ($collection) {
+                $term = Term::query()
+                    ->where('slug', $collection['handle'])
+                    ->where('taxonomy', config('shopify.taxonomies.collections'))
+                    ->first();
 
-        $collections = array_merge($collections, $this->getManualCollections());
-        $collections = array_merge($collections, $this->getSmartCollections());
+                if (! $term) {
+                    return;
+                }
 
-        ImportCollectionsForProductJob::dispatch($collections, $this->product)
-            ->onQueue(config('shopify.queue'));
+                return $collection['handle'];
+            })
+            ->filter()
+            ->all();
+
+        $this->product->set(config('shopify.taxonomies.collections'), $collections)->save();
     }
 
     public function getManualCollections()

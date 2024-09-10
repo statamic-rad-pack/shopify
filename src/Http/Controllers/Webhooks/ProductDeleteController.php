@@ -13,7 +13,7 @@ class ProductDeleteController extends WebhooksController
         // Decode data
         $data = json_decode($request->getContent());
 
-        if (! is_object($data) && ! $data->id) {
+        if (! is_object($data) || ! $data->id) {
             return;
         }
 

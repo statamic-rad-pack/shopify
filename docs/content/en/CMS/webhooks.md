@@ -20,6 +20,36 @@ If you are trying to test any webhooks locally you'll need to use a service like
 
 </alert>
 
+## Collection Create
+
+You should add a webhook on **Collection Creation** that sends the data to Statamic and queues the import of that one collection.
+
+Your URL should point to the following endpoint:
+
+```bash
+https://YOURSITE/!/shopify/webhook/collection/create
+```
+
+## Collection Update
+
+Similarly, rather than running the full import to catch any changes to collections, you can add a webhook on **Collection Update** that sends any updated data to Statamic and queues a refresh of that collection.
+
+Your URL should point to the following endpoint:
+
+```bash
+https://YOURSITE/!/shopify/webhook/collection/update
+```
+
+## Collection Delete
+
+If you want collections to be removed from Statamic whenever you delete them from Shopify, you can add a webhook in Shopify which tells the system to delete the collection.
+
+Your URL should point to the following endpoint:
+
+```bash
+https://YOURSITE/!/shopify/webhook/collection/delete
+```
+
 
 ## Product Create
 
@@ -67,13 +97,18 @@ Each webhook listener also fires an event you can use to hook into with your own
 
 The available events are:
 
-`StatamicRadPack\Shopify\Events\CustomerCreate`
-`StatamicRadPack\Shopify\Events\CustomerDelete`
-`StatamicRadPack\Shopify\Events\CustomerUpdate`
-`StatamicRadPack\Shopify\Events\ProductCreate`
-`StatamicRadPack\Shopify\Events\ProductDelete`
-`StatamicRadPack\Shopify\Events\ProductUpdate`
-`StatamicRadPack\Shopify\Events\OrderCreate`
+```
+StatamicRadPack\Shopify\Events\CollectionCreate
+StatamicRadPack\Shopify\Events\CollectionDelete
+StatamicRadPack\Shopify\Events\CollectionUpdate
+StatamicRadPack\Shopify\Events\CustomerCreate
+StatamicRadPack\Shopify\Events\CustomerDelete
+StatamicRadPack\Shopify\Events\CustomerUpdate
+StatamicRadPack\Shopify\Events\ProductCreate
+StatamicRadPack\Shopify\Events\ProductDelete
+StatamicRadPack\Shopify\Events\ProductUpdate
+StatamicRadPack\Shopify\Events\OrderCreate
+```
 
 Each event has one property `$data` with the payload data decoded to a `stdClass`.
 
