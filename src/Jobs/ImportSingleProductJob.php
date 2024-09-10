@@ -118,6 +118,14 @@ class ImportSingleProductJob implements ShouldQueue
             $query = <<<QUERY
               query {
                 product(id: "gid://shopify/Product/{$this->data['id']}") {
+                  collections(first: 100) {
+                    edges {
+                       node {
+                        id
+                        handle
+                      }
+                    }
+                  }
                   metafields(first: 100) {
                     edges {
                        node {
@@ -144,6 +152,34 @@ class ImportSingleProductJob implements ShouldQueue
             QUERY;
 
             $response = app(Graphql::class)->query(['query' => $query]);
+
+            // collections
+            try {
+                $collections = collect(Arr::get($response->getDecodedBody(), 'data.product.collections.edges', []))
+                    ->map(function ($collection) {
+                        if (! $node = $collection['node'] ?? []) {
+                            return [];
+                        }
+
+                        $term = Term::query()
+                            ->where('slug', $node['handle'])
+                            ->where('taxonomy', config('shopify.taxonomies.collections'))
+                            ->first();
+
+                        if (! $term) {
+                            return;
+                        }
+
+                        return $node['handle'];
+                    })
+                    ->filter()
+                    ->all();
+
+                $entry->set(config('shopify.taxonomies.collections'), $collections)->save();
+            } catch (\Throwable $e) {
+                Log::error('Could not retrieve collections for product '.$this->data['id']);
+                Log::error($e->getMessage());
+            }
 
             // meta fields
             try {
@@ -238,9 +274,6 @@ class ImportSingleProductJob implements ShouldQueue
                 }
             });
         }
-
-        // Get the collections
-        FetchCollectionsForProductJob::dispatch($entry)->onQueue(config('shopify.queue'));
     }
 
     private function importTaxonomy(string $tags, string $taxonomyHandle)

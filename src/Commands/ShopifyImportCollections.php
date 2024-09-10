@@ -4,11 +4,12 @@ namespace StatamicRadPack\Shopify\Commands;
 
 use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
-use Statamic\Facades\Entry;
-use StatamicRadPack\Shopify\Jobs\FetchCollectionsForProductJob;
+use StatamicRadPack\Shopify\Jobs\ImportCollectionJob;
+use StatamicRadPack\Shopify\Traits\FetchCollections;
 
 class ShopifyImportCollections extends Command
 {
+    use FetchCollections;
     use RunsInPlease;
 
     protected $signature = 'shopify:import:collections';
@@ -21,14 +22,12 @@ class ShopifyImportCollections extends Command
         $this->info('================= IMPORT SHOPIFY COLLECTIONS ===================');
         $this->info('================================================================');
 
-        $products = Entry::query()
-            ->where('collection', 'products')
-            ->get();
-
-        foreach ($products as $product) {
-            FetchCollectionsForProductJob::dispatch($product)
-                ->onQueue(config('shopify.queue'));
-        }
+        collect([])
+            ->merge($this->getManualCollections())
+            ->merge($this->getSmartCollections())
+            ->each(function ($collection) {
+                ImportCollectionJob::dispatch($collection)->onQueue(config('shopify.queue'));
+            });
 
         $this->info('Collections have been dispatched for import');
     }
