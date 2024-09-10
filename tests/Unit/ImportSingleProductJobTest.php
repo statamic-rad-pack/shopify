@@ -11,7 +11,7 @@ use Statamic\Facades;
 use StatamicRadPack\Shopify\Jobs;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
-class ImportIndividualProductJobTest extends TestCase
+class ImportSingleProductJobTest extends TestCase
 {
     /** @test */
     public function imports_product()
@@ -90,6 +90,9 @@ class ImportIndividualProductJobTest extends TestCase
         Facades\Taxonomy::make()->handle('tags')->save();
         Facades\Taxonomy::make()->handle('type')->save();
         Facades\Taxonomy::make()->handle('vendor')->save();
+
+        Facades\Term::make()->taxonomy('collections')->slug('ipods')->merge([])->save();
+        Facades\Term::make()->taxonomy('collections')->slug('ipods-1')->merge([])->save();
 
         $this->mock(Rest::class, function (MockInterface $mock) {
             $mock

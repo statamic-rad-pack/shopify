@@ -28,30 +28,30 @@ class ImportCollectionJob implements ShouldQueue
     public function handle()
     {
         $term = Term::query()
-            ->where('slug', $collection['handle'])
+            ->where('slug', $this->collection['handle'])
             ->where('taxonomy', config('shopify.taxonomies.collections'))
             ->first();
 
         if (! $term) {
             $term = Term::make()
                 ->taxonomy(config('shopify.taxonomies.collections'))
-                ->slug($collection['handle']);
+                ->slug($this->collection['handle']);
         }
 
         $data = [
-            'title' => $collection['title'],
-            'collection_id' => $collection['id'],
-            'content' => $collection['body_html'],
+            'title' => $this->collection['title'],
+            'collection_id' => $this->collection['id'],
+            'content' => $this->collection['body_html'],
         ];
 
         // Import Images
-        if (isset($collection['image'])) {
-            $asset = $this->importImages($collection['image']);
+        if (isset($this->collection['image'])) {
+            $asset = $this->importImages($this->collection['image']);
             $data['featured_image'] = $asset->path();
         }
 
         try {
-            $response = app(Rest::class)->get(path: 'metafields', query: ['metafield' => ['owner_id' => $collection['id'], 'owner_resource' => 'collection']]);
+            $response = app(Rest::class)->get(path: 'metafields', query: ['metafield' => ['owner_id' => $this->collection['id'], 'owner_resource' => 'collection']]);
 
             if ($response->getStatusCode() == 200) {
                 $metafields = Arr::get($response->getDecodedBody(), 'metafields', []);
@@ -65,14 +65,14 @@ class ImportCollectionJob implements ShouldQueue
                 }
             }
         } catch (\Throwable $e) {
-            Log::error('Could not retrieve metafields for collection '.$collection['id']);
+            Log::error('Could not retrieve metafields for collection '.$this->collection['id']);
         }
 
         // if we are multisite, get translations
         if (Site::hasMultiple()) {
             $taxonomySites = $term->taxonomy()->sites();
 
-            Site::all()->each(function ($site) use ($collection, $taxonomySites, $term) {
+            Site::all()->each(function ($site) use ($taxonomySites, $term) {
                 if (Site::default()->handle() == $site->handle()) {
                     return;
                 }
@@ -83,7 +83,7 @@ class ImportCollectionJob implements ShouldQueue
 
                 $query = <<<QUERY
                   query {
-                    translatableResource(resourceId: "gid://shopify/Collection/{$collection['id']}") {
+                    translatableResource(resourceId: "gid://shopify/Collection/{$this->collection['id']}") {
                       resourceId
                       translations(locale: "{$site->locale()}") {
                         key
