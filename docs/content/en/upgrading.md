@@ -5,6 +5,12 @@ position: 3
 category: Installation
 ---
 
+## Upgrading from 3.x to 4.x
+
+Due to the changes to how collections are processed, you will now need to set up webhooks for collection create, collection update, and collection delete.
+
+See the webhooks documentation for full details.
+
 ## Upgrading from 2.x to 3.x
 
 Due to the migration to the offical Shopify PHP library this update is being treated as a breaking change. 
