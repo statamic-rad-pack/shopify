@@ -168,71 +168,7 @@ class ServiceProvider extends AddonServiceProvider
             Artisan::call('vendor:publish --tag=shopify-config');
             Artisan::call('vendor:publish --tag=shopify-resources --force');
 
-            if (! Facades\AssetContainer::find(config('shopify.asset.container'))) {
-                Facades\AssetContainer::make()
-                    ->handle(config('shopify.asset.container'))
-                    ->title('Shopify')
-                    ->disk('assets')
-                    ->save();
-            }
-
-            if (! Facades\Taxonomy::find(config('shopify.taxonomies.collections'))) {
-                $taxonomy = tap(Facades\Taxonomy::make()
-                    ->handle(config('shopify.taxonomies.collections'))
-                    ->title('Product Collections'))
-                    ->save();
-
-                $taxonomy->blueprint()
-                    ->setContents(Facades\YAML::parse(__DIR__ . '/../resources/blueprints/collection.yaml'))
-                    ->save();
-            }
-
-            if (! Facades\Taxonomy::find(config('shopify.taxonomies.tags'))) {
-                Facades\Taxonomy::make()
-                    ->handle(config('shopify.taxonomies.tags'))
-                    ->title('Product Tags')
-                    ->save();
-            }
-
-            if (! Facades\Taxonomy::find(config('shopify.taxonomies.type'))) {
-                Facades\Taxonomy::make()
-                    ->handle(config('shopify.taxonomies.type'))
-                    ->title('Product Type')
-                    ->save();
-            }
-
-            if (! Facades\Taxonomy::find(config('shopify.taxonomies.vendor'))) {
-                Facades\Taxonomy::make()
-                    ->handle(config('shopify.taxonomies.vendor'))
-                    ->title('Product Vendor')
-                    ->save();
-            }
-
-            if (! Facades\Collection::find('products')) {
-                $collection = tap(Facades\Collection::make()
-                    ->handle('products')
-                    ->title('Products')
-                    ->route('/products/{slug}')
-                    ->template('product')
-                    ->dated(true)
-                    ->taxonomies(collect(config('shopify.taxonomies', []))->values()->all()))
-                    ->save();
-
-                $collection->blueprint()
-                    ->setContents(Facades\YAML::parse(__DIR__ . '/../resources/blueprints/product.yaml'))
-                    ->save();
-            }
-
-            if (! Facades\Collection::find('variants')) {
-                $collection = tap(Facades\Collection::make()
-                    ->handle('variants')
-                    ->title('Variants'))
-                    ->save();
-
-                $collection->blueprint()
-                    ->setContents(Facades\YAML::parse(__DIR__ . '/../resources/blueprints/variant.yaml'))
-                    ->save();
-            }
+            static::installCollectionsTaxonomiesAssetsAndBlueprints();
         });
     }
 
@@ -241,5 +177,74 @@ class ServiceProvider extends AddonServiceProvider
         $this->app->booted(function () {
             Facades\Permission::register('access shopify')->label('Manage Shopify Imports');
         });
+    }
+
+    public static function installCollectionsTaxonomiesAssetsAndBlueprints()
+    {
+        if (! Facades\AssetContainer::find(config('shopify.asset.container'))) {
+            Facades\AssetContainer::make()
+                ->handle(config('shopify.asset.container'))
+                ->title('Shopify')
+                ->disk('assets')
+                ->save();
+        }
+
+        if (! Facades\Taxonomy::find(config('shopify.taxonomies.collections'))) {
+            $taxonomy = tap(Facades\Taxonomy::make()
+                ->handle(config('shopify.taxonomies.collections'))
+                ->title('Product Collections'))
+                ->save();
+
+            $taxonomy->termBlueprint()
+                ->setContents(Facades\YAML::file(__DIR__ . '/../resources/blueprints/collection.yaml')->parse())
+                ->save();
+        }
+
+        if (! Facades\Taxonomy::find(config('shopify.taxonomies.tags'))) {
+            Facades\Taxonomy::make()
+                ->handle(config('shopify.taxonomies.tags'))
+                ->title('Product Tags')
+                ->save();
+        }
+
+        if (! Facades\Taxonomy::find(config('shopify.taxonomies.type'))) {
+            Facades\Taxonomy::make()
+                ->handle(config('shopify.taxonomies.type'))
+                ->title('Product Type')
+                ->save();
+        }
+
+        if (! Facades\Taxonomy::find(config('shopify.taxonomies.vendor'))) {
+            Facades\Taxonomy::make()
+                ->handle(config('shopify.taxonomies.vendor'))
+                ->title('Product Vendor')
+                ->save();
+        }
+
+        if (! Facades\Collection::find('products')) {
+            $collection = tap(Facades\Collection::make()
+                ->handle('products')
+                ->title('Products')
+                ->route('/products/{slug}')
+                ->template('product')
+                ->dated(true)
+                ->taxonomies(collect(config('shopify.taxonomies', []))->values()->all()))
+                ->save();
+
+            $collection->entryBlueprint()
+                ->setContents(Facades\YAML::file(__DIR__ . '/../resources/blueprints/product.yaml')->parse())
+                ->save();
+        }
+
+        if (! Facades\Collection::find('variants')) {
+            $collection = tap(Facades\Collection::make()
+                ->handle('variants')
+                ->title('Variants'))
+                ->save();
+
+            $collection->blueprint()
+                ->setContents(Facades\YAML::parse(__DIR__ . '/../resources/blueprints/variant.yaml'))
+                ->save();
+        }
     }
 }
