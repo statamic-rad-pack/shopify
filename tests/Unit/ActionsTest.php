@@ -3,6 +3,7 @@
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
 use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\Test;
 use Shopify\Clients\Rest;
 use Shopify\Clients\RestResponse;
 use Statamic\Facades;
@@ -10,7 +11,7 @@ use StatamicRadPack\Shopify\Tests\TestCase;
 
 class ActionsTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function gets_correct_data_from_action_url()
     {
         $product = Facades\Entry::make()
@@ -61,7 +62,7 @@ class ActionsTest extends TestCase
         $this->assertSame('[{"title":"T-shirt","storefront_id":"abc","price":9.99,"inventory_quantity":10}]', $response->getContent());
     }
 
-    /** @test */
+    #[Test]
     public function creates_an_address()
     {
         $this->mock(Rest::class, function (MockInterface $mock) {
@@ -83,7 +84,7 @@ class ActionsTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function updates_an_address()
     {
         $this->mock(Rest::class, function (MockInterface $mock) {
@@ -105,7 +106,7 @@ class ActionsTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function deletes_an_address()
     {
         $this->mock(Rest::class, function (MockInterface $mock) {

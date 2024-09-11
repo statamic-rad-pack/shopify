@@ -2,13 +2,14 @@
 
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades;
 use StatamicRadPack\Shopify\ServiceProvider;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
 class ServiceProviderTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function installs_collections_assets_and_taxonomies()
     {
         ServiceProvider::installCollectionsTaxonomiesAssetsAndBlueprints();

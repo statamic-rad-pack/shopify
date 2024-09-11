@@ -2,6 +2,7 @@
 
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
@@ -12,7 +13,7 @@ class ScopesTest extends TestCase
         return (string) Facades\Parse::template($tag, $variables);
     }
 
-    /** @test */
+    #[Test]
     public function limits_variants_by_product()
     {
         $product = Facades\Entry::make()->data([
@@ -56,7 +57,7 @@ class ScopesTest extends TestCase
         $this->assertEquals('obi-wan-tshirt-2', $this->tag('{{ collection:variants query_scope="variant_by_product" product="not-obi-wan" }}{{ sku }}{{ /collection:variants }}'));
     }
 
-    /** @test */
+    #[Test]
     public function limits_variants_by_is_on_sale()
     {
         $product = Facades\Entry::make()->data([

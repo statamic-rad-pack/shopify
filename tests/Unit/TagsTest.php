@@ -3,6 +3,7 @@
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
 use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\Test;
 use Shopify\Clients\Rest;
 use Shopify\Clients\RestResponse;
 use Statamic\Facades;
@@ -15,7 +16,7 @@ class TagsTest extends TestCase
         return (string) Facades\Parse::template($tag, $variables);
     }
 
-    /** @test */
+    #[Test]
     public function outputs_shopify_tokens()
     {
         config()->set('shopify.url', 'abcd');
@@ -29,13 +30,13 @@ window.shopifyToken = '1234';
         );
     }
 
-    /** @test */
+    #[Test]
     public function outputs_shopify_scripts()
     {
         $this->assertStringStartsWith('<script', $this->tag('{{ shopify:scripts }}'));
     }
 
-    /** @test */
+    #[Test]
     public function outputs_product_price()
     {
         $product = Facades\Entry::make()->data([
@@ -87,7 +88,7 @@ window.shopifyToken = '1234';
 
     }
 
-    /** @test */
+    #[Test]
     public function outputs_in_stock()
     {
         $product = Facades\Entry::make()->data([
@@ -123,7 +124,7 @@ window.shopifyToken = '1234';
         $this->assertEquals('', $this->tag('{{ if {shopify:in_stock} }}Yes{{ /if }}', ['slug' => 'obi-wan']));
     }
 
-    /** @test */
+    #[Test]
     public function outputs_product_variants_generate()
     {
         $product = Facades\Entry::make()->data([
@@ -188,7 +189,7 @@ window.shopifyToken = '1234';
 
     }
 
-    /** @test */
+    #[Test]
     public function outputs_product_variants()
     {
         $product = Facades\Entry::make()->data([
@@ -236,7 +237,7 @@ window.shopifyToken = '1234';
         $this->assertEquals('abc', $this->tag('{{ shopify:variants storefront_id:is="abc" }}{{ storefront_id }}{{ /shopify:variants }}', ['slug' => 'obi-wan']));
     }
 
-    /** @test */
+    #[Test]
     public function outputs_an_address_form()
     {
         $this->assertEquals('<form method="POST" action="http://localhost/!/shopify/address"><input type="hidden" name="_token" value="">Some content</form>', str_replace(' autocomplete="off"', '', $this->tag('{{ shopify:address_form }}Some content{{ /shopify:address_form }}')));
@@ -246,7 +247,7 @@ window.shopifyToken = '1234';
         $this->assertEquals('<form method="POST" action="http://localhost/!/shopify/address"><input type="hidden" name="_token" value=""><input type="hidden" name="customer_id" value="1" />Some content</form>', str_replace(' autocomplete="off"', '', $this->tag('{{ shopify:address_form customer_id="1"  }}Some content{{ /shopify:address_form }}')));
     }
 
-    /** @test */
+    #[Test]
     public function outputs_a_customer()
     {
         $this->mock(Rest::class, function (MockInterface $mock) {
@@ -274,7 +275,7 @@ window.shopifyToken = '1234';
         $this->assertEquals('706405506930370000 - bob@biller.com', $this->tag('{{ shopify:customer }}{{ shopify_id }} - {{ email }}{{ /shopify:customer }}'));
     }
 
-    /** @test */
+    #[Test]
     public function outputs_customer_addresses()
     {
         $this->mock(Rest::class, function (MockInterface $mock) {
@@ -324,7 +325,7 @@ window.shopifyToken = '1234';
         $this->assertEquals('207119551 - Chestnut Street 92', $this->tag('{{ shopify:customer:addresses }}{{ addresses }}{{ id }} - {{ address1 }}{{ /addresses }}{{ /shopify:customer:addresses }}'));
     }
 
-    /** @test */
+    #[Test]
     public function outputs_customer_orders()
     {
         $this->mock(Rest::class, function (MockInterface $mock) {

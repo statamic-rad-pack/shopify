@@ -2,12 +2,13 @@
 
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Test;
 use StatamicRadPack\Shopify\Support\RichTextConverter;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
 class MetafieldsTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function parses_metafields_correctly()
     {
         $fields = app(config('shopify.metafields_parser'))->execute([
@@ -29,7 +30,7 @@ class MetafieldsTest extends TestCase
         $this->assertSame(['sponsor' => 'Shopify'], $fields);
     }
 
-    /** @test */
+    #[Test]
     public function converts_rich_text_to_html()
     {
         $richText = '{"type":"root","children":[{"type":"paragraph","children":[{"type":"text","value":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}]},{"type":"paragraph","children":[{"type":"text","value":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}]},{"type":"paragraph","children":[{"type":"text","value":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}]},{"type":"paragraph","children":[{"type":"text","value":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."},{"type":"link","url":"https://some.url","title":null,"target":null,"children":[{"type":"text","value":"I am a link"}]},{"type":"text","value":", but i am not."}]},{"type":"paragraph","children":[{"type":"text","value":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}]}]}';
@@ -39,7 +40,7 @@ class MetafieldsTest extends TestCase
         $this->assertSame($html, '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.<a href="https://some.url" title="" target="">I am a link</a>, but i am not.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>');
     }
 
-    /** @test */
+    #[Test]
     public function converts_rich_text_to_bard()
     {
         $richText = '{"type":"root","children":[{"type":"paragraph","children":[{"type":"text","value":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}]},{"type":"paragraph","children":[{"type":"text","value":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}]},{"type":"paragraph","children":[{"type":"text","value":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}]},{"type":"paragraph","children":[{"type":"text","value":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."},{"type":"link","url":"https://some.url","title":null,"target":null,"children":[{"type":"text","value":"I am a link"}]},{"type":"text","value":", but i am not."}]},{"type":"paragraph","children":[{"type":"text","value":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}]}]}';
