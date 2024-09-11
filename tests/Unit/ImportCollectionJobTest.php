@@ -3,6 +3,7 @@
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
 use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\Test;
 use Shopify\Clients\Graphql;
 use Shopify\Clients\HttpResponse;
 use Shopify\Clients\Rest;
@@ -13,7 +14,7 @@ use StatamicRadPack\Shopify\Tests\TestCase;
 
 class ImportCollectionJobTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function imports_collections()
     {
         Facades\Taxonomy::make()->handle('collections')->save();
@@ -65,7 +66,7 @@ class ImportCollectionJobTest extends TestCase
         $this->assertSame($term->get('sponsor'), 'Shopify');
     }
 
-    /** @test */
+    #[Test]
     public function imports_collections_translations_for_product()
     {
         Facades\Site::setSites([

@@ -2,12 +2,13 @@
 
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
 class WebhooksTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function creates_a_product()
     {
         config()->set('shopify.ignore_webhook_integrity_check', true);
@@ -23,7 +24,7 @@ class WebhooksTest extends TestCase
         $this->assertSame('{"message":"Product has been dispatched to the queue for update"}', $response->getContent());
     }
 
-    /** @test */
+    #[Test]
     public function updates_a_product()
     {
         config()->set('shopify.ignore_webhook_integrity_check', true);
@@ -39,7 +40,7 @@ class WebhooksTest extends TestCase
         $this->assertSame('{"message":"Product has been dispatched to the queue for update"}', $response->getContent());
     }
 
-    /** @test */
+    #[Test]
     public function deletes_a_product()
     {
         config()->set('shopify.ignore_webhook_integrity_check', true);
@@ -51,7 +52,7 @@ class WebhooksTest extends TestCase
         $this->assertSame('{"message":"Product has been deleted"}', $response->getContent());
     }
 
-    /** @test */
+    #[Test]
     public function creates_a_customer()
     {
         config()->set('shopify.ignore_webhook_integrity_check', true);
@@ -63,7 +64,7 @@ class WebhooksTest extends TestCase
         $this->assertSame('{"message":"Customer has been updated"}', $response->getContent());
     }
 
-    /** @test */
+    #[Test]
     public function updates_a_customer()
     {
         config()->set('shopify.ignore_webhook_integrity_check', true);
@@ -79,7 +80,7 @@ class WebhooksTest extends TestCase
         $this->assertSame('{"message":"Customer has been updated"}', $response->getContent());
     }
 
-    /** @test */
+    #[Test]
     public function deletes_a_customer()
     {
         config()->set('shopify.ignore_webhook_integrity_check', true);

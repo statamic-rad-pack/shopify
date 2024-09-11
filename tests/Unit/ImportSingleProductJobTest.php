@@ -3,6 +3,7 @@
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
 use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\Test;
 use Shopify\Clients\Graphql;
 use Shopify\Clients\HttpResponse;
 use Shopify\Clients\Rest;
@@ -13,7 +14,7 @@ use StatamicRadPack\Shopify\Tests\TestCase;
 
 class ImportSingleProductJobTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function imports_product()
     {
         $data = json_decode('{
@@ -134,7 +135,7 @@ class ImportSingleProductJobTest extends TestCase
         $this->assertSame($entry->get('collections'), ['ipods', 'ipods-1']);
     }
 
-    /** @test */
+    #[Test]
     public function imports_translations_for_product()
     {
         Facades\Site::setConfig(['sites' => [
@@ -258,7 +259,7 @@ class ImportSingleProductJobTest extends TestCase
         $this->assertSame($entry->title, 'Featured items');
     }
 
-    /** @test */
+    #[Test]
     public function updates_metafield_data()
     {
         $data = json_decode('{
@@ -370,7 +371,7 @@ class ImportSingleProductJobTest extends TestCase
         $this->assertSame($entry->get('some_metafield'), 'this is a value');
     }
 
-    /** @test */
+    #[Test]
     public function updates_publish_status_based_on_shopify_resource_publications()
     {
         $data = json_decode('{
