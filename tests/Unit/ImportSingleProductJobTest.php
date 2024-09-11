@@ -11,7 +11,7 @@ use Statamic\Facades;
 use StatamicRadPack\Shopify\Jobs;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
-class ImportIndividualProductJobTest extends TestCase
+class ImportSingleProductJobTest extends TestCase
 {
     /** @test */
     public function imports_product()
@@ -91,59 +91,36 @@ class ImportIndividualProductJobTest extends TestCase
         Facades\Taxonomy::make()->handle('type')->save();
         Facades\Taxonomy::make()->handle('vendor')->save();
 
-        $this->mock(Rest::class, function (MockInterface $mock) {
-            $mock
-                ->shouldReceive('get')
-                ->with('custom_collections', [], ['limit' => 30, 'product_id' => 1072481042])
-                ->andReturn(new RestResponse(
-                    status: 200,
-                    body: '{
-                      "custom_collections": [
-                        {
-                          "id": 841564295,
-                          "handle": "ipods",
-                          "title": "IPods",
-                          "updated_at": "2008-02-01T19:00:00-05:00",
-                          "body_html": "<p>The best selling ipod ever</p>",
-                          "published_at": "2008-02-01T19:00:00-05:00",
-                          "sort_order": "manual",
-                          "template_suffix": null,
-                          "published_scope": "web",
-                          "admin_graphql_api_id": "gid://shopify/Collection/841564295"
-                        }
-                    ]
-                }'
-                ));
+        Facades\Term::make()->taxonomy('collections')->slug('ipods')->merge([])->save();
+        Facades\Term::make()->taxonomy('collections')->slug('ipods-1')->merge([])->save();
 
+        $this->mock(Graphql::class, function (MockInterface $mock) {
             $mock
-                ->shouldReceive('get')
-                ->with('smart_collections', [], ['limit' => 30, 'product_id' => 1072481042])
-                ->andReturn(new RestResponse(
+                ->shouldReceive('query')
+                ->andReturn(new HttpResponse(
                     status: 200,
                     body: '{
-                      "smart_collections": [
-                        {
-                          "id": 1063001323,
-                          "handle": "ipods-1",
-                          "title": "IPods",
-                          "updated_at": "2023-10-03T13:23:35-04:00",
-                          "body_html": null,
-                          "published_at": "2023-10-03T13:23:35-04:00",
-                          "sort_order": "best-selling",
-                          "template_suffix": null,
-                          "disjunctive": false,
-                          "rules": [
-                            {
-                              "column": "title",
-                              "relation": "starts_with",
-                              "condition": "iPod"
-                            }
-                          ],
-                          "published_scope": "web",
-                          "admin_graphql_api_id": "gid://shopify/Collection/1063001323"
-                        }
-                      ]
-                }'
+                    "data": {
+                      "product": {
+                          "collections": {
+                            "edges": [
+                                {
+                                   "node": {
+                                      "id": 841564295,
+                                      "handle": "ipods"
+                                   }
+                                },
+                                {
+                                   "node": {
+                                      "id": 841564294,
+                                      "handle": "ipods-1"
+                                   }
+                                }
+                            ]
+                          }
+                      }
+                    }
+                    }'
                 ));
         });
 
@@ -239,62 +216,6 @@ class ImportIndividualProductJobTest extends TestCase
         Facades\Taxonomy::make()->handle('tags')->save();
         Facades\Taxonomy::make()->handle('type')->save();
         Facades\Taxonomy::make()->handle('vendor')->save();
-
-        $this->mock(Rest::class, function (MockInterface $mock) {
-            $mock
-                ->shouldReceive('get')
-                ->with('custom_collections', [], ['limit' => 30, 'product_id' => 1072481042])
-                ->andReturn(new RestResponse(
-                    status: 200,
-                    body: '{
-                      "custom_collections": [
-                        {
-                          "id": 841564295,
-                          "handle": "ipods",
-                          "title": "IPods",
-                          "updated_at": "2008-02-01T19:00:00-05:00",
-                          "body_html": "<p>The best selling ipod ever</p>",
-                          "published_at": "2008-02-01T19:00:00-05:00",
-                          "sort_order": "manual",
-                          "template_suffix": null,
-                          "published_scope": "web",
-                          "admin_graphql_api_id": "gid://shopify/Collection/841564295"
-                        }
-                    ]
-                }'
-                ));
-
-            $mock
-                ->shouldReceive('get')
-                ->with('smart_collections', [], ['limit' => 30, 'product_id' => 1072481042])
-                ->andReturn(new RestResponse(
-                    status: 200,
-                    body: '{
-                      "smart_collections": [
-                        {
-                          "id": 1063001323,
-                          "handle": "ipods-1",
-                          "title": "IPods",
-                          "updated_at": "2023-10-03T13:23:35-04:00",
-                          "body_html": null,
-                          "published_at": "2023-10-03T13:23:35-04:00",
-                          "sort_order": "best-selling",
-                          "template_suffix": null,
-                          "disjunctive": false,
-                          "rules": [
-                            {
-                              "column": "title",
-                              "relation": "starts_with",
-                              "condition": "iPod"
-                            }
-                          ],
-                          "published_scope": "web",
-                          "admin_graphql_api_id": "gid://shopify/Collection/1063001323"
-                        }
-                      ]
-                }'
-                ));
-        });
 
         $this->mock(Graphql::class, function (MockInterface $mock) {
             $mock
@@ -414,62 +335,6 @@ class ImportIndividualProductJobTest extends TestCase
         Facades\Taxonomy::make()->handle('tags')->save();
         Facades\Taxonomy::make()->handle('type')->save();
         Facades\Taxonomy::make()->handle('vendor')->save();
-
-        $this->mock(Rest::class, function (MockInterface $mock) {
-            $mock
-                ->shouldReceive('get')
-                ->with('custom_collections', [], ['limit' => 30, 'product_id' => 1072481042])
-                ->andReturn(new RestResponse(
-                    status: 200,
-                    body: '{
-                      "custom_collections": [
-                        {
-                          "id": 841564295,
-                          "handle": "ipods",
-                          "title": "IPods",
-                          "updated_at": "2008-02-01T19:00:00-05:00",
-                          "body_html": "<p>The best selling ipod ever</p>",
-                          "published_at": "2008-02-01T19:00:00-05:00",
-                          "sort_order": "manual",
-                          "template_suffix": null,
-                          "published_scope": "web",
-                          "admin_graphql_api_id": "gid://shopify/Collection/841564295"
-                        }
-                    ]
-                }'
-                ));
-
-            $mock
-                ->shouldReceive('get')
-                ->with('smart_collections', [], ['limit' => 30, 'product_id' => 1072481042])
-                ->andReturn(new RestResponse(
-                    status: 200,
-                    body: '{
-                      "smart_collections": [
-                        {
-                          "id": 1063001323,
-                          "handle": "ipods-1",
-                          "title": "IPods",
-                          "updated_at": "2023-10-03T13:23:35-04:00",
-                          "body_html": null,
-                          "published_at": "2023-10-03T13:23:35-04:00",
-                          "sort_order": "best-selling",
-                          "template_suffix": null,
-                          "disjunctive": false,
-                          "rules": [
-                            {
-                              "column": "title",
-                              "relation": "starts_with",
-                              "condition": "iPod"
-                            }
-                          ],
-                          "published_scope": "web",
-                          "admin_graphql_api_id": "gid://shopify/Collection/1063001323"
-                        }
-                      ]
-                }'
-                ));
-        });
 
         $this->mock(Graphql::class, function (MockInterface $mock) {
             $mock

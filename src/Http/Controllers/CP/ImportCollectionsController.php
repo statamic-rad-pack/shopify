@@ -3,21 +3,22 @@
 namespace StatamicRadPack\Shopify\Http\Controllers\CP;
 
 use Illuminate\Http\JsonResponse;
-use Statamic\Facades\Entry;
 use Statamic\Http\Controllers\CP\CpController;
-use StatamicRadPack\Shopify\Jobs\FetchCollectionsForProductJob;
+use StatamicRadPack\Shopify\Jobs;
+use StatamicRadPack\Shopify\Traits\FetchCollections;
 
 class ImportCollectionsController extends CpController
 {
+    use FetchCollections;
+
     public function fetchAll(): JsonResponse
     {
-        $products = Entry::query()
-            ->where('collection', 'products')
-            ->get();
-
-        foreach ($products as $product) {
-            FetchCollectionsForProductJob::dispatch($product)->onQueue(config('shopify.queue'));
-        }
+        collect([])
+            ->merge($this->getManualCollections())
+            ->merge($this->getSmartCollections())
+            ->each(function ($collection) {
+                Jobs\ImportCollectionJob::dispatch($collection)->onQueue(config('shopify.queue'));
+            });
 
         return response()->json([
             'message' => 'Import has been queued.',
