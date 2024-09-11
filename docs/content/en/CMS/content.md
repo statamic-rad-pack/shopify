@@ -9,6 +9,7 @@ The addon currently brings in the following content:
 - Products.
 - Images for products.
 - Variants for products.
+- Collections
 
 ## Product Content
 
@@ -50,6 +51,8 @@ You can change this by editing the `overwrite` option in the config file. The fo
 ]
 ```
 
+In addition you can add to the blueprint and any [metafields](CMS/importing-data#metafields) associated with your products will be imported.
+
 ## Variants Content
 
 The addon pulls the following information for variants.
@@ -69,6 +72,26 @@ The addon pulls the following information for variants.
 | Requires shipping | `requires_shipping`  | Flag for if the product needs shipping | |
 | Image  | `image`  | Variant image as set in Shopify | |
 
+
+<alert type="warning">
+
+The above fields will always be overwritten to stay in sync with Shopify
+
+</alert>
+
+## Collections Content
+
+The addon pulls the following information for collections.
+
+| Value                  | Key                  | Description                                  | Required |
+|------------------------|----------------------|----------------------------------------------|----------|
+| Collection ID          | `collection_id`      | The Shopify ID for the collection            | Y        |
+| Slug                   | `slug`               | The handle of the collection in Shopify      | Y        |
+| Title                  | `title`              | Collection title as shown in Shopify         | Y        |
+| Content                | `content`            | The content/description of the Collection    |          |
+| Featured Image | `featured_image` | The featured image / asset if set in Shopify |          |
+
+In addition you can add to the blueprint and any [metafields](CMS/importing-data#metafields) associated with your collections will be imported.
 
 <alert type="warning">
 

@@ -9,6 +9,7 @@ taxonomies:
 revisions: false
 route: '/products/{slug}'
 sort_dir: asc
+date: true
 date_behavior:
   past: public
   future: private

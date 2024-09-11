@@ -7,13 +7,13 @@ category: Installation
 
 ## Upgrading from 3.x to 4.x
 
-Due to the changes to how collections are processed, you will now need to set up webhooks for collection create, collection update, and collection delete.
+Due to the changes to how collections are processed, you will now need to set up webhooks for collection create, collection update, and collection delete. See the [webhooks](CMS/webhooks) documentation for full details.
 
-See the webhooks documentation for full details.
+Product status and publish dates now respect the settings from Shopify. To enable date support ensure your Products collection has `Publish Dates` enabled, with `Past Date Behavior` public, and `Future Date Behavior` hidden.
 
 ## Upgrading from 2.x to 3.x
 
-Due to the migration to the offical Shopify PHP library this update is being treated as a breaking change. 
+Due to the migration to the official Shopify PHP library this update is being treated as a breaking change. 
 
 The following .env variables are now required:
 
