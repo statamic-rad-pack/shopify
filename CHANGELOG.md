@@ -1,5 +1,14 @@
 # Changelog
 
+## v4.0.0 - 2024-09-11
+
+### 🚀 New
+
+- Final v4 changes [@ryanmitchell](https://github.com/ryanmitchell) (#231)
+- Remove `respect_shopify_publish_status_and_dates` config [@ryanmitchell](https://github.com/ryanmitchell) (#230)
+- Move collection create/update/delete to its own webhook and job [@ryanmitchell](https://github.com/ryanmitchell) (#229)
+- Create collections, taxonomies and asset containers programatically [@ryanmitchell](https://github.com/ryanmitchell) (#233)
+
 ## v3.6.0 - 2024-09-09
 
 ### What's new
@@ -346,6 +355,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
