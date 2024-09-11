@@ -30,7 +30,7 @@ class TestCase extends AddonTestCase
         $app['config']->set('statamic.system.multisite', true);
 
         Statamic::booted(function () {
-            $blueprintContents = Facades\YAML::parse(file_get_contents(__DIR__.'/../resources/blueprints/collections/products/product.yaml'));
+            $blueprintContents = Facades\YAML::parse(file_get_contents(__DIR__.'/../resources/blueprints/product.yaml'));
 
             $productCollectionBlueprint = Facades\Blueprint::make()
                 ->setNamespace('collections.products')
@@ -41,7 +41,7 @@ class TestCase extends AddonTestCase
             Facades\Collection::make('products')
                 ->save();
 
-            $blueprintContents = Facades\YAML::parse(file_get_contents(__DIR__.'/../resources/blueprints/collections/variants/variant.yaml'));
+            $blueprintContents = Facades\YAML::parse(file_get_contents(__DIR__.'/../resources/blueprints/variant.yaml'));
 
             $variantCollectionBlueprint = Facades\Blueprint::make()
                 ->setNamespace('collections.variants')
