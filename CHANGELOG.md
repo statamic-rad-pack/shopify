@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.0.2 - 2024-09-13
+
+### 🐛 Fixed
+
+- Fix nextPage being null [@ryanmitchell](https://github.com/ryanmitchell) (#237)
+
 ## v4.0.1 - 2024-09-13
 
 ### 🐛 Fixed
@@ -361,6 +367,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
