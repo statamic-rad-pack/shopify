@@ -225,7 +225,7 @@ class ServiceProvider extends AddonServiceProvider
             $collection = tap(Facades\Collection::make()
                 ->handle('products')
                 ->title('Products')
-                ->route('/products/{slug}')
+                ->routes('/products/{slug}')
                 ->template('product')
                 ->dated(true)
                 ->taxonomies(collect(config('shopify.taxonomies', []))->values()->all()))
@@ -242,7 +242,7 @@ class ServiceProvider extends AddonServiceProvider
                 ->title('Variants'))
                 ->save();
 
-            $collection->blueprint()
+            $collection->entryBlueprint()
                 ->setContents(Facades\YAML::parse(__DIR__ . '/../resources/blueprints/variant.yaml'))
                 ->save();
         }
