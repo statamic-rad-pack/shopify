@@ -12,7 +12,8 @@ trait FetchAllProducts
     {
         $client = app(Rest::class);
         $response = $client->get(path: 'products', query: ['limit' => config('shopify.api_limit')]);
-        $nextPage = $response->getPageInfo();
+
+        $nextPage = ($response->getPageInfo()?->getNextPageUrl() ?? false) ? $response->getPageInfo() : false;
 
         if ($response->getStatusCode() == 200) {
 
@@ -22,7 +23,7 @@ trait FetchAllProducts
             // Recursively loop.
             while ($nextPage) {
                 $response = $client->get(path: 'products', query: $nextPage->getNextPageQuery());
-                $nextPage = $response->getPageInfo();
+                $nextPage = ($response->getPageInfo()?->getNextPageUrl() ?? false) ? $response->getPageInfo() : false;
 
                 $this->callJob($response);
             }
