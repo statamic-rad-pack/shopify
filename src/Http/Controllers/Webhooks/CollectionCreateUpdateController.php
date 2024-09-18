@@ -5,6 +5,7 @@ namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 use Closure;
 use Illuminate\Http\Request;
 use StatamicRadPack\Shopify\Events;
+use StatamicRadPack\Shopify\Jobs;
 
 class CollectionCreateUpdateController extends WebhooksController
 {
@@ -25,7 +26,7 @@ class CollectionCreateUpdateController extends WebhooksController
         $data = json_decode($request->getContent());
 
         // Dispatch job
-        ImportCollectionJob::dispatch($dataArray)->onQueue(config('shopify.queue'));
+        Jobs\ImportCollectionJob::dispatch($dataArray)->onQueue(config('shopify.queue'));
 
         $eventCallback($data);
 
