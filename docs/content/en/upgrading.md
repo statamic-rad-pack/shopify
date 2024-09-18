@@ -11,6 +11,8 @@ Due to the changes to how collections are processed, you will now need to set up
 
 Product status and publish dates now respect the settings from Shopify. To enable date support ensure your Products collection has `Publish Dates` enabled, with `Past Date Behavior` public, and `Future Date Behavior` hidden.
 
+Your app needs to add the `read_publications` and `read_metaobjects` scopes.
+
 ## Upgrading from 2.x to 3.x
 
 Due to the migration to the official Shopify PHP library this update is being treated as a breaking change. 

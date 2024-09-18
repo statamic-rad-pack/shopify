@@ -32,7 +32,7 @@ To set up a private app on Shopify for this add-on to use, use the following ste
 4. Set a nice name to remember as well as your email.
 5. Click the "Configuration" Tab.
     1. Click "Configure" next to Admin API Integration.
-    2. Enable `read_product_listings`, `read_inventory`, `read_products`, `read_orders`, `read_translations` and `write_customers`
+    2. Enable `read_inventory`, `read_metaobjects`, `read_orders`, `read_products`, `read_product_listings`, `read_publications`, `read_translations` and `write_customers`
     3. Click "Configure" next to Storefront API Integration.
     4. Enable `unauthenticated_read_product_listings`, `unauthenticated_read_product_tags`, `unauthenticated_read_product_inventory`, `unauthenticated_write_customers`, `unauthenticated_write_checkouts`, `unauthenticated_read_customers`, `unauthenticated_read_checkouts`, `unauthenticated_read_metaobjects`
     5. Click "Save" in the top right.
