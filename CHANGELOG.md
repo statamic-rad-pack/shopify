@@ -1,5 +1,17 @@
 # Changelog
 
+## v4.0.3 - 2024-09-18
+
+### What's Changed
+
+* Error on Collection Create/Update Webhook by @anditopping in https://github.com/statamic-rad-pack/shopify/pull/238
+
+### New Contributors
+
+* @anditopping made their first contribution in https://github.com/statamic-rad-pack/shopify/pull/238
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v4.0.2...v4.0.3
+
 ## v4.0.2 - 2024-09-13
 
 ### 🐛 Fixed
@@ -367,6 +379,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
