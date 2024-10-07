@@ -212,11 +212,19 @@ class ImportSingleProductJob implements ShouldQueue
                     ->first();
 
                 if ($publicationStatus) {
-                    $entry->published($publicationStatus['isPublished'] ?? false);
+                    $published = $publicationStatus['isPublished'] ?? false;
 
                     if ($entry->collection()->dated() && $publicationStatus['publishDate']) {
-                        $entry->date(Carbon::parse($publicationStatus['publishDate']));
+                        $publishDate = Carbon::parse($publicationStatus['publishDate']);
+
+                        $entry->date($publishDate);
+
+                        if (! $published && $publishDate->gt(now())) {
+                            $published = true;
+                        }
                     }
+
+                    $entry->published($published);
                 }
             } catch (\Throwable $e) {
                 Log::error('Could not manage publications status for product '.$this->data['id']);
