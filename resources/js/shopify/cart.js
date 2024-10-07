@@ -106,16 +106,6 @@ const createFreshCart = async (cartLines = []) => {
     return;
 };
 
-const getCartCount = () => {
-    let cart = cart();
-
-    if (! cart) {
-        return 0;
-    }
-
-    return (cart.lines?.edges ?? []).reduce((accumulator, node) => (accumulator + node.quantity), 0);
-}
-
 const getExistingCart = async (id) => {
     const operation = `{
         cart(id: "${id}") {
@@ -261,7 +251,6 @@ const updateLineQuantity = async (cartId, lineId, quantity) => {
 export {
     addLines,
     createFreshCart,
-    getCartCount,
     getExistingCart,
     getOrCreateCart,
     removeLine,
