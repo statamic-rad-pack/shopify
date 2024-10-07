@@ -236,7 +236,7 @@ window.shopify = {
                 $langKey .= '_nostock';
             }
 
-            $html .= '<option value="'.$variant['storefront_id'].'" data-in-stock="'.($out_of_stock ? 'false' : 'true').'"'.($out_of_stock ? ' disabled' : '').'>'.__($langKey, $langParams).'</option>';
+            $html .= '<option value="'.$variant['id'].'" data-in-stock="'.($out_of_stock ? 'false' : 'true').'"'.($out_of_stock ? ' disabled' : '').'>'.__($langKey, $langParams).'</option>';
         }
 
         return $html;

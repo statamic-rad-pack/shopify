@@ -3,32 +3,48 @@ import client from './client';
 const cartQuery = `
       id
       checkoutUrl
-      completedAt
-      lines(first: 1000) {
-        edges {
-          node {
-            id
-            merchandise {
-              ... on ProductVariant {
-                id
-                quantity
-                title
-              }
-            }
-          }
-        }
-      }
       cost {
         totalAmount {
           amount
           currencyCode
         }
       }
+      lines(first: 250) {
+        edges {
+          node {
+            attributes {
+                key
+                value
+            }
+            cost {
+              amountPerQuantity {
+                amount
+              }
+            }
+            id
+            merchandise {
+              ... on ProductVariant {
+                id
+                image {
+                  url
+                }
+                title
+                product {
+                   title
+                }
+                sku
+              }
+            }
+            quantity
+          }
+        }
+      }
+      note
 `;
 
-const addLines = (cartId, lines) => {
-    const operation = `mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
-      cartLinesAdd(cartId: ${cartId}, lines: $lines) {
+const addLines = async (cartId, lines) => {
+    const operation = `mutation cartLinesAdd($lines: [CartLineInput!]!) {
+      cartLinesAdd(cartId: "${cartId}", lines: $lines) {
         cart {
           ${cartQuery}
         }
@@ -39,7 +55,7 @@ const addLines = (cartId, lines) => {
       }
     }`;
 
-    const { data, errors } => await client.request(operation, {
+    const { data, errors } = await client.request(operation, {
         variables: {
             "lines": lines,
         }
@@ -51,30 +67,16 @@ const addLines = (cartId, lines) => {
         return;
     }
 
-    if (data.userErrors !== null) {
+    if (data.cartLinesAdd.userErrors.length > 0) {
         console.warn(errors);
 
         return;
     }
 
-    return data.cart;
+    return data.cartLinesAdd.cart;
 };
 
-const cart = (cartId) => {
-    if (cartId) {
-        if (cart = getExistingCart(cartId)) {
-            return cart;
-        }
-    }
-
-    if (cart = createFreshCart()) {
-        return cart;
-    }
-
-    return false;
-};
-
-const createFreshCart = (cartLines = []) => {
+const createFreshCart = async (cartLines = []) => {
     const operation = `mutation createCart($cartInput: CartInput) {
       cartCreate(input: $cartInput) {
         cart {
@@ -97,8 +99,8 @@ const createFreshCart = (cartLines = []) => {
         return;
     }
 
-    if (data.createCart) {
-        return data.createCart;
+    if (data.cartCreate) {
+        return data.cartCreate.cart;
     }
 
     return;
@@ -114,14 +116,14 @@ const getCartCount = () => {
     return (cart.lines?.edges ?? []).reduce((accumulator, node) => (accumulator + node.quantity), 0);
 }
 
-const getExistingCart = (id) => {
+const getExistingCart = async (id) => {
     const operation = `{
-        cart(id: "gid://shopify/Cart/${id}") {
+        cart(id: "${id}") {
             ${cartQuery}
         }
     }`;
 
-    const { data, errors } => await client.request(operation);
+    const { data, errors } = await client.request(operation);
 
     if (errors) {
         console.warn(errors);
@@ -129,31 +131,37 @@ const getExistingCart = (id) => {
         return;
     }
 
-    if (data.cart.completedAt !== null) {
-        return;
-    }
-
     return data.cart;
 }
 
-const removeLine = (cartId, lineId) => {
-    const operation = `mutation cartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
-      cartLinesRemove(cartId: ${cartId}, lineIds: $lineIds) {
+const getOrCreateCart = async (cartId = null) => {
+    let cart;
+
+    if (cartId) {
+        if (cart = await getExistingCart(cartId)) {
+            return cart;
+        }
+    }
+
+    if (cart = await createFreshCart()) {
+        return cart;
+    }
+
+    return false;
+};
+
+const removeLine = async (cartId, lineId) => {
+    const operation = `mutation cartLinesRemove($lineIds: [ID!]!) {
+      cartLinesRemove(cartId: "${cartId}", lineIds: $lineIds) {
         cart {
           ${cartQuery}
-        }
-        userErrors {
-          field
-          message
-        }
-        warnings {
         }
       }
     }`;
 
-    const { data, errors } => await client.request(operation, {
+    const { data, errors } = await client.request(operation, {
         variables: {
-            "linesIds": ["gid://shopify/CartLine/${lineId}"],
+            "lineIds": [lineId],
         }
     });
 
@@ -163,23 +171,65 @@ const removeLine = (cartId, lineId) => {
         return;
     }
 
-    if (data.userErrors !== null) {
+    return data.cartLinesRemove.cart;
+}
+
+const setCartAttributes = async (cartId, attributes) => {
+    const operation = `mutation cartAttributesUpdate($attributes: [AttributeInput!]!) {
+      cartAttributesUpdate(attributes: $attributes, cartId: "${cartId}") {
+        cart {
+           ${cartQuery}
+        }
+      }
+    }`;
+
+    const { data, errors } = await client.request(operation, {
+        variables: {
+            "attributes": attributes,
+        }
+    });
+
+    if (errors) {
         console.warn(errors);
 
         return;
     }
 
-    return data.cart;
+    return data.cartAttributesUpdate.cart;
 }
 
-const updateLineQuantity = (cartId, lineId, quantity) => {
+const setCartNote = async (cartId, note) => {
+    const operation = `mutation cartNoteUpdate($note: String!) {
+      cartNoteUpdate(cartId: "${cartId}", note: $note) {
+        cart {
+           ${cartQuery}
+        }
+      }
+    }`;
+
+    const { data, errors } = await client.request(operation, {
+        variables: {
+            "note": note,
+        }
+    });
+
+    if (errors) {
+        console.warn(errors);
+
+        return;
+    }
+
+    return data.cartNoteUpdate.cart;
+}
+
+const updateLineQuantity = async (cartId, lineId, quantity) => {
     quantity = parseInt(quantity);
 
     if (quantity < 1) {
         return removeLine(lineId);
     }
 
-    const operation = `mutation {
+    const operation = `mutation cartLinesUpdate($lines: [CartLineUpdateInput!]!) {
       cartLinesUpdate(
         cartId: "${cartId}"
         lines: $lines
@@ -190,10 +240,10 @@ const updateLineQuantity = (cartId, lineId, quantity) => {
       }
     }`;
 
-    const { data, errors } => await client.request(operation, {
+    const { data, errors } = await client.request(operation, {
         variables: {
             "lines": [{
-                id: "gid://shopify/CartLine/${lineId}"
+                id: lineId,
                 quantity: quantity,
             }],
         }
@@ -205,17 +255,17 @@ const updateLineQuantity = (cartId, lineId, quantity) => {
         return;
     }
 
-    return data.cart;
+    return data.cartLinesUpdate.cart;
 };
 
 export {
     addLines,
-    cart,
     createFreshCart,
     getCartCount,
     getExistingCart,
+    getOrCreateCart,
     removeLine,
+    setCartAttributes,
+    setCartNote,
     updateLineQuantity,
 };
-
-export default cart;
