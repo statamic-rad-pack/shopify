@@ -5,9 +5,9 @@ import { createStorefrontApiClient } from '@shopify/storefront-api-client';
  * token values set by {{ shopify:tokens }} in your template.
  */
 const client = createStorefrontApiClient({
-    storeDomain: window.shopify.url,
+    storeDomain: window.shopifyConfig.url,
     apiVersion: '2024-04',
-    publicAccessToken: window.shopify.token,
+    publicAccessToken: window.shopifyConfig.token,
 });
 
 export default client;
