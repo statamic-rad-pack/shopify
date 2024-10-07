@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.0.4 - 2024-10-03
+
+### 🐛 Fixed
+
+- Ensure future dated products get marked a published [@ryanmitchell](https://github.com/ryanmitchell) (#240)
+
 ## v4.0.3 - 2024-09-18
 
 ### What's Changed
@@ -379,6 +385,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
