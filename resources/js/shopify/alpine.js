@@ -1,4 +1,5 @@
-import { addLines, getOrCreateCart, removeLine, setCartAttributes, setCartNote, updateLineQuantity } from './cart'
+import { addLines, getOrCreateCart, removeLine, setCartAttributes, setCartNote, updateLineQuantity } from './cart';
+import Alpine from 'alpinejs';
 
 Alpine.store('statamic.shopify.cart', {
     cartId: null,
@@ -48,11 +49,6 @@ Alpine.store('statamic.shopify.cart', {
             line.attributes.forEach((attr) => attrs[key] = attr.value);
 
             let qty = line.quantity;
-
-            if (attrs.maximum_quantity && (qty > attrs.maximum_quantity)) {
-                qty = attrs.maximum_quantity;
-                updateQtyInStorefront(line.id, qty);
-            }
 
             mappedLineItems.push({
                 id: line.id,
@@ -128,9 +124,9 @@ Alpine.data('statamic.shopify.product', (options, variants) => ({
     },
 
     async handleSubmit(target) {
-        let variantStorefrontId = this.variantEl.value;
+        let variantId = this.variantEl.value;
 
-        if (! variantStorefrontId) {
+        if (! variantId) {
             return;
         }
 
@@ -155,7 +151,7 @@ Alpine.data('statamic.shopify.product', (options, variants) => ({
 
         let response = await addLines(cart.id, [{
             attributes: attributes,
-            merchandiseId: "gid://shopify/ProductVariant/" + variantStorefrontId,
+            merchandiseId: "gid://shopify/ProductVariant/" + variantId,
             quantity: qty,
         }]);
 
@@ -174,7 +170,6 @@ Alpine.data('statamic.shopify.product', (options, variants) => ({
     },
 
     variantExistsAndIsInStock() {
-        let exists = false;
         let filteredVariants = variants;
 
         for (const [key, value] of Object.entries(options)) {
@@ -198,5 +193,4 @@ Alpine.data('statamic.shopify.product', (options, variants) => ({
 
         return this.selectedVariant && ! this.selectedVariant.out_of_stock;
     },
-
 }));
