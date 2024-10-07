@@ -85,8 +85,10 @@ class Shopify extends Tags
     public function tokens()
     {
         return "<script>
-window.shopifyUrl = '".(config('shopify.storefront_url') ?? config('shopify.url'))."';
-window.shopifyToken = '".config('shopify.storefront_token')."';
+window.shopify = {
+    url: '" . (config('shopify.storefront_url') ?? config('shopify.url')) . "',
+    token: '" . config('shopify.storefront_token') . "'
+};
 </script>";
     }
 
