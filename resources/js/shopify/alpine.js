@@ -131,21 +131,11 @@ Alpine.data('statamic.shopify.product', (options, variants) => ({
         }
 
         let attributes = [];
-        let maxQty = 0;
         for (const key in this.customAttributes) {
             attributes.push({key: key, value: this.customAttributes[key] + '' });
-            if (key == 'maximum_quantity') {
-                maxQty = parseInt(this.customAttributes[key]);
-            }
         }
 
         let qty = parseInt(this.$refs.qty.value);
-
-        if (maxQty) {
-            if (qty > maxQty) {
-                qty = maxQty;
-            }
-        }
 
         let cart = await getOrCreateCart(Alpine.store('statamic.shopify.cart').cartId);
 
