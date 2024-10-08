@@ -56,34 +56,77 @@ import client from 'vendor/shopify/client';
 ```
 
 ## cart.js
+This file provides methods for creating, updating and reading from the cart associated with the current user. You can import any of the following methods. Note that all methods are `async` and return [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
 
-This file provides methods for creating, updating and reading from the cart associated with the current user.
 
-You can import any of the following methods. Note that all methods are `async` so returns promises.
+### createFreshCart
 
-`addLines(string: cartId, array: lines)`
-This method lets you add an array of lines to the cart. See [Shopify's documentation](https://shopify.dev/docs/api/storefront/2024-01/mutations/cartLinesAdd) for more information.
+```js
+createFreshCart(?array: lines)
+```
+Creates a brand new cart. If an array of cart lines are passed into the function, they will be added to the cart. 
 
-`createFreshCart(?array: lines)`
-This method will make a totally new cart. If an array of cart lines are passed then they will be added to the cart.
 
-`getExistingCart(string: cartId)`
-This returns gets the cart identified by the passed id.
+### getExistingCart
+```js
+getExistingCart(string: cartId)
+```
+Returns the cart identified by the passed id.
 
-`getOrCreateCart(?string: cartId)`
-This method will get the cart that matches the id, or if there is none or no id is passed then  an fresh cart will be returned.
-   
-`removeLine(string cartId, string lineId)`
-This method will return the line identified by line id from the cart.
 
-`setCartAttributes(string: cartId, array: lines)`
-This method lets you update the cart attributes associated with the cart. This should be an array of objects of `key` and `value` (eg `[{ key: 'my_key', value: 'my_value' }]` );
+### getOrCreateCart
+```js
+getOrCreateCart(?string: cartId)
+```
+Gets a cart that matches the id. If one cannot be found, then a new cart will be returned instead.
 
-`setCartNote(string: cartId, string: note)`
-This method lets you update the note attached to the cart.
 
-`updateLineQuantity(string cartId, string lineId, int quantity)`
-This method will update the line identified by line id to have the quantity passed.
+### setCartAttributes
+```js
+setCartAttributes(string: cartId, array: lines)
+```
+Set attributes associated with the cart. This should be an array of objects consisting of a `key` and `value`. Eg:
+
+```js
+[
+    { 
+        key: 'my_key', 
+        value: 'my_value' 
+    },
+    { 
+        key: 'my_key', 
+        value: 'my_value' 
+    }
+]
+```
+
+
+### setCartNote
+```js
+setCartNote(string: cartId, string: note)
+```
+Sets a note that will be attached to the cart. 
+
+
+### addLines
+```js
+addLines(string: cartId, array: lines)
+```
+Adds an array of product lines to the cart. See [Shopify's documentation](https://shopify.dev/docs/api/storefront/2024-01/mutations/cartLinesAdd) for more information.
+
+
+### removeLine
+```js
+removeLine(string cartId, string lineId)
+```
+Remove the line identified by line id from the cart.
+
+
+### updateLineQuantity
+```js
+updateLineQuantity(string cartId, string lineId, int quantity)
+```
+Updates the quantity of a specified cart line. 
 
 
 ## alpine.js
