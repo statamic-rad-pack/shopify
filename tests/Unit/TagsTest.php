@@ -30,12 +30,6 @@ window.shopifyConfig = { url: 'abcd', token: '1234' };
     }
 
     #[Test]
-    public function outputs_shopify_scripts()
-    {
-        $this->assertStringStartsWith('<script', $this->tag('{{ shopify:scripts }}'));
-    }
-
-    #[Test]
     public function outputs_product_price()
     {
         $product = Facades\Entry::make()->data([

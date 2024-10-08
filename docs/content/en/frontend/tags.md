@@ -21,8 +21,7 @@ Allows you to output your Site URL and Storefront Token to the front end and bin
 
 ```html
 <script>
-  window.shopifyURL = 'your-site.myshopify.com'
-  window.shopifyToken = 'storefront-token'
+  window.shopifyConfig = { url: 'your-site.myshopify.com', token: 'storefront-token' }
 </script>
 ```
 

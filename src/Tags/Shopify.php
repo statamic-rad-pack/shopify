@@ -74,14 +74,6 @@ class Shopify extends Tags
     /**
      * @return string|array
      */
-    public function scripts()
-    {
-        return '<script src="'.url('/vendor/shopify/js/statamic-shopify-front.js').'"></script>';
-    }
-
-    /**
-     * @return string|array
-     */
     public function tokens()
     {
         return "<script>
