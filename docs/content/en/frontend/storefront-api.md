@@ -56,7 +56,7 @@ import client from 'vendor/shopify/client';
 ```
 
 ## cart.js
-This file provides methods for creating, updating and reading from the cart associated with the current user. You can import any of the following methods. Note that all methods are `async` and return [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
+This file provides methods for creating, updating and reading from the cart associated with the current user. You can import any of the following methods. Note that all methods are `async`.
 
 
 ### createFreshCart
