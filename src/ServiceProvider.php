@@ -195,7 +195,7 @@ class ServiceProvider extends AddonServiceProvider
                 ->save();
 
             $taxonomy->termBlueprint()
-                ->setContents(Facades\YAML::file(__DIR__ . '/../resources/blueprints/collection.yaml')->parse())
+                ->setContents(Facades\YAML::file(__DIR__.'/../resources/blueprints/collection.yaml')->parse())
                 ->save();
         }
 
@@ -231,7 +231,7 @@ class ServiceProvider extends AddonServiceProvider
                 ->save();
 
             $collection->entryBlueprint()
-                ->setContents(Facades\YAML::file(__DIR__ . '/../resources/blueprints/product.yaml')->parse())
+                ->setContents(Facades\YAML::file(__DIR__.'/../resources/blueprints/product.yaml')->parse())
                 ->save();
         }
 
@@ -242,7 +242,7 @@ class ServiceProvider extends AddonServiceProvider
                 ->save();
 
             $collection->entryBlueprint()
-                ->setContents(Facades\YAML::parse(__DIR__ . '/../resources/blueprints/variant.yaml'))
+                ->setContents(Facades\YAML::parse(__DIR__.'/../resources/blueprints/variant.yaml'))
                 ->save();
         }
     }
