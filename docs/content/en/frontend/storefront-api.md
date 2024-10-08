@@ -88,7 +88,7 @@ This method will update the line identified by line id to have the quantity pass
 
 ## alpine.js
 
-This file provides an [Alpine.js](https://alpinejs.dev) store and helper to make getting up and running that much quicker. The published views assume this code is available and being includedin your site.js:
+This file provides an [Alpine.js](https://alpinejs.dev) store and helper to make getting up and running that much quicker. The published views assume this code is available and being included in your site.js:
 
 ```js
 import { createData, createStore } from './vendor/shopify/alpine';
@@ -151,7 +151,7 @@ This store provides client side cart functionality and methods that are needed t
 
 The cart reference is stored in localStorage so that it persists across page loads and new carts are not unecessarily created.
 
-This snipped from the cart.antlers.html shows you how it can be used to display the line items in the basket to the end user.
+This snippet from the cart.antlers.html shows you how it can be used to display the line items in the basket to the end user.
 
 ```antlers
 <template x-for="line in Alpine.store('statamic.shopify.cart').lineItems">
