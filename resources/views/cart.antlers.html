@@ -31,7 +31,7 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <template x-for="line in Alpine.store('statamic.shopify.cart').lineItems">
-                            <tr data-ss-variant-id="${id}">
+                            <tr>
                                 <td class="px-6 py-4 whitespace-nowrap" colspan="2">
                                     <div class="flex items-center">
                                         <div class="mr-3">
@@ -47,11 +47,11 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap" x-html="line.price"></td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <input type="number" name="qty" min="1" class="border w-20 p-1" :value="line.qty" @change="Alpine.store('cart').updateQuantity(line.id, $event.target.value)" />
+                                    <input type="number" name="qty" min="1" class="border w-20 p-1" :value="line.qty" @change="Alpine.store('statamic.shopify.cart').updateQuantity(line.id, $event.target.value)" />
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap" x-html="line.subtotal"></td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <a href="#" @click.prevent="Alpine.store('cart').removeLine(line.id)" class="text-red-600"><svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></a>
+                                    <a href="#" @click.prevent="Alpine.store('statamic.shopify.cart').removeLine(line.id)" class="text-red-600"><svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></a>
                                 </td>
                             </tr>
                         </template>

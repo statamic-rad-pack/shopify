@@ -88,13 +88,21 @@ This method will update the line identified by line id to have the quantity pass
 
 ## alpine.js
 
-This file provides an [Alpine.js](https://alpinejs.dev) store and helper to make getting up and running that much quicker. The published views assume this code is available and being included:
+This file provides an [Alpine.js](https://alpinejs.dev) store and helper to make getting up and running that much quicker. The published views assume this code is available and being includedin your site.js:
 
 ```js
-import * from 'vendor/shopify/alpine';
+import { createData, createStore } from './vendor/shopify/alpine';
+import Alpine from 'alpinejs';
+
+window.Alpine = Alpine;
+
+createStore();
+createData();
+
+Alpine.start();
 ```
 
-### Alpine.data('statamic.shopify.product')
+### Alpine.data('shopifyProduct')
 This Alpine helper helps you take the output of `{{ shopify:variant:generate }}` and turn into a dependent set of drop downs. In addition it provides some useful methods for checking if the selected variant is in stock, or requires further options to be selected.
 
 To use it:
@@ -103,34 +111,39 @@ To use it:
 {{ $variants = {shopify:variants} }}
 <div x-data='statamic.shopify.product({{ options | to_json }}, {{ variants | to_json }})'>
 
-   <form @submit.prevent="handleSubmit($event.target)">
-        <input type="hidden" name="product_id" value="{{ product_id }}" />
-
-        {{ shopify:variants:generate show_price="true" show_out_of_stock="true" class="hidden" }}
-
+	<form @submit.prevent="handleSubmit($event.target)">
+        <input type="hidden" name="product_id" id="ss-product-id" value="{{ product_id }}" />
+    
+        {{ shopify:variants:generate show_price="true" show_out_of_stock="true"  }}
+    
         <div x-show="variants.length > 1">
             <template x-for="(option, index) in options">
                 <div>
                     <label x-text="option"></label>
-
+    
                     <select @change="optionChange(index, $event.target.value)">
                         <option disabled x-text="'Choose ' + option"></option>
                         <template x-for="value in getOptions(index)">
                             <option :value="value" x-text="value" :selected="(selected[index] ?? false) == value">
                         </template>
                     </select>
-
+    
                 </div>
             </template>
         </div>
+    
+        <div>
+            <input type="number" min="1" value="1" x-ref="qty" name="quantity" />
+        </div>
+    
+        <button type="submit" :disabled="! (allOptionsSelected() && variantExistsAndIsInStock())">Add to Cart</button>
+    </form>
 
 </div>
 
  ```
 
 The `handleSubmit` method makes use of the `cart.js` methods to update the cart with the line items to be added.
-
-file:/Users/ryan/Git%20Repos/statamic-shopify/resources/views/cart.antlers.html
 
 
 ### Alpine.store('statamic.shopify.cart')
