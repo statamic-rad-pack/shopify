@@ -1,4 +1,4 @@
-import { addLines } from '../cart'
+import { addLines } from '../shopify/cart'
 import { checkoutId } from './checkout'
 import { htmlToElements, bannerMessage } from './helpers'
 import { setCartCount } from './cart'

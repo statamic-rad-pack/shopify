@@ -1,4 +1,4 @@
-import { getOrCreateCart, removeLine } from '../cart'
+import { getOrCreateCart, removeLine } from '../shopify/cart'
 import { checkoutId } from './checkout'
 
 import {
