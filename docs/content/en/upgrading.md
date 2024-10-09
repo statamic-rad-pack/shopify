@@ -7,7 +7,7 @@ category: Installation
 
 ## Upgrading from 4.x to 5.x
 
-Due to the essential migration to the Shopify Storefront Checkout API, any previous Javascript integrations that relied on the supplied Javascript files will no longer continue to work. Code updates will be required. See the [Storefront API](frontend/storefront-api) documentation for details on how to set up your integration.
+Due to the essential migration to the Shopify Storefront Checkout API, any previous Javascript integrations that relied on the supplied Javascript files will no longer continue to work. Code updates will be required. We strongly recommend taking this opportunity to move to the newly provided Alpine.js integration (See the [Storefront API](frontend/storefront-api) documentation for details on this). If however you want a like for like replacement, you can [find updated JS files here](https://github.com/statamic-rad-pack/shopify/pull/241/commits/d87038ed85d99daa62066b5cc277e51d1d688bef). You will still need to make code changes, however these Javascript files are in line with what was previously supplied.
 
 The output of `{{ shopify:tokens }}` has changed, so that `window.shopifyUrl` is now `window.shopifyConfig.url` and `window.shopifyToken` is now `window.shopifyConfig.token`.
 
