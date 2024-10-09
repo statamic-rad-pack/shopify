@@ -74,19 +74,10 @@ class Shopify extends Tags
     /**
      * @return string|array
      */
-    public function scripts()
-    {
-        return '<script src="'.url('/vendor/shopify/js/statamic-shopify-front.js').'"></script>';
-    }
-
-    /**
-     * @return string|array
-     */
     public function tokens()
     {
         return "<script>
-window.shopifyUrl = '".(config('shopify.storefront_url') ?? config('shopify.url'))."';
-window.shopifyToken = '".config('shopify.storefront_token')."';
+window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('shopify.url'))."', token: '".config('shopify.storefront_token')."' };
 </script>";
     }
 
@@ -234,7 +225,7 @@ window.shopifyToken = '".config('shopify.storefront_token')."';
                 $langKey .= '_nostock';
             }
 
-            $html .= '<option value="'.$variant['storefront_id'].'" data-in-stock="'.($out_of_stock ? 'false' : 'true').'"'.($out_of_stock ? ' disabled' : '').'>'.__($langKey, $langParams).'</option>';
+            $html .= '<option value="'.$variant['id'].'" data-in-stock="'.($out_of_stock ? 'false' : 'true').'"'.($out_of_stock ? ' disabled' : '').'>'.__($langKey, $langParams).'</option>';
         }
 
         return $html;

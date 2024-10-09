@@ -1,12 +1,13 @@
-import Client from 'shopify-buy'
+import { createStorefrontApiClient } from '@shopify/storefront-api-client';
 
 /**
  * Set up a new version of the Shopify Buy this uses the
  * token values set by {{ shopify:tokens }} in your template.
  */
-const client = Client.buildClient({
-  domain: window.shopifyUrl,
-  storefrontAccessToken: window.shopifyToken
-})
+const client = createStorefrontApiClient({
+    storeDomain: window.shopifyConfig.url,
+    apiVersion: '2024-04',
+    publicAccessToken: window.shopifyConfig.token,
+});
 
-export default client
+export default client;
