@@ -85,7 +85,7 @@ Gets a cart that matches the id. If one cannot be found, then a new cart will be
 ```js
 setCartAttributes(string: cartId, array: lines)
 ```
-Set attributes associated with the cart. This should be an array of objects consisting of a `key` and `value`. Eg:
+Set attributes associated with the cart. This will overwrite previously set attributes if you have any. This should be an array of objects consisting of a `key` and `value`. Eg:
 
 ```js
 [
@@ -105,7 +105,7 @@ Set attributes associated with the cart. This should be an array of objects cons
 ```js
 setCartNote(string: cartId, string: note)
 ```
-Sets a note that will be attached to the cart. 
+Sets a note that will be attached to the cart. This will overwrite existing cart notes.
 
 
 ### addLines
