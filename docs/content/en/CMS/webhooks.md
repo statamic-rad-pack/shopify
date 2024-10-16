@@ -51,16 +51,6 @@ https://YOURSITE/!/shopify/webhook/collection/delete
 ```
 
 
-## Product Create
-
-Rather than running the full import continuously you can add a webhook on **Product Creation** that sends the data to Statamic and queues the import of that one product.
-
-Your URL should point to the following endpoint:
-
-```bash
-https://YOURSITE/!/shopify/webhook/product/create
-```
-
 ## Product Update
 
 Similarly, rather than running the full import to catch any changes to products, you can add a webhook on **Product Update** that sends any updated data to Statamic and queues a refresh of that product.
