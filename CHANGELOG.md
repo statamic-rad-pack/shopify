@@ -1,5 +1,15 @@
 # Changelog
 
+## v4.0.5 - 2024-10-17
+
+### 🐛 Fixed
+
+- Mirror pagination change to fetchCollections [@ryanmitchell](https://github.com/ryanmitchell) (#244)
+
+### 🧰 Maintenance
+
+- We don't need Product Create on setup [@ryanmitchell](https://github.com/ryanmitchell) (#243)
+
 ## v4.0.4 - 2024-10-03
 
 ### 🐛 Fixed
@@ -385,6 +395,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
