@@ -22,7 +22,8 @@ trait FetchCollections
         $items = [];
 
         $response = app(Rest::class)->get(path: $resource, query: ['limit' => config('shopify.api_limit')]);
-        $nextPage = $response->getPageInfo();
+
+        $nextPage = ($response->getPageInfo()?->getNextPageUrl() ?? false) ? $response->getPageInfo() : false;
 
         if ($response->getStatusCode() == 200) {
 
@@ -33,7 +34,7 @@ trait FetchCollections
                 $response = app(Rest::class)->get(path: $resource, query: $nextPage->getNextPageQuery());
                 $collections = Arr::get($response->getDecodedBody(), $resource, []);
 
-                $nextPage = $response->getPageInfo();
+                $nextPage = ($response->getPageInfo()?->getNextPageUrl() ?? false) ? $response->getPageInfo() : false;
 
                 $items = array_merge($items, $collections);
             }
