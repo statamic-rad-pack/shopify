@@ -12,11 +12,11 @@
   "devDependencies": {
     "cross-env": "^5.1",
     "laravel-mix": "^5.0.0",
-    "vue-template-compiler": "^2.6.14",
-    "vue": "^2.6.0"
+    "vue": "^2.6.0",
+    "vue-template-compiler": "^2.6.14"
   },
   "dependencies": {
-    "axios": "^0.21.1",
-    "shopify-buy": "^2.11.0"
+    "@shopify/storefront-api-client": "^1.0.2",
+    "axios": "^0.21.1"
   }
 }

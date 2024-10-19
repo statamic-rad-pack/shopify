@@ -7,7 +7,7 @@ position: 9
 
 As we are pulling all our products into Statamic, we'll want a way to access everything on the front-end from our `antlers` files. There are two options available to you:
 
-1. Storefront API by the [JS SDK](https://shopify.github.io/js-buy-sdk/)
+1. Storefront API by the [JS Client](https://github.com/Shopify/shopify-app-js/tree/main/packages/api-clients/storefront-api-client#readme)
 2. [Buy Buttons](https://www.shopify.co.uk/buy-button) (easiest to set up)
 
 This addon only takes into account the Storefront API as we want more control over what happens on our frontend.
@@ -18,7 +18,7 @@ To see the front-end in action, you can view a demo at [https://statamic-shopify
 
 ## Storefront API
 
-The [Storefront API](https://shopify.github.io/js-buy-sdk/) has a lot of data you can retrieve, however we are only focusing on three elements.
+The [Storefront API](https://github.com/Shopify/shopify-app-js/tree/main/packages/api-clients/storefront-api-client#readme) has a lot of data you can retrieve, however we are only focusing on three elements.
 
 1. Creating a cart instance and remembering it across pages
 2. Handling adding products from our CMS to the cart
