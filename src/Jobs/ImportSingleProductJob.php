@@ -65,7 +65,7 @@ class ImportSingleProductJob implements ShouldQueue
         $data = [
             'product_id' => $this->data['id'],
             'published' => $this->data['status'] === 'active' ? true : false,
-            'published_at' => Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s'),
+            'published_at' => $this->data['status'] === 'active' ? Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s') : null,
             'title' => (! $entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
             'content' => (! $entry || config('shopify.overwrite.content')) ? $this->data['body_html'] : $entry->content,
             'options' => $options,
