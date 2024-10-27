@@ -1,5 +1,17 @@
 # Changelog
 
+## v4.0.6 - 2024-10-27
+
+### What's Changed
+
+* Prevent current timestamp being added to draft products by @sunscreem in https://github.com/statamic-rad-pack/shopify/pull/245
+
+### New Contributors
+
+* @sunscreem made their first contribution in https://github.com/statamic-rad-pack/shopify/pull/245
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v4.0.5...v4.0.6
+
 ## v4.0.5 - 2024-10-17
 
 ### 🐛 Fixed
@@ -395,6 +407,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
