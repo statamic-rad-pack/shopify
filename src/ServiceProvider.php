@@ -147,7 +147,7 @@ class ServiceProvider extends AddonServiceProvider
             scopes: ['read_metaobjects', 'read_products'],
             hostName: config('shopify.url'),
             sessionStorage: new FileSessionStorage(config('shopify.session_storage_path', '/tmp/php_sessions')),
-            apiVersion: config('shopify.api_version') ?? '2023-07',
+            apiVersion: config('shopify.api_version') ?? '2024-07',
             isEmbeddedApp: false,
             isPrivateApp: config('shopify.api_private_app') ?? false,
         );
