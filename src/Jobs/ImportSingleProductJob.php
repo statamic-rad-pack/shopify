@@ -130,7 +130,6 @@ class ImportSingleProductJob implements ShouldQueue
                     edges {
                        node {
                         id
-                        jsonValue
                         key
                         value
                       }
