@@ -1,7 +1,7 @@
-import client from './client'
+import { addLines } from '../shopify/cart'
+import { checkoutId } from './checkout'
 import { htmlToElements, bannerMessage } from './helpers'
 import { setCartCount } from './cart'
-import { checkoutId } from './checkout'
 
 /**
  * Initialise the Product form which handles the
@@ -37,22 +37,21 @@ const handleProductFormSubmit = (form) => {
 
   const lineItemsToAdd = [
     {
-      variantId: variantId.value,
+      merchandiseId: "gid://shopify/ProductVariant/" + variantId.value,
       quantity: quantity != null ? parseInt(quantity.value) : 1,
     },
   ]
 
-  client.checkout
-    .addLineItems(
-      checkoutId,
-      lineItemsToAdd
-    )
+  addLines(
+    checkoutId,
+    lineItemsToAdd
+  )
     .then((checkout) => {
       const elements = htmlToElements(
         '<div class="text-center"><span class="mr-4">Product added to the basket.</span><a href="/cart" class="inline-flex items-center"><span>Go to cart</span> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="ml-2 w-4"><path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></a></div>'
       )
       bannerMessage(elements, true)
-      setCartCount(checkout.lineItems)
+      setCartCount(checkout.items)
     })
     .catch((err) => {
       // Handle Errors here.

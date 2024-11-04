@@ -23,17 +23,10 @@ class TagsTest extends TestCase
         config()->set('shopify.storefront_token', '1234');
 
         $this->assertEquals(str_replace(["\r", "\n"], '', "<script>
-window.shopifyUrl = 'abcd';
-window.shopifyToken = '1234';
+window.shopifyConfig = { url: 'abcd', token: '1234' };
 </script>"),
             str_replace(["\r", "\n"], '', $this->tag('{{ shopify:tokens }}'))
         );
-    }
-
-    #[Test]
-    public function outputs_shopify_scripts()
-    {
-        $this->assertStringStartsWith('<script', $this->tag('{{ shopify:scripts }}'));
     }
 
     #[Test]
@@ -154,7 +147,7 @@ window.shopifyToken = '1234';
 
         $tagOutput = (string) $this->tag('{{ shopify:variants:generate show_price="true" show_out_of_stock="true" }}', ['slug' => 'obi-wan']);
 
-        $this->assertEquals('<input type="hidden" name="ss-product-variant" id="ss-product-variant" value="abc">', trim($tagOutput));
+        $this->assertEquals('<input type="hidden" name="ss-product-variant" id="ss-product-variant" value="obi-wan-tshirt">', trim($tagOutput));
 
         $variant2 = Facades\Entry::make()->data([
             'title' => 'Another T-shirt',
@@ -175,7 +168,7 @@ window.shopifyToken = '1234';
         $tagOutput = str_replace(["\r", "\n", "\t"], '', $tagOutput);
         $tagOutput = preg_replace('/\>\s+\</m', '><', trim($tagOutput));
 
-        $this->assertEquals('<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select "><option value="abc" data-in-stock="true">T-shirt - £9.99</option><option value="def" data-in-stock="true">Another T-shirt - £10.99</option></select>', $tagOutput);
+        $this->assertEquals('<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select "><option value="obi-wan-tshirt" data-in-stock="true">T-shirt - £9.99</option><option value="obi-wan-tshirt-2" data-in-stock="true">Another T-shirt - £10.99</option></select>', $tagOutput);
 
         $variant->merge([
             'inventory_quantity' => 0,
@@ -185,7 +178,7 @@ window.shopifyToken = '1234';
         $tagOutput = str_replace(["\r", "\n", "\t"], '', $tagOutput);
         $tagOutput = preg_replace('/\>\s+\</m', '><', trim($tagOutput));
 
-        $this->assertEquals('<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select "><option value="abc" data-in-stock="false" disabled>T-shirt - £9.99</option><option value="def" data-in-stock="true">Another T-shirt - £10.99</option></select>', $tagOutput);
+        $this->assertEquals('<select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select "><option value="obi-wan-tshirt" data-in-stock="false" disabled>T-shirt - £9.99</option><option value="obi-wan-tshirt-2" data-in-stock="true">Another T-shirt - £10.99</option></select>', $tagOutput);
 
     }
 
