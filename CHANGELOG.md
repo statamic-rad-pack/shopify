@@ -1,5 +1,11 @@
 # Changelog
 
+## v5.0.1 - 2024-11-04
+
+Fix bad release
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v5.0.0...v5.0.1
+
 ## v5.0.0 - 2024-11-04
 
 ### 🚀 New
@@ -417,6 +423,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
