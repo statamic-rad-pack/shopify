@@ -1,5 +1,15 @@
 # Changelog
 
+## v5.0.0 - 2024-11-04
+
+### 🚀 New
+
+- Move to shopfront-api checkouts, provide agnostic JS and alpine helper [@ryanmitchell](https://github.com/ryanmitchell) (#241)
+
+### Fixed
+
+- Types needs renamed to type in the product template [@sunscreem](https://github.com/sunscreem) (#246)
+
 ## v4.0.6 - 2024-10-27
 
 ### What's Changed
@@ -407,6 +417,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
