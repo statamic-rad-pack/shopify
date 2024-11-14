@@ -1,5 +1,11 @@
 # Changelog
 
+## v5.0.2 - 2024-11-14
+
+### 🐛 Fixed
+
+- Fix incorrect variable name on order create [@ryanmitchell](https://github.com/ryanmitchell) (#255)
+
 ## v5.0.1 - 2024-11-04
 
 Fix bad release
@@ -423,6 +429,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
