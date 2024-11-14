@@ -17,7 +17,7 @@ class OrderCreateController extends WebhooksController
         $data = json_decode($request->getContent());
 
         // Fetch Single Product
-        $shopify = app(Rest::class);
+        $client = app(Rest::class);
 
         foreach ($data->line_items as $item) {
             $response = $client->get(path: 'products/'.$item->product_id);
