@@ -1,5 +1,11 @@
 # Changelog
 
+## v5.0.3 - 2024-11-22
+
+### 🐛 Fixed
+
+- Installing blueprint should use YAML file, not YAML parse [@ryanmitchell](https://github.com/ryanmitchell) (#257)
+
 ## v5.0.2 - 2024-11-14
 
 ### 🐛 Fixed
@@ -429,6 +435,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
