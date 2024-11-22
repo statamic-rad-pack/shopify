@@ -15,7 +15,10 @@ trait SavesImagesAndMetafields
      */
     private function importImages(array $image)
     {
-        $url = $this->cleanImageURL($image['src']);
+        if (! $url = $this->cleanImageURL($image['src'])) {
+            return;
+        }
+
         $name = $this->getImageNameFromUrl($url);
 
         // Check if it exists first - no point double importing.

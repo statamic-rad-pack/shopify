@@ -46,8 +46,9 @@ class ImportCollectionJob implements ShouldQueue
 
         // Import Images
         if (isset($this->collection['image'])) {
-            $asset = $this->importImages($this->collection['image']);
-            $data['featured_image'] = $asset->path();
+            if ($asset = $this->importImages($this->collection['image'])) {
+                $data['featured_image'] = $asset->path();
+            }
         }
 
         try {
