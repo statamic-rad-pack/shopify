@@ -242,7 +242,7 @@ class ServiceProvider extends AddonServiceProvider
                 ->save();
 
             $collection->entryBlueprint()
-                ->setContents(Facades\YAML::parse(__DIR__.'/../resources/blueprints/variant.yaml'))
+                ->setContents(Facades\YAML::file(__DIR__.'/../resources/blueprints/variant.yaml')->parse())
                 ->save();
         }
     }
