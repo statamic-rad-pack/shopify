@@ -156,7 +156,7 @@ const createData = () => {
 
         optionChange(index, value) {
             this.selected[index] = value;
-            
+
             let filteredVariants = variants;
             for (const [key, value] of Object.entries(options)) {
                 filteredVariants = filteredVariants.filter((variant) => {

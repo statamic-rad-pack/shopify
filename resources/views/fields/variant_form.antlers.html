@@ -1,9 +1,9 @@
 {{ if (variants | count) > 1 }}
-    <select name="ss-product-variant" id="ss-product-variant" class="ss-variant-select {{ params.class }}">
+    <select name="ss-product-variant" class="ss-variant-select {{ params.class }}">
     {{ variants }}
         <option value="{{ slug }}" data-in-stock="{{ if __out_of_stock }}false{{ else }}true{{ /if }}"{{ if __out_of_stock }} disabled{{ /if }}>{{ __translated_string }}</option>
     {{ /variants }}
     </select>
 {{ else }}
-    <input type="hidden" name="ss-product-variant" id="ss-product-variant" value="{{ variants.0.slug }}">
+    <input type="hidden" name="ss-product-variant" value="{{ variants.0.slug }}">
 {{ /if }}
