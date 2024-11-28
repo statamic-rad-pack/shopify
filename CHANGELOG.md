@@ -1,5 +1,12 @@
 # Changelog
 
+## v5.0.4 - 2024-11-28
+
+### 🐛 Fixed
+
+- Update publishable views to Alpine [@ryanmitchell](https://github.com/ryanmitchell) (#260)
+- Handle empty images in import [@ryanmitchell](https://github.com/ryanmitchell) (#259)
+
 ## v5.0.3 - 2024-11-22
 
 ### 🐛 Fixed
@@ -435,6 +442,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
