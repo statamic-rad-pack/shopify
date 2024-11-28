@@ -12,7 +12,7 @@
 
     <div class="md:grid md:grid-cols-2 md:gap-10">
         <div class="mb-6 grid-cell md:mb-0">
-            <picture class="relative block overflow-hidden shadow-lg aspect-w-1 aspect-h-1 rounded-3xl">
+            <picture class="relative block overflow-hidden shadow-lg aspect-square rounded-3xl">
                 {{ featured_image }}
                     <img class="absolute object-cover w-full h-full" src="{{ url }}" alt="{{ alt }}">
                 {{ /featured_image }}
@@ -20,7 +20,7 @@
         </div>
 
         {{ $variants = {shopify:variants} }}
-        <div class="grid-cell" x-data='statamic.shopify.product({{ options | to_json }}, {{ variants | to_json }})'>
+        <div class="grid-cell" x-data='shopifyProduct({{ options | to_json }}, {{ variants | to_json }})'>
             <div class="mb-8 prose">{{ content }}</div>
 
             {{ if type }}
@@ -45,34 +45,34 @@
                 </div>
             {{ /if }}
 
-            {{ if {shopify:in_stock} }}
-            <form class="mt-5" @submit.prevent="handleSubmit($event.target)">
-                <input type="hidden" name="product_id" id="ss-product-id" value="{{ product_id }}" />
+            {{ if {shopify:in_stock :product="slug"} }}
+                <form @submit.prevent='handleSubmit($event.target);'>
+                    <input type="hidden" name="product_id" id="ss-product-id" value="{{ product_id }}" />
 
-                {{ shopify:variants:generate show_price="true" show_out_of_stock="true" class="hidden" }}
+                    {{ shopify:variants:generate show_price="true" show_out_of_stock="true" class="hidden" }}
 
-                <div class="flex mb-3" x-show="variants.length > 1">
-                    <template x-for="(option, index) in options">
-                        <div class="block w-1/2 px-2 py-3 mr-4 border">
-                            <label class="block my-2" x-text="option"></label>
+                    <div class="flex mb-3" x-show="variants.length > 1">
+                        <template x-for="(option, index) in options">
+                            <div class="block my-2">
+                                <label class="block my-2" x-text="option"></label>
 
-                            <select @change="optionChange(index, $event.target.value)">
-                                <option disabled x-text="'Choose ' + option"></option>
-                                <template x-for="value in getOptions(index)">
-                                    <option :value="value" x-text="value" :selected="(selected[index] ?? false) == value">
-                                </template>
-                            </select>
+                                <select @change="optionChange(index, $event.target.value)">
+                                    <option disabled x-text="'Choose ' + option"></option>
+                                    <template x-for="value in getOptions(index)">
+                                        <option :value="value" x-text="value" :selected="(selected[index] ?? false) == value">
+                                    </template>
+                                </select>
 
-                        </div>
-                    </template>
-                </div>
+                            </div>
+                        </template>
+                    </div>
 
-                <div class="flex mb-3">
-                    <input type="number" min="1" value="1" x-ref="qty" name="quantity"  class="w-20 p-2 border" />
-                </div>
+                    <div class="flex mb-3">
+                        <input type="number" min="1" value="1" x-ref="qty" class="w-20 p-2 border" />
+                    </div>
 
-                <button type="submit" :disabled="! (allOptionsSelected() && variantExistsAndIsInStock())" class="px-4 py-2 text-base font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700">Add to Cart</button>
-            </form>
+                    <button type="submit" :disabled="! (allOptionsSelected() && variantExistsAndIsInStock())" class="px-4 py-2 text-base font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700" x-text="added ? 'Added!' : 'Add to cart'">Add to Cart</button>
+                </form>
             {{ else }}
                 <p class="mt-5 mb-2 font-medium">Out of Stock</p>
 
@@ -81,3 +81,4 @@
         </div>
     </div>
 </div>
+
