@@ -95,14 +95,16 @@ class ImportSingleProductJob implements ShouldQueue
 
         // Import Images
         if ($this->data['image']) {
-            $asset = $this->importImages($this->data['image']);
-            $data['featured_image'] = $asset->path();
+            if ($asset = $this->importImages($this->data['image'])) {
+                $data['featured_image'] = $asset->path();
+            }
         }
 
         if ($this->data['images']) {
             foreach ($this->data['images'] as $image) {
-                $asset = $this->importImages($image);
-                $data['gallery'][] = $asset->path();
+                if ($asset = $this->importImages($image)) {
+                    $data['gallery'][] = $asset->path();
+                }
             }
         }
 
@@ -353,8 +355,9 @@ class ImportSingleProductJob implements ShouldQueue
             if ($variant['image_id']) {
                 foreach (($this->data['images'] ?? []) as $image) {
                     if ($image['id'] == $variant['image_id']) {
-                        $asset = $this->importImages($image);
-                        $data['image'] = $asset->path();
+                        if ($asset = $this->importImages($image)) {
+                            $data['image'] = $asset->path();
+                        }
                     }
                 }
             }
