@@ -156,6 +156,17 @@ const createData = () => {
 
         optionChange(index, value) {
             this.selected[index] = value;
+            
+            let filteredVariants = variants;
+            for (const [key, value] of Object.entries(options)) {
+                filteredVariants = filteredVariants.filter((variant) => {
+                    return variant[key] == this.selected[key] ?? false;
+                });
+            }
+
+            if (filteredVariants.length == 1) {
+                this.variantEl.value = filteredVariants[0].slug;
+            }
         },
 
         outOfStock(variant) {
