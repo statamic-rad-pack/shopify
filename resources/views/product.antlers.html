@@ -71,7 +71,7 @@
                         <input type="number" min="1" value="1" x-ref="qty" class="w-20 p-2 border" />
                     </div>
 
-                    <button type="submit" class="px-4 py-2 text-base font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700" x-text="added ? 'Added!' : 'Add to cart'">Add to Cart</button>
+                    <button type="submit" :disabled="! (allOptionsSelected() && variantExistsAndIsInStock())" class="px-4 py-2 text-base font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700" x-text="added ? 'Added!' : 'Add to cart'">Add to Cart</button>
                 </form>
             {{ else }}
                 <p class="mt-5 mb-2 font-medium">Out of Stock</p>
