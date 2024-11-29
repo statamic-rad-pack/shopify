@@ -1,5 +1,11 @@
 # Changelog
 
+## v5.0.6 - 2024-11-29
+
+### 🐛 Fixed
+
+- Fix created_at on order create [@ryanmitchell](https://github.com/ryanmitchell) (#263)
+
 ## v5.0.5 - 2024-11-29
 
 ### 🐛 Fixed
@@ -448,6 +454,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
