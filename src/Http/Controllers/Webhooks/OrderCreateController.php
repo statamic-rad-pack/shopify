@@ -28,7 +28,7 @@ class OrderCreateController extends WebhooksController
                 if ($product) {
                     ImportSingleProductJob::dispatch($product, [
                         'quantity' => [$item->sku => $item->quantity ?? 1],
-                        'date' => Carbon::parse($data['created_at']),
+                        'date' => Carbon::parse($data->created_at),
                     ])->onQueue(config('shopify.queue'));
                 }
             }
