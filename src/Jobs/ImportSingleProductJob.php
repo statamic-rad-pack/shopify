@@ -62,9 +62,10 @@ class ImportSingleProductJob implements ShouldQueue
             }
         }
 
+        $published = $this->data['status'] === 'active' ? true : false;
+
         $data = [
             'product_id' => $this->data['id'],
-            'published' => $this->data['status'] === 'active' ? true : false,
             'published_at' => $this->data['status'] === 'active' ? Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s') : null,
             'title' => (! $entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
             'content' => (! $entry || config('shopify.overwrite.content')) ? $this->data['body_html'] : $entry->content,
@@ -225,8 +226,6 @@ class ImportSingleProductJob implements ShouldQueue
                             $published = true;
                         }
                     }
-
-                    $entry->published($published);
                 }
             } catch (\Throwable $e) {
                 Log::error('Could not manage publications status for product '.$this->data['id']);
@@ -237,6 +236,7 @@ class ImportSingleProductJob implements ShouldQueue
             Log::error($e->getMessage());
         }
 
+        $entry->published($published);
         $entry->save();
 
         // if we are multisite, get translations
