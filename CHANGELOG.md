@@ -1,5 +1,11 @@
 # Changelog
 
+## v5.0.7 - 2024-12-03
+
+### 🐛 Fixed
+
+- Update quantities correctly [@ryanmitchell](https://github.com/ryanmitchell) (#265)
+
 ## v5.0.6 - 2024-11-29
 
 ### 🐛 Fixed
@@ -454,6 +460,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
