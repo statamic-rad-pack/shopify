@@ -109,8 +109,13 @@ class ImportSingleProductJob implements ShouldQueue
             }
         }
 
-        if ($this->orderData) {
-            $data = $this->updatePurchaseHistory($data);
+        if ($this->orderData && ($quantities = Arr::get($this->orderData, 'quantity'))) {
+            $qty = 0;
+            foreach ($quantities as $sku => $q) {
+                $qty += (int) $q;
+            }
+
+            $data = $this->updatePurchaseHistory($data, $qty);
         }
 
         $entry->merge($data);
@@ -363,7 +368,7 @@ class ImportSingleProductJob implements ShouldQueue
             }
 
             if ($this->orderData && ($qty = Arr::get($this->orderData, 'quantity.'.$variant['sku']))) {
-                $data = $this->updatePurchaseHistory($data);
+                $data = $this->updatePurchaseHistory($data, (int) $qty);
             }
 
             $entry->merge($data);
@@ -454,7 +459,7 @@ class ImportSingleProductJob implements ShouldQueue
     /**
      * Update the purchase history for this item
      */
-    private function updatePurchaseHistory(array $data): array
+    private function updatePurchaseHistory(array $data, int $qty): array
     {
         $data['last_purchased'] = $this->orderData['date']->format('Y-m-d H:i:s');
 
