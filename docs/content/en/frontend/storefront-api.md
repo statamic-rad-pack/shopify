@@ -139,8 +139,8 @@ import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;
 
-createStore();
-createData();
+createStore(Alpine);
+createData(Alpine);
 
 Alpine.start();
 ```
@@ -152,7 +152,7 @@ To use it:
 
 ```antlers
 {{ $variants = {shopify:variants} }}
-<div x-data='statamic.shopify.product({{ options | to_json }}, {{ variants | to_json }})'>
+<div x-data='shopifyProduct({{ options | to_json }}, {{ variants | to_json }})'>
 
 	<form @submit.prevent="handleSubmit($event.target)">
         <input type="hidden" name="product_id" id="ss-product-id" value="{{ product_id }}" />
