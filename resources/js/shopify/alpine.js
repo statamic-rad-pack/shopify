@@ -1,7 +1,6 @@
 import { addLines, getOrCreateCart, removeLine, setCartAttributes, setCartNote, updateLineQuantity } from './cart';
-import Alpine from 'alpinejs';
 
-const createStore = () => {
+const createStore = (Alpine) => {
     Alpine.store('statamic.shopify.cart', {
         cartId: null,
         checkoutUrl: '',
@@ -76,7 +75,7 @@ const createStore = () => {
     });
 }
 
-const createData = () => {
+const createData = (Alpine) => {
     Alpine.data('shopifyProduct', (options, variants) => ({
         added: false,
         customAttributes: {},
