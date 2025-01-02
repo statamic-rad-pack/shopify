@@ -101,6 +101,19 @@ class ServiceProvider extends AddonServiceProvider
             $nav->remove('Content', 'Taxonomies', 'Product Type');
             $nav->remove('Content', 'Taxonomies', 'Product Vendor');
 
+            $user = Facades\User::current();
+
+            $canViewSomething = $user->can('view', Facades\Collection::find('products'))
+                || $user->can('view', Facades\Taxonomy::find(config('shopify.taxonomies.collections')))
+                || $user->can('view', Facades\Taxonomy::find(config('shopify.taxonomies.tags')))
+                || $user->can('view', Facades\Taxonomy::find(config('shopify.taxonomies.type')))
+                || $user->can('view', Facades\Taxonomy::find(config('shopify.taxonomies.vendor')))
+                || $user->can('access shopify');
+
+            if (! $canViewSomething) {
+                return;
+            }
+
             $nav->create(__('Shopify'))
                 ->section('Shopify')
                 ->icon($shopifySvg)
