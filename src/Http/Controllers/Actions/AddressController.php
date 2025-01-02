@@ -14,7 +14,7 @@ class AddressController extends BaseActionController
         $customerId = request()->input('customer_id') ?? User::current()?->get('shopify_id') ?? false;
 
         if (! $customerId) {
-            return $this->withErrors($request, __('No customer_id to associate the address with'));
+            return back()->withErrors($request, __('No customer_id to associate the address with'));
         }
 
         $validatedData = $request->validate($this->rules());
@@ -26,14 +26,14 @@ class AddressController extends BaseActionController
             if ($response->getStatusCode() == 201) {
                 $data = Arr::get($response->getDecodedBody(), 'customer_address', []);
 
-                return $this->withSuccess($request, [
+                return back()->withSuccess($request, [
                     'message' => __('Address created'),
                     'address' => $data,
                 ]);
             }
 
         } catch (\Exception $error) {
-            return $this->withErrors($request, $error->getMessage());
+            return back()->withErrors($request, $error->getMessage());
         }
     }
 
@@ -42,7 +42,7 @@ class AddressController extends BaseActionController
         $customerId = request()->input('customer_id') ?? User::current()?->get('shopify_id') ?? false;
 
         if (! $customerId) {
-            return $this->withErrors($request, __('No customer_id to associate the address with'));
+            return back()->withErrors($request, __('No customer_id to associate the address with'));
         }
 
         try {
@@ -51,13 +51,13 @@ class AddressController extends BaseActionController
 
             if ($response->getStatusCode() == 200) {
 
-                return $this->withSuccess($request, [
+                return back()->withSuccess($request, [
                     'message' => __('Address deleted'),
                 ]);
             }
 
         } catch (\Exception $error) {
-            return $this->withErrors($request, $error->getMessage());
+            return back()->withErrors($request, $error->getMessage());
         }
     }
 
@@ -66,7 +66,7 @@ class AddressController extends BaseActionController
         $customerId = request()->input('customer_id') ?? User::current()?->get('shopify_id') ?? false;
 
         if (! $customerId) {
-            return $this->withErrors($request, __('No customer_id to associate the address with'));
+            return back()->withErrors($request, __('No customer_id to associate the address with'));
         }
 
         $validatedData = $request->validate($this->rules());
@@ -78,16 +78,14 @@ class AddressController extends BaseActionController
             if ($response->getStatusCode() == 200) {
                 $data = Arr::get($response->getDecodedBody(), 'customer_address', []);
 
-                return $this->withSuccess($request, [
+                return back()->withSuccess($request, [
                     'message' => __('Address updated'),
                     'address' => $data,
                 ]);
             }
 
         } catch (\Exception $error) {
-            dd($error);
-
-            return $this->withErrors($request, $error->getMessage());
+            return back()->withErrors($request, $error->getMessage());
         }
     }
 
@@ -105,7 +103,6 @@ class AddressController extends BaseActionController
             'phone' => ['nullable', 'string'],
             'name' => ['nullable', 'string'],
             'province_code' => ['nullable', 'string'],
-            'name' => ['nullable', 'string'],
             'country' => ['required', 'string'],
             'country_code' => ['required_without:country', 'string', 'size:2'],
             'default' => ['nullable', 'boolean'],
