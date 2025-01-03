@@ -124,4 +124,26 @@ class ActionsTest extends TestCase
         $response = $this->postJson('/!/shopify/address/1', ['_method' => 'delete', 'customer_id' => 1]);
         $response->assertStatus(200);
     }
+
+    #[Test]
+    public function can_use_precognition_when_creating_an_address()
+    {
+        $response = $this
+            ->withPrecognition()
+            ->postJson('/!/shopify/address', []);
+
+        $this->assertSame('true', $response->headers->get('precognition'));
+        $response->assertStatus(422);
+    }
+
+    #[Test]
+    public function can_use_precognition_when_updating_an_address()
+    {
+        $response = $this
+            ->withPrecognition()
+            ->postJson('/!/shopify/address/1', []);
+
+        $this->assertSame('true', $response->headers->get('precognition'));
+        $response->assertStatus(422);
+    }
 }

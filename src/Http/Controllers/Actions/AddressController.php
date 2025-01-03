@@ -6,10 +6,11 @@ use Illuminate\Http\Request;
 use Shopify\Clients\Rest;
 use Statamic\Facades\User;
 use Statamic\Support\Arr;
+use StatamicRadPack\Shopify\Http\Requests;
 
 class AddressController extends BaseActionController
 {
-    public function create(Request $request)
+    public function create(Requests\CreateOrUpdateAddressRequest $request)
     {
         $customerId = request()->input('customer_id') ?? User::current()?->get('shopify_id') ?? false;
 
@@ -61,7 +62,7 @@ class AddressController extends BaseActionController
         }
     }
 
-    public function store(Request $request, $id)
+    public function store(Requests\CreateOrUpdateAddressRequest $request, $id)
     {
         $customerId = request()->input('customer_id') ?? User::current()?->get('shopify_id') ?? false;
 

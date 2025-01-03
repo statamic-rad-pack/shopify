@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Support\Facades\Route;
 use StatamicRadPack\Shopify\Http\Controllers\Actions\AddressController;
 use StatamicRadPack\Shopify\Http\Controllers\Actions\VariantsController;
@@ -10,6 +11,7 @@ use StatamicRadPack\Shopify\Http\Middleware\VerifyShopifyHeaders;
 Route::name('shopify.')
     ->group(function () {
         Route::prefix('address')
+            ->middleware([HandlePrecognitiveRequests::class])
             ->group(function () {
                 Route::post('/', [AddressController::class, 'create'])
                     ->name('address.create');
