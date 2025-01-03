@@ -18,7 +18,7 @@ class AddressController extends BaseActionController
             return $this->withErrors($request, __('No customer_id to associate the address with'));
         }
 
-        $validatedData = $request->validate($this->rules());
+        $validatedData = $request->validated();
 
         try {
 
@@ -70,7 +70,7 @@ class AddressController extends BaseActionController
             return $this->withErrors($request, __('No customer_id to associate the address with'));
         }
 
-        $validatedData = $request->validate($this->rules());
+        $validatedData = $request->validated();
 
         try {
 
