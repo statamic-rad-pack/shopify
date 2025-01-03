@@ -130,6 +130,7 @@ Check if a product is in stock or not.
 
 ```twig
 {{ if {shopify:in_stock} }}
+   ...
 {{ /if }}
 ```
 
@@ -145,7 +146,6 @@ Return any Shopify customer data associated with the current logged in user, or 
 
 ```twig
 {{ shopify:customer customer_id="my_id" }} ... {{ /shopify:customer }}
-
 ```
 
 ## Customer Addresses
@@ -160,7 +160,6 @@ Return any Shopify addresses associated with the current logged in user, or the 
 
 ```twig
 {{ shopify:customer:addresses customer_id="my_id" }} ... {{ /shopify:customer:addresses }}
-
 ```
 
 ## Customer Address Form
@@ -175,7 +174,6 @@ Creates a form that directs to the appropriate endpoint for processing a custome
 
 ```twig
 {{ shopify:address_form customer_id="my_id" }} ... {{ /shopify:address_form }}
-
 ```
 
 ```twig
@@ -199,7 +197,6 @@ Return any Shopify addresses associated with the current logged in user, or the 
 
 ```twig
 {{ shopify:customer:orders customer_id="my_id" }} ... {{ /shopify:customer:orders }}
-
 ```
 
 This tag also supports pagination:
