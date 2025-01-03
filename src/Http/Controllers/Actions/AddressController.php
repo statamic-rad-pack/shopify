@@ -89,24 +89,4 @@ class AddressController extends BaseActionController
             return $this->withErrors($request, $error->getMessage());
         }
     }
-
-    private function rules()
-    {
-        return [
-            'first_name' => ['required', 'string'],
-            'last_name' => ['required', 'string'],
-            'company' => ['nullable', 'string'],
-            'address1' => ['required', 'string'],
-            'address2' => ['nullable', 'string'],
-            'city' => ['required', 'string'],
-            'province' => ['required', 'string'],
-            'zip' => ['required', 'string'],
-            'phone' => ['nullable', 'string'],
-            'name' => ['nullable', 'string'],
-            'province_code' => ['nullable', 'string'],
-            'country' => ['required', 'string'],
-            'country_code' => ['required_without:country', 'string', 'size:2'],
-            'default' => ['nullable', 'boolean'],
-        ];
-    }
 }
