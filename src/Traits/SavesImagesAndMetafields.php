@@ -80,13 +80,13 @@ trait SavesImagesAndMetafields
     }
 
     /**
-     * Make a fake file so Statamic can interpert the data we need.
+     * Make a fake file so Statamic can interpret the data we need.
      */
     public function uploadFakeFileFromUrl(string $name, string $url): UploadedFile
     {
         Storage::disk('local')->put($name, file_get_contents($url));
 
-        return new UploadedFile(realpath(storage_path("app/$name")), $name);
+        return new UploadedFile(Storage::disk('local')->path($name), $name);
     }
 
     /**
