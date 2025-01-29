@@ -1,5 +1,12 @@
 # Changelog
 
+## v5.2.0 - 2025-01-29
+
+### 🚀 New
+
+- Remove hardcoded API version from JS client [@ryanmitchell](https://github.com/ryanmitchell) (#272)
+- Use storage facade to get real path [@ryanmitchell](https://github.com/ryanmitchell) (#271)
+
 ## v5.0.7 - 2024-12-03
 
 ### 🐛 Fixed
@@ -460,6 +467,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
