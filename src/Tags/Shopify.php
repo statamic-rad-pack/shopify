@@ -77,7 +77,7 @@ class Shopify extends Tags
     public function tokens()
     {
         return "<script>
-window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('shopify.url'))."', token: '".config('shopify.storefront_token')."', apiVersion: '".config('shopify.api_version', '2024-07')."' };
+window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('shopify.url'))."', token: '".config('shopify.storefront_token')."', apiVersion: '".(config('shopify.api_version') ?? '2024-07')."' };
 </script>";
     }
 

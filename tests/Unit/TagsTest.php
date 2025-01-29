@@ -23,7 +23,7 @@ class TagsTest extends TestCase
         config()->set('shopify.storefront_token', '1234');
 
         $this->assertEquals(str_replace(["\r", "\n"], '', "<script>
-window.shopifyConfig = { url: 'abcd', token: '1234' };
+window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
 </script>"),
             str_replace(["\r", "\n"], '', $this->tag('{{ shopify:tokens }}'))
         );
