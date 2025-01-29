@@ -6,7 +6,7 @@ import { createStorefrontApiClient } from '@shopify/storefront-api-client';
  */
 const client = createStorefrontApiClient({
     storeDomain: window.shopifyConfig.url,
-    apiVersion: '2024-04',
+    apiVersion: window.shopifyConfig.apiVersion ?? '2024-07',
     publicAccessToken: window.shopifyConfig.token,
 });
 
