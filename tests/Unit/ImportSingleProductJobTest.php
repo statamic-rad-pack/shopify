@@ -86,7 +86,7 @@ class ImportSingleProductJobTest extends TestCase
             "image": null
         }', true);
 
-        Facades\Collection::make('products')->save();
+        Facades\Collection::make(config('shopify.collection_handle'))->save();
         Facades\Taxonomy::make()->handle('collections')->save();
         Facades\Taxonomy::make()->handle('tags')->save();
         Facades\Taxonomy::make()->handle('type')->save();
@@ -127,7 +127,7 @@ class ImportSingleProductJobTest extends TestCase
 
         Jobs\ImportSingleProductJob::dispatch($data);
 
-        $entry = Facades\Entry::whereCollection('products')->first();
+        $entry = Facades\Entry::whereCollection(config('shopify.collection_handle'))->first();
 
         $this->assertSame($entry->product_id, 1072481042);
         $this->assertSame($entry->get('vendor'), ['burton']);
@@ -212,7 +212,7 @@ class ImportSingleProductJobTest extends TestCase
             "image": null
         }', true);
 
-        Facades\Collection::make('products')->sites(['en', 'fr'])->save();
+        Facades\Collection::make(config('shopify.collection_handle'))->sites(['en', 'fr'])->save();
         Facades\Taxonomy::make()->handle('collections')->save();
         Facades\Taxonomy::make()->handle('tags')->save();
         Facades\Taxonomy::make()->handle('type')->save();
@@ -253,7 +253,7 @@ class ImportSingleProductJobTest extends TestCase
 
         Jobs\ImportSingleProductJob::dispatch($data);
 
-        $entry = Facades\Entry::whereCollection('products')->firstWhere('locale', 'fr');
+        $entry = Facades\Entry::whereCollection(config('shopify.collection_handle'))->firstWhere('locale', 'fr');
 
         $this->assertNotNull($entry);
         $this->assertSame($entry->title, 'Featured items');
@@ -331,7 +331,7 @@ class ImportSingleProductJobTest extends TestCase
             "image": null
         }', true);
 
-        Facades\Collection::make('products')->sites(['en', 'fr'])->dated(true)->save();
+        Facades\Collection::make(config('shopify.collection_handle'))->sites(['en', 'fr'])->dated(true)->save();
         Facades\Taxonomy::make()->handle('collections')->save();
         Facades\Taxonomy::make()->handle('tags')->save();
         Facades\Taxonomy::make()->handle('type')->save();
@@ -365,7 +365,7 @@ class ImportSingleProductJobTest extends TestCase
 
         Jobs\ImportSingleProductJob::dispatch($data);
 
-        $entry = Facades\Entry::whereCollection('products')->first();
+        $entry = Facades\Entry::whereCollection(config('shopify.collection_handle'))->first();
 
         $this->assertNotNull($entry);
         $this->assertSame($entry->get('some_metafield'), 'this is a value');
@@ -443,7 +443,7 @@ class ImportSingleProductJobTest extends TestCase
             "image": null
         }', true);
 
-        Facades\Collection::make('products')->sites(['en', 'fr'])->dated(true)->save();
+        Facades\Collection::make(config('shopify.collection_handle'))->sites(['en', 'fr'])->dated(true)->save();
         Facades\Taxonomy::make()->handle('collections')->save();
         Facades\Taxonomy::make()->handle('tags')->save();
         Facades\Taxonomy::make()->handle('type')->save();
@@ -555,7 +555,7 @@ class ImportSingleProductJobTest extends TestCase
 
         Jobs\ImportSingleProductJob::dispatch($data);
 
-        $entry = Facades\Entry::whereCollection('products')->first();
+        $entry = Facades\Entry::whereCollection(config('shopify.collection_handle'))->first();
 
         $this->assertNotNull($entry);
         $this->assertSame($entry->published(), false);

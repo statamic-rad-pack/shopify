@@ -11,7 +11,7 @@ class ProductsController extends CpController
     public function index(): JsonResponse
     {
         $products = Entry::query()
-            ->where('collection', 'products')
+            ->where('collection', config('shopify.collection_handle'))
             ->get()
             ->map(function ($product) {
                 $values['title'] = $product->title;
