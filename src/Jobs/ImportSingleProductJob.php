@@ -227,7 +227,7 @@ class ImportSingleProductJob implements ShouldQueue
 
                         $entry->date($publishDate);
 
-                        if (! $published && $publishDate->gt(now())) {
+                        if (! $published && $publishDate->lt(now())) {
                             $published = true;
                         }
                     }
