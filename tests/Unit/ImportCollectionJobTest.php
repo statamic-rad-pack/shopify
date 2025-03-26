@@ -20,7 +20,7 @@ class ImportCollectionJobTest extends TestCase
         Facades\Taxonomy::make()->handle('collections')->save();
 
         $product = tap(Facades\Entry::make()
-            ->collection(config('shopify.collection_handle'))
+            ->collection(config('shopify.collection_handle', 'products'))
             ->id('product-1')
             ->slug('product-1')
         )->save();

@@ -22,7 +22,7 @@ class ScopesTest extends TestCase
             'slug' => 'obi-wan',
             'product_id' => 1,
         ])
-            ->collection(config('shopify.collection_handle'));
+            ->collection(config('shopify.collection_handle', 'products'));
 
         $product->save();
 
@@ -66,7 +66,7 @@ class ScopesTest extends TestCase
             'slug' => 'obi-wan',
             'product_id' => 1,
         ])
-            ->collection(config('shopify.collection_handle'));
+            ->collection(config('shopify.collection_handle', 'products'));
 
         $product->save();
 
