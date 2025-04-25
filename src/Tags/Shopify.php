@@ -2,11 +2,9 @@
 
 namespace StatamicRadPack\Shopify\Tags;
 
-use NumberFormatter;
 use Shopify\Clients\Rest;
 use Statamic\Extensions\Pagination\LengthAwarePaginator;
 use Statamic\Facades\Entry;
-use Statamic\Facades\Site;
 use Statamic\Facades\User;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
@@ -65,23 +63,10 @@ class Shopify extends Tags
 
         $price = $pricePluck->sort()->first();
 
-        $payload = [
+        $payload = $this->runHooksWith('product-price', [
             'currency' => config('shopify.currency'),
             'price' => $price,
-        ];
-
-        $this->runHooksWith('shopify-price', $payload);
-
-        // try to use currency
-        if (($currencyCode = config('shopify.currency_code')) && class_exists('NumberFormatter')) {
-            try {
-                $formatter = new \NumberFormatter(Site::current()->locale(), \NumberFormatter::CURRENCY);
-
-                $price = $formatter->formatCurrency((float) $price, $currencyCode);
-
-                $currencyString = ''; // blank this as its included in price
-            } catch (\Throwable $e) { }
-        }
+        ]);
 
         if ($pricePluck->count() > 1 && $this->params->get('show_from') === true) {
             return __('shopify::messages.display_price_from', ['currency' => $payload->currency, 'price' => $payload->price]);
