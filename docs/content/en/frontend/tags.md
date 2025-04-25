@@ -53,6 +53,20 @@ From £50.00
 £4.99
 ```
 
+#### product-price hook
+
+This tag provides a [Hook](https://statamic.dev/extending/hooks) to modify the price and currency. For example, if you wanted to format the price using PHP's NumberFormatter:
+
+```php
+\StatamicRadPack\Shopify\Tags\Shopify::hook('product-price', function ($payload, $next) {
+    $formatter = new \NumberFormatter(\Statamic\Facades\Site::current()->locale(), \NumberFormatter::CURRENCY);
+
+    $payload->price = $formatter->formatCurrency((float) $payload->price, 'EUR');
+    
+    return $next($payload);
+});
+```
+
 ## Product Variants
 
 You can interact with the variants in several ways. In the demo theme we output this automatically, but you may want to drill down deeper.

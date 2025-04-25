@@ -7,6 +7,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Shopify\Clients\Rest;
 use Shopify\Clients\RestResponse;
 use Statamic\Facades;
+use StatamicRadPack\Shopify\Tags\Shopify;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
 class TagsTest extends TestCase
@@ -79,6 +80,43 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
 
         $this->assertEquals('From £9.99', $this->tag('{{ shopify:product_price show_from="true" }}', ['slug' => 'obi-wan']));
 
+    }
+
+    #[Test]
+    public function runs_hooks_on_product_price()
+    {
+        $product = Facades\Entry::make()->data([
+            'title' => 'Obi wan',
+            'vendor' => 'Kenobe',
+            'slug' => 'obi-wan',
+            'product_id' => 1,
+        ])
+            ->collection('products');
+
+        $product->save();
+
+        $variant = Facades\Entry::make()->data([
+            'title' => 'T-shirt',
+            'slug' => 'obi-wan-tshirt',
+            'sku' => 'obi-wan-tshirt',
+            'product_slug' => 'obi-wan',
+            'price' => 1999.99,
+            'inventory_quantity' => 10,
+            'inventory_policy' => 'deny',
+            'inventory_management' => 'shopify',
+        ])
+            ->collection('variants');
+
+        $variant->save();
+
+        Shopify::hook('product-price', function ($payload, $next) {
+            $payload->price = '10.00';
+            $payload->currency = '$';
+
+            return $next($payload);
+        });
+
+        $this->assertEquals('$10.00', $this->tag('{{ shopify:product_price }}', ['slug' => 'obi-wan']));
     }
 
     #[Test]
