@@ -1,5 +1,16 @@
 # Changelog
 
+## v5.3.0 - 2025-04-25
+
+### 🚀 New
+
+- Add product-price hook [@ryanmitchell](https://github.com/ryanmitchell) (#286)
+
+### 🐛 Fixed
+
+- Publish date should be lt not gt [@ryanmitchell](https://github.com/ryanmitchell) (#284)
+- Document setting of ENV Variables [@anditopping](https://github.com/anditopping) (#273)
+
 ## v5.2.0 - 2025-01-29
 
 ### 🚀 New
@@ -467,6 +478,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
