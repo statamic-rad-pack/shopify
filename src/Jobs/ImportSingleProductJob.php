@@ -7,7 +7,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Shopify\Clients\Graphql;
 use Shopify\Clients\Rest;
@@ -24,25 +23,115 @@ class ImportSingleProductJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SavesImagesAndMetafields;
-    use SerializesModels;
 
-    /** @var array */
-    public $data;
+    public $data = [];
 
-    /** @var array */
-    public $orderData;
-
-    /**
-     * ImportSingleProductJob constructor.
-     */
-    public function __construct(array $data, array $orderData = [])
+    public function __construct(public int $productId, public array $orderData = [])
     {
-        $this->data = $data;
-        $this->orderData = $orderData;
     }
 
     public function handle()
     {
+        $query = <<<QUERY
+            query {
+               product(id: "gid://shopify/Product/{$this->productId}") {
+               collections(first: 100) {
+                  edges {
+                    node {
+                      id
+                      handle
+                    }
+                  }
+                }
+                descriptionHtml
+                handle
+                id
+                metafields(first: 100) {
+                  edges {
+                    node {
+                      id
+                      jsonValue
+                      key
+                      value
+                    }
+                  }
+                }
+                media(first: 20, sortKey: POSITION, query: "media_type: IMAGE") {
+                  edges {
+                    node {
+                      id
+                      ... on MediaImage {
+                        id
+                        image {
+                          altText
+                          url
+                        }
+                      }
+                    }
+                  }
+                }
+                options {
+                  id
+                }
+                productType
+                resourcePublications(onlyPublished: false, first: 100) {
+                  edges {
+                    node {
+                      isPublished
+                      publication {
+                        id
+                      }
+                      publishDate
+                    }
+                  }
+                }
+                tags
+                title
+                variants(first: 100) {
+                  edges {
+                    node {
+                      compareAtPrice
+                      id
+                      inventoryItem {
+                        measurement {
+                          weight {
+                            value
+                          }
+                        }
+                        requiresShipping
+                      }
+                      inventoryPolicy
+                      inventoryQuantity
+                      price
+                      selectedOptions {
+                        name
+                        value
+                      }
+                      sku
+                      title
+                    }
+                  }
+                }
+                vendor
+              }
+            }
+            QUERY;
+
+
+//                'inventory_management' => $variant['inventory_management'] ?? null,
+//                'grams' => $variant['grams'] ?? null,
+//                'requires_shipping' => $variant['requires_shipping'] ?? null,
+//                'option1' => $variant['option1'],
+//                'option2' => $variant['option2'] ?? '',
+//                'option3' => $variant['option3'] ?? '',
+//                'storefront_id' => base64_encode($variant['admin_graphql_api_id']),
+
+        $response = app(Graphql::class)->query(['query' => $query]);
+
+        if (! $this->data = Arr::get($response->getDecodedBody(), 'data.product', [])) {
+            return;
+        }
+
         $entry = Entry::query()
             ->where('collection', 'products')
             ->where('site', Site::default()->handle())
@@ -62,13 +151,10 @@ class ImportSingleProductJob implements ShouldQueue
             }
         }
 
-        $published = $this->data['status'] === 'active' ? true : false;
-
         $data = [
             'product_id' => $this->data['id'],
-            'published_at' => $this->data['status'] === 'active' ? Carbon::parse($this->data['published_at'])->format('Y-m-d H:i:s') : null,
             'title' => (! $entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
-            'content' => (! $entry || config('shopify.overwrite.content')) ? $this->data['body_html'] : $entry->content,
+            'content' => (! $entry || config('shopify.overwrite.content')) ? $this->data['descriptionHtml'] : $entry->content,
             'options' => $options,
         ];
 
@@ -95,16 +181,16 @@ class ImportSingleProductJob implements ShouldQueue
         $this->importVariants($this->data['variants'], $this->data['handle']);
 
         // Import Images
-        if ($this->data['image']) {
-            if ($asset = $this->importImages($this->data['image'])) {
-                $data['featured_image'] = $asset->path();
+        if (Arr::get($this->data, 'media.edges') as $index => $edge) {
+            if (! $image = Arr::get($edge, 'node.image', [])) {
+                continue;
             }
-        }
 
-        if ($this->data['images']) {
-            foreach ($this->data['images'] as $image) {
-                if ($asset = $this->importImages($image)) {
-                    $data['gallery'][] = $asset->path();
+            if ($asset = $this->importImages($image)) {
+                $data['gallery'][] = $asset->path();
+
+                if ($index == 0) {
+                    $data['featured_image'] = $asset->path();
                 }
             }
         }
@@ -120,46 +206,11 @@ class ImportSingleProductJob implements ShouldQueue
 
         $entry->merge($data);
 
+        $published = false;
+
         // this is to make testing easier
         // means we can just test individual parts of the job
         try {
-            $query = <<<QUERY
-              query {
-                product(id: "gid://shopify/Product/{$this->data['id']}") {
-                  collections(first: 100) {
-                    edges {
-                       node {
-                        id
-                        handle
-                      }
-                    }
-                  }
-                  metafields(first: 100) {
-                    edges {
-                       node {
-                        id
-                        jsonValue
-                        key
-                        value
-                      }
-                    }
-                  }
-                  resourcePublications(onlyPublished: false, first:100) {
-                    edges {
-                      node {
-                        isPublished
-                        publication {
-                            id
-                        }
-                        publishDate
-                      }
-                    }
-                  }
-                }
-              }
-            QUERY;
-
-            $response = app(Graphql::class)->query(['query' => $query]);
 
             // collections
             try {
@@ -225,6 +276,7 @@ class ImportSingleProductJob implements ShouldQueue
                     if ($entry->collection()->dated() && $publicationStatus['publishDate']) {
                         $publishDate = Carbon::parse($publicationStatus['publishDate']);
 
+                        $entry->set('published_at', $publishDate->format('Y-m-d H:i:s'));
                         $entry->date($publishDate);
 
                         if (! $published && $publishDate->lt(now())) {
@@ -321,8 +373,13 @@ class ImportSingleProductJob implements ShouldQueue
         return $tags->keys()->toArray();
     }
 
-    private function importVariants(array $variants, string $product_slug)
+    private function importVariants(array $returnedVariants, string $product_slug)
     {
+        $variants = [];
+        foreach ($returnedVariants['edges'] as $variant) {
+            $variants[] = $variant['node'];
+        }
+
         $this->removeOldVariants($variants, $product_slug);
 
         foreach ($variants as $variant) {
@@ -339,22 +396,23 @@ class ImportSingleProductJob implements ShouldQueue
                     ->slug($variant['id']);
             }
 
+            // see https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductVariant#field-productvariant-compareatprice
             $data = [
                 'variant_id' => $variant['id'],
                 'product_slug' => $product_slug,
                 'title' => $variant['title'] === 'Default Title' ? 'Default' : $variant['title'],
-                'inventory_quantity' => $variant['inventory_quantity'] ?? null,
-                'inventory_policy' => $variant['inventory_policy'] ?? null,
-                'inventory_management' => $variant['inventory_management'] ?? null,
+                'inventory_quantity' => $variant['inventoryQuantity'] ?? null,
+                'inventory_policy' => $variant['inventoryPolicy'] ?? null,
+                'inventory_management' => 'shopify', // hard code for backwards compatibility
                 'price' => $variant['price'],
-                'compare_at_price' => $variant['compare_at_price'],
+                'compare_at_price' => $variant['compareAtPrice'],
                 'sku' => $variant['sku'],
-                'grams' => $variant['grams'] ?? null,
-                'requires_shipping' => $variant['requires_shipping'] ?? null,
-                'option1' => $variant['option1'],
+                'grams' => $variant['grams'] ?? null, // should this be value and units now?
+                'requires_shipping' => Arr::get($variant, 'inventoryItem.requiresShipping', null),
+                'option1' => $variant['option1'], // do we break this and just pull out selectedOptions?
                 'option2' => $variant['option2'] ?? '',
                 'option3' => $variant['option3'] ?? '',
-                'storefront_id' => base64_encode($variant['admin_graphql_api_id']),
+                'storefront_id' => base64_encode($variant['id']),
             ];
 
             if ($variant['image_id']) {
@@ -443,7 +501,7 @@ class ImportSingleProductJob implements ShouldQueue
      */
     private function removeOldVariants(array $variants, string $productSlug)
     {
-        $allVariants = Entry::query()
+        Entry::query()
             ->where('collection', 'variants')
             ->where('product_slug', $productSlug)
             ->get()

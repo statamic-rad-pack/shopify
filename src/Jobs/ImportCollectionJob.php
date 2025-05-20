@@ -6,7 +6,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Shopify\Clients\Graphql;
 use Shopify\Clients\Rest;
@@ -21,9 +20,8 @@ class ImportCollectionJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SavesImagesAndMetafields;
-    use SerializesModels;
 
-    public function __construct(public array $collection) {}
+    public function __construct(public int $collectionId) {}
 
     public function handle()
     {

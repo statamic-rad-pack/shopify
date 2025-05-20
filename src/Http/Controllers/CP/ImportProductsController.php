@@ -25,26 +25,8 @@ class ImportProductsController extends CpController
 
     public function fetchSingleProduct(Request $request): JsonResponse
     {
-        // Fetch Single Product
-        $client = app(Rest::class);
-        $response = $client->get(path: 'products/'.$request->get('product'));
-
-        if ($response->getStatusCode() != 200) {
-            return response()->json([
-                'message' => 'Failed to retrieve product',
-            ]);
-        }
-
-        $product = Arr::get($response->getDecodedBody(), 'product', []);
-
-        if (! $product) {
-            return response()->json([
-                'message' => 'Failed to retrieve product',
-            ]);
-        }
-
         // Pass to import Job.
-        ImportSingleProductJob::dispatch($product)->onQueue(config('shopify.queue'));
+        ImportSingleProductJob::dispatch((int) $request->get('product'))->onQueue(config('shopify.queue'));
 
         return response()->json([
             'message' => 'Product import has been queued.',
