@@ -23,8 +23,7 @@ class ShopifyImportSingleProduct extends Command
         $this->info('================================================================');
 
         // Pass to import Job.
-        ImportSingleProductJob::dispatch($this->argument('productId'))
-            ->onQueue(config('shopify.queue'));
+        ImportSingleProductJob::dispatch($this->argument('productId'));
 
         $this->info('Product has been dispatched for import');
     }

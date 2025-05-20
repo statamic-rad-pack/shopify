@@ -130,10 +130,9 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             'variants' => $variants->map(function ($variant) {
                 $out_of_stock = false;
 
-                if (isset($variant['inventory_policy']) && isset($variant['inventory_management'])) {
+                if (isset($variant['inventory_policy'])) {
                     if (
                         $variant['inventory_policy'] === 'deny' &&
-                        $variant['inventory_management'] === 'shopify' &&
                         $variant['inventory_quantity'] <= 0
                     ) {
                         $out_of_stock = true;
@@ -207,10 +206,9 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             $title = $variant['title'];
             $out_of_stock = false;
 
-            if (isset($variant['inventory_policy']) && isset($variant['inventory_management'])) {
+            if (isset($variant['inventory_policy'])) {
                 if (
                     $variant['inventory_policy'] === 'deny' &&
-                    $variant['inventory_management'] === 'shopify' &&
                     $variant['inventory_quantity'] <= 0
                 ) {
                     $out_of_stock = true;
@@ -282,8 +280,8 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
         foreach ($variants as $variant) {
             $stock += $variant['inventory_quantity'];
 
-            if (isset($variant['inventory_policy']) && isset($variant['inventory_management'])) {
-                $deny = $variant['inventory_policy'] === 'deny' && $variant['inventory_management'] === 'shopify';
+            if (isset($variant['inventory_policy'])) {
+                $deny = $variant['inventory_policy'] === 'deny';
             }
         }
 

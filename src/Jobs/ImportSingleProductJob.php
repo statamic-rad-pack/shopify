@@ -28,6 +28,9 @@ class ImportSingleProductJob implements ShouldQueue
 
     public function __construct(public int $productId, public array $orderData = [])
     {
+        if ($queue = config('shopify.queue')) {
+            $this->onQueue($queue);
+        }
     }
 
     public function handle()
@@ -71,7 +74,8 @@ class ImportSingleProductJob implements ShouldQueue
                   }
                 }
                 options {
-                  id
+                  name
+                  value
                 }
                 productType
                 resourcePublications(onlyPublished: false, first: 100) {
@@ -102,9 +106,27 @@ class ImportSingleProductJob implements ShouldQueue
                       }
                       inventoryPolicy
                       inventoryQuantity
+
+                        media(first: 20, sortKey: POSITION, query: "media_type: IMAGE") {
+                          edges {
+                            node {
+                              id
+                              ... on MediaImage {
+                                id
+                                image {
+                                  altText
+                                  url
+                                }
+                              }
+                            }
+                          }
+                        }
                       price
                       selectedOptions {
                         name
+                        optionValue {
+                          id
+                        }
                         value
                       }
                       sku
@@ -116,15 +138,6 @@ class ImportSingleProductJob implements ShouldQueue
               }
             }
             QUERY;
-
-
-//                'inventory_management' => $variant['inventory_management'] ?? null,
-//                'grams' => $variant['grams'] ?? null,
-//                'requires_shipping' => $variant['requires_shipping'] ?? null,
-//                'option1' => $variant['option1'],
-//                'option2' => $variant['option2'] ?? '',
-//                'option3' => $variant['option3'] ?? '',
-//                'storefront_id' => base64_encode($variant['admin_graphql_api_id']),
 
         $response = app(Graphql::class)->query(['query' => $query]);
 
@@ -146,8 +159,8 @@ class ImportSingleProductJob implements ShouldQueue
         // Get option Names
         $options = [];
         foreach ($this->data['options'] as $option) {
-            if ($option['name'] != 'Title') {
-                $options['option'.$option['position']] = $option['name'];
+            if ($option['value'] != 'Title') {
+                $options['option_'.$option['name']] = $option['value'];
             }
         }
 
@@ -396,31 +409,32 @@ class ImportSingleProductJob implements ShouldQueue
                     ->slug($variant['id']);
             }
 
-            // see https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductVariant#field-productvariant-compareatprice
-            $data = [
+            // see https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductVariant
+            $data = array_merge([
                 'variant_id' => $variant['id'],
                 'product_slug' => $product_slug,
                 'title' => $variant['title'] === 'Default Title' ? 'Default' : $variant['title'],
                 'inventory_quantity' => $variant['inventoryQuantity'] ?? null,
                 'inventory_policy' => $variant['inventoryPolicy'] ?? null,
-                'inventory_management' => 'shopify', // hard code for backwards compatibility
+                'inventory_management' => 'shopify', // @deprecated, left in for backwards JS compatibility
                 'price' => $variant['price'],
                 'compare_at_price' => $variant['compareAtPrice'],
                 'sku' => $variant['sku'],
-                'grams' => $variant['grams'] ?? null, // should this be value and units now?
+                'weight' => Arr::get($variant, 'inventoryItem.measurement.weight', null), // blueprint update: was grams, this has unit and value now
                 'requires_shipping' => Arr::get($variant, 'inventoryItem.requiresShipping', null),
-                'option1' => $variant['option1'], // do we break this and just pull out selectedOptions?
-                'option2' => $variant['option2'] ?? '',
-                'option3' => $variant['option3'] ?? '',
                 'storefront_id' => base64_encode($variant['id']),
-            ];
+            ], collect($variant['selectedOptions'] ?? [])->mapWithKeys(fn ($opt) => ['option_'.$opt['name'] => $opt['value']])->all());  // blueprint update: replacing option 1, 2, 3
 
-            if ($variant['image_id']) {
-                foreach (($this->data['images'] ?? []) as $image) {
-                    if ($image['id'] == $variant['image_id']) {
-                        if ($asset = $this->importImages($image)) {
-                            $data['image'] = $asset->path();
-                        }
+            if (Arr::get($variant, 'media.edges', []) as $index => $edge) {
+                if (! $image = Arr::get($edge, 'node.image', [])) {
+                    continue;
+                }
+
+                if ($asset = $this->importImages($image)) {
+                    $data['gallery'][] = $asset->path();
+
+                    if ($index == 0) {
+                        $data['image'] = $asset->path();
                     }
                 }
             }
