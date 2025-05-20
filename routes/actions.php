@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Support\Facades\Route;
 use StatamicRadPack\Shopify\Http\Controllers\Actions\AddressController;
@@ -27,7 +26,7 @@ Route::name('shopify.')
             ->name('variants.fetch');
 
         Route::prefix('webhook')
-            ->withoutMiddleware([VerifyCsrfToken::class])
+            ->withoutMiddleware(['App\Http\Middleware\VerifyCsrfToken', 'Illuminate\Foundation\Http\Middleware\VerifyCsrfToken'])
             ->middleware([VerifyShopifyHeaders::class])
             ->group(function () {
                 Route::post('collection/create', [Webhooks\CollectionCreateUpdateController::class, 'create'])
