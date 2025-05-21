@@ -5,7 +5,6 @@ namespace StatamicRadPack\Shopify\Http\Controllers\CP;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Statamic\Http\Controllers\CP\CpController;
-use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 use StatamicRadPack\Shopify\Traits\FetchAllProducts;
 
 class ImportProductsController extends CpController
@@ -14,17 +13,19 @@ class ImportProductsController extends CpController
 
     public function fetchAll(): JsonResponse
     {
-        $this->fetchProducts();
+        collect($this->fetchProducts())
+            ->each(function ($productId) {
+                $this->callJob($productId);
+            });
 
         return response()->json([
-            'message' => 'Import has been queued.',
+            'message' => 'Product import has been queued.',
         ]);
     }
 
     public function fetchSingleProduct(Request $request): JsonResponse
     {
-        // Pass to import Job.
-        ImportSingleProductJob::dispatch((int) $request->get('product'));
+        $this->callJob((int) $request->get('product'));
 
         return response()->json([
             'message' => 'Product import has been queued.',
