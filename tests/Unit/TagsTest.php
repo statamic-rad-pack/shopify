@@ -72,7 +72,7 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
             'product_slug' => 'obi-wan',
             'price' => 10.99,
             'inventory_quantity' => 5,
-            'storefront_id' => 'def',
+            'variant_id' => 'def',
         ])
             ->collection('variants');
 
@@ -175,7 +175,7 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
             'product_slug' => 'obi-wan',
             'price' => 9.99,
             'inventory_quantity' => 10,
-            'storefront_id' => 'abc',
+            'variant_id' => 'abc',
             'inventory_policy' => 'deny',
             'inventory_management' => 'shopify',
         ])
@@ -194,7 +194,7 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
             'product_slug' => 'obi-wan',
             'price' => 10.99,
             'inventory_quantity' => 5,
-            'storefront_id' => 'def',
+            'variant_id' => 'def',
             'inventory_policy' => 'deny',
             'inventory_management' => 'shopify',
         ])
@@ -240,7 +240,7 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
             'product_slug' => 'obi-wan',
             'price' => 9.99,
             'inventory_quantity' => 10,
-            'storefront_id' => 'abc',
+            'variant_id' => 'abc',
             'inventory_policy' => 'deny',
             'inventory_management' => 'shopify',
         ])
@@ -255,7 +255,7 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
             'product_slug' => 'obi-wan',
             'price' => 10.99,
             'inventory_quantity' => 5,
-            'storefront_id' => 'def',
+            'variant_id' => 'def',
             'inventory_policy' => 'deny',
             'inventory_management' => 'shopify',
         ])
@@ -263,9 +263,9 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
 
         $variant2->save();
 
-        $this->assertEquals('abcdef', $this->tag('{{ shopify:variants }}{{ storefront_id }}{{ /shopify:variants }}', ['slug' => 'obi-wan']));
+        $this->assertEquals('abcdef', $this->tag('{{ shopify:variants }}{{ variant_id }}{{ /shopify:variants }}', ['slug' => 'obi-wan']));
 
-        $this->assertEquals('abc', $this->tag('{{ shopify:variants storefront_id:is="abc" }}{{ storefront_id }}{{ /shopify:variants }}', ['slug' => 'obi-wan']));
+        $this->assertEquals('abc', $this->tag('{{ shopify:variants variant_id:is="abc" }}{{ variant_id }}{{ /shopify:variants }}', ['slug' => 'obi-wan']));
     }
 
     #[Test]

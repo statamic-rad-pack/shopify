@@ -33,7 +33,7 @@ class ActionsTest extends TestCase
                 'product_slug' => 'obi-wan',
                 'price' => 9.99,
                 'inventory_quantity' => 10,
-                'storefront_id' => 'abc',
+                'variant_id' => 'abc',
                 'option1' => 'a',
             ])
             ->collection('variants');
@@ -48,7 +48,7 @@ class ActionsTest extends TestCase
                 'product_slug' => 'obi-wan',
                 'price' => 10.99,
                 'inventory_quantity' => 5,
-                'storefront_id' => 'def',
+                'variant_id' => 'def',
                 'option1' => 'b',
             ])
             ->collection('variants');
@@ -56,10 +56,10 @@ class ActionsTest extends TestCase
         $variant2->save();
 
         $response = $this->get('/!/shopify/variants/obi-wan');
-        $this->assertSame('[{"title":"T-shirt","storefront_id":"abc","price":9.99,"inventory_quantity":10},{"title":"Another T-shirt","storefront_id":"def","price":10.99,"inventory_quantity":5}]', $response->getContent());
+        $this->assertSame('[{"title":"T-shirt","id":"abc","price":9.99,"inventory_quantity":10},{"title":"Another T-shirt","id":"def","price":10.99,"inventory_quantity":5}]', $response->getContent());
 
         $response = $this->get('/!/shopify/variants/obi-wan?option1=a');
-        $this->assertSame('[{"title":"T-shirt","storefront_id":"abc","price":9.99,"inventory_quantity":10}]', $response->getContent());
+        $this->assertSame('[{"title":"T-shirt","id":"abc","price":9.99,"inventory_quantity":10}]', $response->getContent());
     }
 
     #[Test]

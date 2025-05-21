@@ -5,7 +5,7 @@ namespace StatamicRadPack\Shopify\Traits;
 use Shopify\Clients\Graphql;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
-use StatamicRadPack\Shopify\Jobs\ImportAllProductsJob;
+use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 
 trait FetchAllProducts
 {
@@ -53,6 +53,6 @@ trait FetchAllProducts
 
     private function callJob(int $productId)
     {
-        ImportAllProductsJob::dispatch($productId);
+        ImportSingleProductJob::dispatch($productId);
     }
 }

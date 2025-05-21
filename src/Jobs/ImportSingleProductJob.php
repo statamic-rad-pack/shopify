@@ -58,7 +58,7 @@ class ImportSingleProductJob implements ShouldQueue
                 }
               }
             }
-            media(first: 20, sortKey: POSITION, query: "media_type: IMAGE") {
+            media(first: 20, sortKey: POSITION, query: "media_type:IMAGE") {
               edges {
                 node {
                   id
@@ -98,6 +98,7 @@ class ImportSingleProductJob implements ShouldQueue
                   inventoryItem {
                     measurement {
                       weight {
+                        unit
                         value
                       }
                     }
@@ -153,6 +154,8 @@ class ImportSingleProductJob implements ShouldQueue
             return;
         }
 
+        $this->data['id'] = Str::afterLast($this->data['id'], '/');
+
         $entry = Entry::query()
             ->where('collection', 'products')
             ->where('site', Site::default()->handle())
@@ -168,12 +171,12 @@ class ImportSingleProductJob implements ShouldQueue
         $options = [];
         foreach ($this->data['options'] as $index => $option) {
             if ($option['name'] != 'Title') {
-                $options['option_'.($index + 1)] = $option['name'];
+                $options['option'.($index + 1)] = $option['name'];
             }
         }
 
         $data = [
-            'product_id' => Str::afterLast($this->data['id'], '/'),
+            'product_id' => $this->data['id'],
             'title' => (! $entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
             'content' => (! $entry || config('shopify.overwrite.content')) ? $this->data['descriptionHtml'] : $entry->content,
             'options' => $options,
@@ -397,7 +400,10 @@ class ImportSingleProductJob implements ShouldQueue
     {
         $variants = [];
         foreach ($returnedVariants['edges'] as $variant) {
-            $variants[] = $variant['node'];
+            $variant = $variant['node'];
+            $variant['id'] = Str::afterLast($variant['id'], '/');
+
+            $variants[] = $variant;
         }
 
         $this->removeOldVariants($variants, $product_slug);
@@ -418,7 +424,7 @@ class ImportSingleProductJob implements ShouldQueue
 
             // see https://shopify.dev/docs/api/admin-graphql/latest/objects/ProductVariant
             $data = array_merge([
-                'variant_id' => Str::afterLast($variant['id'], '/'),
+                'variant_id' => (int) $variant['id'],
                 'product_slug' => $product_slug,
                 'title' => $variant['title'] === 'Default Title' ? 'Default' : $variant['title'],
                 'inventory_quantity' => $variant['inventoryQuantity'] ?? null,
@@ -429,7 +435,6 @@ class ImportSingleProductJob implements ShouldQueue
                 'sku' => $variant['sku'],
                 'weight' => Arr::get($variant, 'inventoryItem.measurement.weight', null), // blueprint update: was grams, this has unit and value now
                 'requires_shipping' => Arr::get($variant, 'inventoryItem.requiresShipping', null),
-                'storefront_id' => base64_encode($variant['id']),
             ], collect($variant['selectedOptions'] ?? [])->mapWithKeys(fn ($opt, $index) => ['option'.($index + 1) => $opt['value']])->all());  // blueprint update: what if there are more than 3?
 
             foreach (Arr::get($variant, 'media.edges', []) as $index => $edge) {
