@@ -83,6 +83,7 @@ class ImportSingleProductJob implements ShouldQueue
                   isPublished
                   publication {
                     id
+                    name
                   }
                   publishDate
                 }
