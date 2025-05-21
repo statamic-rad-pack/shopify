@@ -6,8 +6,6 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Shopify\Clients\Graphql;
 use Shopify\Clients\HttpResponse;
-use Shopify\Clients\Rest;
-use Shopify\Clients\RestResponse;
 use Statamic\Facades;
 use StatamicRadPack\Shopify\Jobs;
 use StatamicRadPack\Shopify\Tests\TestCase;
@@ -17,75 +15,6 @@ class ImportSingleProductJobTest extends TestCase
     #[Test]
     public function imports_product()
     {
-        $data = json_decode('{
-            "id": 1072481042,
-            "title": "Burton Custom Freestyle 151",
-            "body_html": "<strong>Good snowboard!</strong>",
-            "vendor": "Burton",
-            "product_type": "Snowboard",
-            "created_at": "2023-10-03T13:23:57-04:00",
-            "handle": "burton-custom-freestyle-151",
-            "updated_at": "2023-10-03T13:23:57-04:00",
-            "published_at": null,
-            "template_suffix": null,
-            "published_scope": "web",
-            "tags": "",
-            "status": "draft",
-            "admin_graphql_api_id": "gid://shopify/Product/1072481042",
-            "variants": [
-              {
-                "id": 1070325019,
-                "product_id": 1072481042,
-                "title": "Default Title",
-                "price": "0.00",
-                "sku": "",
-                "position": 1,
-                "inventory_policy": "deny",
-                "compare_at_price": null,
-                "fulfillment_service": "manual",
-                "inventory_management": null,
-                "option1": "Default Title",
-                "option2": null,
-                "option3": null,
-                "created_at": "2023-10-03T13:23:57-04:00",
-                "updated_at": "2023-10-03T13:23:57-04:00",
-                "taxable": true,
-                "barcode": null,
-                "grams": 0,
-                "image_id": null,
-                "weight": 0,
-                "weight_unit": "lb",
-                "inventory_item_id": 1070325019,
-                "inventory_quantity": 0,
-                "old_inventory_quantity": 0,
-                "presentment_prices": [
-                  {
-                    "price": {
-                      "amount": "0.00",
-                      "currency_code": "USD"
-                    },
-                    "compare_at_price": null
-                  }
-                ],
-                "requires_shipping": true,
-                "admin_graphql_api_id": "gid://shopify/ProductVariant/1070325019"
-              }
-            ],
-            "options": [
-              {
-                "id": 1055547176,
-                "product_id": 1072481042,
-                "name": "Title",
-                "position": 1,
-                "values": [
-                  "Default Title"
-                ]
-              }
-            ],
-            "images": [],
-            "image": null
-        }', true);
-
         Facades\Collection::make('products')->save();
         Facades\Taxonomy::make()->handle('collections')->save();
         Facades\Taxonomy::make()->handle('tags')->save();
@@ -98,40 +27,22 @@ class ImportSingleProductJobTest extends TestCase
         $this->mock(Graphql::class, function (MockInterface $mock) {
             $mock
                 ->shouldReceive('query')
+                ->withArgs(function ($query) {
+                    return str_contains($query['query'], 'product(id');
+                })
                 ->andReturn(new HttpResponse(
                     status: 200,
-                    body: '{
-                    "data": {
-                      "product": {
-                          "collections": {
-                            "edges": [
-                                {
-                                   "node": {
-                                      "id": 841564295,
-                                      "handle": "ipods"
-                                   }
-                                },
-                                {
-                                   "node": {
-                                      "id": 841564294,
-                                      "handle": "ipods-1"
-                                   }
-                                }
-                            ]
-                          }
-                      }
-                    }
-                    }'
+                    body: $this->getProductJson()
                 ));
         });
 
-        Jobs\ImportSingleProductJob::dispatch($data);
+        Jobs\ImportSingleProductJob::dispatch(1);
 
         $entry = Facades\Entry::whereCollection('products')->first();
 
-        $this->assertSame($entry->product_id, 1072481042);
-        $this->assertSame($entry->get('vendor'), ['burton']);
-        $this->assertSame($entry->get('type'), ['snowboard']);
+        $this->assertSame($entry->product_id, '108828309');
+        $this->assertSame($entry->get('vendor'), ['arbor']);
+        $this->assertSame($entry->get('type'), ['snowboards']);
         $this->assertSame($entry->get('collections'), ['ipods', 'ipods-1']);
     }
 
@@ -143,75 +54,6 @@ class ImportSingleProductJobTest extends TestCase
             'fr' => ['url' => '/fr/', 'locale' => 'fr_FR'],
         ]]);
 
-        $data = json_decode('{
-            "id": 1072481042,
-            "title": "Burton Custom Freestyle 151",
-            "body_html": "<strong>Good snowboard!</strong>",
-            "vendor": "Burton",
-            "product_type": "Snowboard",
-            "created_at": "2023-10-03T13:23:57-04:00",
-            "handle": "burton-custom-freestyle-151",
-            "updated_at": "2023-10-03T13:23:57-04:00",
-            "published_at": null,
-            "template_suffix": null,
-            "published_scope": "web",
-            "tags": "",
-            "status": "draft",
-            "admin_graphql_api_id": "gid://shopify/Product/1072481042",
-            "variants": [
-              {
-                "id": 1070325019,
-                "product_id": 1072481042,
-                "title": "Default Title",
-                "price": "0.00",
-                "sku": "",
-                "position": 1,
-                "inventory_policy": "deny",
-                "compare_at_price": null,
-                "fulfillment_service": "manual",
-                "inventory_management": null,
-                "option1": "Default Title",
-                "option2": null,
-                "option3": null,
-                "created_at": "2023-10-03T13:23:57-04:00",
-                "updated_at": "2023-10-03T13:23:57-04:00",
-                "taxable": true,
-                "barcode": null,
-                "grams": 0,
-                "image_id": null,
-                "weight": 0,
-                "weight_unit": "lb",
-                "inventory_item_id": 1070325019,
-                "inventory_quantity": 0,
-                "old_inventory_quantity": 0,
-                "presentment_prices": [
-                  {
-                    "price": {
-                      "amount": "0.00",
-                      "currency_code": "USD"
-                    },
-                    "compare_at_price": null
-                  }
-                ],
-                "requires_shipping": true,
-                "admin_graphql_api_id": "gid://shopify/ProductVariant/1070325019"
-              }
-            ],
-            "options": [
-              {
-                "id": 1055547176,
-                "product_id": 1072481042,
-                "name": "Title",
-                "position": 1,
-                "values": [
-                  "Default Title"
-                ]
-              }
-            ],
-            "images": [],
-            "image": null
-        }', true);
-
         Facades\Collection::make('products')->sites(['en', 'fr'])->save();
         Facades\Taxonomy::make()->handle('collections')->save();
         Facades\Taxonomy::make()->handle('tags')->save();
@@ -221,6 +63,19 @@ class ImportSingleProductJobTest extends TestCase
         $this->mock(Graphql::class, function (MockInterface $mock) {
             $mock
                 ->shouldReceive('query')
+                ->withArgs(function ($query) {
+                    return str_contains($query['query'], 'product(id');
+                })
+                ->andReturn(new HttpResponse(
+                    status: 200,
+                    body: $this->getProductJson()
+                ));
+
+            $mock
+                ->shouldReceive('query')
+                ->withArgs(function ($query) {
+                    return str_contains($query['query'], 'translatableResource(resourceId: "');
+                })
                 ->andReturn(new HttpResponse(
                     status: 200,
                     body: '{
@@ -251,7 +106,7 @@ class ImportSingleProductJobTest extends TestCase
                 ));
         });
 
-        Jobs\ImportSingleProductJob::dispatch($data);
+        Jobs\ImportSingleProductJob::dispatch(1);
 
         $entry = Facades\Entry::whereCollection('products')->firstWhere('locale', 'fr');
 
@@ -262,75 +117,6 @@ class ImportSingleProductJobTest extends TestCase
     #[Test]
     public function updates_metafield_data()
     {
-        $data = json_decode('{
-            "id": 1072481042,
-            "title": "Burton Custom Freestyle 151",
-            "body_html": "<strong>Good snowboard!</strong>",
-            "vendor": "Burton",
-            "product_type": "Snowboard",
-            "created_at": "2023-10-03T13:23:57-04:00",
-            "handle": "burton-custom-freestyle-151",
-            "updated_at": "2023-10-03T13:23:57-04:00",
-            "published_at": null,
-            "template_suffix": null,
-            "published_scope": "web",
-            "tags": "",
-            "status": "draft",
-            "admin_graphql_api_id": "gid://shopify/Product/1072481042",
-            "variants": [
-              {
-                "id": 1070325019,
-                "product_id": 1072481042,
-                "title": "Default Title",
-                "price": "0.00",
-                "sku": "",
-                "position": 1,
-                "inventory_policy": "deny",
-                "compare_at_price": null,
-                "fulfillment_service": "manual",
-                "inventory_management": null,
-                "option1": "Default Title",
-                "option2": null,
-                "option3": null,
-                "created_at": "2023-10-03T13:23:57-04:00",
-                "updated_at": "2023-10-03T13:23:57-04:00",
-                "taxable": true,
-                "barcode": null,
-                "grams": 0,
-                "image_id": null,
-                "weight": 0,
-                "weight_unit": "lb",
-                "inventory_item_id": 1070325019,
-                "inventory_quantity": 0,
-                "old_inventory_quantity": 0,
-                "presentment_prices": [
-                  {
-                    "price": {
-                      "amount": "0.00",
-                      "currency_code": "USD"
-                    },
-                    "compare_at_price": null
-                  }
-                ],
-                "requires_shipping": true,
-                "admin_graphql_api_id": "gid://shopify/ProductVariant/1070325019"
-              }
-            ],
-            "options": [
-              {
-                "id": 1055547176,
-                "product_id": 1072481042,
-                "name": "Title",
-                "position": 1,
-                "values": [
-                  "Default Title"
-                ]
-              }
-            ],
-            "images": [],
-            "image": null
-        }', true);
-
         Facades\Collection::make('products')->sites(['en', 'fr'])->dated(true)->save();
         Facades\Taxonomy::make()->handle('collections')->save();
         Facades\Taxonomy::make()->handle('tags')->save();
@@ -342,28 +128,11 @@ class ImportSingleProductJobTest extends TestCase
                 ->shouldReceive('query')
                 ->andReturn(new HttpResponse(
                     status: 200,
-                    body: '{
-                     "data": {
-                        "product": {
-                          "metafields": {
-                            "edges": [
-                              {
-                                "node": {
-                                  "id": "gid://shopify/Metafield/28325836488927",
-                                  "jsonValue": "false",
-                                  "key": "some_metafield",
-                                  "value": "this is a value"
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    }'
+                    body: $this->getProductJson()
                 ));
         });
 
-        Jobs\ImportSingleProductJob::dispatch($data);
+        Jobs\ImportSingleProductJob::dispatch(1072481042);
 
         $entry = Facades\Entry::whereCollection('products')->first();
 
@@ -374,146 +143,14 @@ class ImportSingleProductJobTest extends TestCase
     #[Test]
     public function updates_publish_status_based_on_shopify_resource_publications()
     {
-        $data = json_decode('{
-            "id": 1072481042,
-            "title": "Burton Custom Freestyle 151",
-            "body_html": "<strong>Good snowboard!</strong>",
-            "vendor": "Burton",
-            "product_type": "Snowboard",
-            "created_at": "2023-10-03T13:23:57-04:00",
-            "handle": "burton-custom-freestyle-151",
-            "updated_at": "2023-10-03T13:23:57-04:00",
-            "published_at": null,
-            "template_suffix": null,
-            "published_scope": "web",
-            "tags": "",
-            "status": "draft",
-            "admin_graphql_api_id": "gid://shopify/Product/1072481042",
-            "variants": [
-              {
-                "id": 1070325019,
-                "product_id": 1072481042,
-                "title": "Default Title",
-                "price": "0.00",
-                "sku": "",
-                "position": 1,
-                "inventory_policy": "deny",
-                "compare_at_price": null,
-                "fulfillment_service": "manual",
-                "inventory_management": null,
-                "option1": "Default Title",
-                "option2": null,
-                "option3": null,
-                "created_at": "2023-10-03T13:23:57-04:00",
-                "updated_at": "2023-10-03T13:23:57-04:00",
-                "taxable": true,
-                "barcode": null,
-                "grams": 0,
-                "image_id": null,
-                "weight": 0,
-                "weight_unit": "lb",
-                "inventory_item_id": 1070325019,
-                "inventory_quantity": 0,
-                "old_inventory_quantity": 0,
-                "presentment_prices": [
-                  {
-                    "price": {
-                      "amount": "0.00",
-                      "currency_code": "USD"
-                    },
-                    "compare_at_price": null
-                  }
-                ],
-                "requires_shipping": true,
-                "admin_graphql_api_id": "gid://shopify/ProductVariant/1070325019"
-              }
-            ],
-            "options": [
-              {
-                "id": 1055547176,
-                "product_id": 1072481042,
-                "name": "Title",
-                "position": 1,
-                "values": [
-                  "Default Title"
-                ]
-              }
-            ],
-            "images": [],
-            "image": null
-        }', true);
-
         Facades\Collection::make('products')->sites(['en', 'fr'])->dated(true)->save();
         Facades\Taxonomy::make()->handle('collections')->save();
         Facades\Taxonomy::make()->handle('tags')->save();
         Facades\Taxonomy::make()->handle('type')->save();
         Facades\Taxonomy::make()->handle('vendor')->save();
 
-        $this->mock(Rest::class, function (MockInterface $mock) {
-            $mock
-                ->shouldReceive('get')
-                ->with('custom_collections', [], ['limit' => 30, 'product_id' => 1072481042])
-                ->andReturn(new RestResponse(
-                    status: 200,
-                    body: '{
-                      "custom_collections": [
-                        {
-                          "id": 841564295,
-                          "handle": "ipods",
-                          "title": "IPods",
-                          "updated_at": "2008-02-01T19:00:00-05:00",
-                          "body_html": "<p>The best selling ipod ever</p>",
-                          "published_at": "2008-02-01T19:00:00-05:00",
-                          "sort_order": "manual",
-                          "template_suffix": null,
-                          "published_scope": "web",
-                          "admin_graphql_api_id": "gid://shopify/Collection/841564295"
-                        }
-                    ]
-                }'
-                ));
-
-            $mock
-                ->shouldReceive('get')
-                ->with('smart_collections', [], ['limit' => 30, 'product_id' => 1072481042])
-                ->andReturn(new RestResponse(
-                    status: 200,
-                    body: '{
-                      "smart_collections": [
-                        {
-                          "id": 1063001323,
-                          "handle": "ipods-1",
-                          "title": "IPods",
-                          "updated_at": "2023-10-03T13:23:35-04:00",
-                          "body_html": null,
-                          "published_at": "2023-10-03T13:23:35-04:00",
-                          "sort_order": "best-selling",
-                          "template_suffix": null,
-                          "disjunctive": false,
-                          "rules": [
-                            {
-                              "column": "title",
-                              "relation": "starts_with",
-                              "condition": "iPod"
-                            }
-                          ],
-                          "published_scope": "web",
-                          "admin_graphql_api_id": "gid://shopify/Collection/1063001323"
-                        }
-                      ]
-                }'
-                ));
-        });
-
         $this->mock(Graphql::class, function (MockInterface $mock) {
-            $mock
-                ->shouldReceive('query')
-                ->andReturn(new HttpResponse(
-                    status: 200,
-                    body: '{
-                     "data": {
-                        "product": {
-                          "resourcePublications": {
+            $jsonResponse = str_replace('"resourcePublications": {}', '"resourcePublications": {
                             "edges": [
                               {
                                 "node": {
@@ -546,19 +183,202 @@ class ImportSingleProductJobTest extends TestCase
                                 }
                               }
                             ]
-                          }
-                        }
-                      }
-                    }'
+                          }', $this->getProductJson());
+
+            $mock
+                ->shouldReceive('query')
+                ->andReturn(new HttpResponse(
+                    status: 200,
+                    body: $jsonResponse
                 ));
         });
 
-        Jobs\ImportSingleProductJob::dispatch($data);
+        Jobs\ImportSingleProductJob::dispatch(1);
 
         $entry = Facades\Entry::whereCollection('products')->first();
 
         $this->assertNotNull($entry);
         $this->assertSame($entry->published(), false);
         $this->assertSame($entry->date()->format('Y-m-d'), '2064-05-13');
+    }
+
+    private function getProductJson(): string
+    {
+        return '{
+                     "data": {
+                          "product": {
+                            "collections": {
+                              "edges": [
+                                {
+                                  "node": {
+                                    "handle": "ipods"
+                                  }
+                                },
+                                {
+                                  "node": {
+                                    "handle": "ipods-1"
+                                  }
+                                }
+                              ]
+                            },
+                            "createdAt": "2005-01-02T00:00:00Z",
+                            "defaultCursor": "eyJsaW1pdCI6MSwib3JkZXIiOiJpZCBhc2MiLCJsYXN0X2lkIjoxMDg4MjgzMDksImxhc3RfdmFsdWUiOjEwODgyODMwOSwiZGlyZWN0aW9uIjoibmV4dCJ9",
+                            "description": "good board",
+                            "descriptionHtml": "<p>good board</p>",
+                            "featuredImage": {
+                              "id": "gid://shopify/ProductImage/183532652"
+                            },
+                            "feedback": null,
+                            "giftCardTemplateSuffix": null,
+                            "handle": "draft",
+                            "hasOnlyDefaultVariant": false,
+                            "hasOutOfStockVariants": false,
+                            "id": "gid://shopify/Product/108828309",
+                            "images": {
+                              "edges": []
+                            },
+                            "inCollection": true,
+                            "isGiftCard": false,
+                            "legacyResourceId": "108828309",
+                            "metafield": null,
+                            "metafields": {
+                              "edges": [
+                                {
+                                  "node": {
+                                    "id" : 1,
+                                    "key": "some_metafield",
+                                    "value": "this is a value"
+                                  }
+                                }
+                              ]
+                            },
+                            "onlineStorePreviewUrl": "https://www.snowdevil.ca/products/draft",
+                            "onlineStoreUrl": "https://www.snowdevil.ca/products/draft",
+                            "options": [
+                              {
+                                "name": "Title"
+                              }
+                            ],
+                            "priceRange": {
+                              "maxVariantPrice": {
+                                "amount": "1000.0"
+                              },
+                              "minVariantPrice": {
+                                "amount": "1000.0"
+                              }
+                            },
+                            "productType": "Snowboards",
+                            "resourcePublicationsCount": {
+                              "count": 4
+                            },
+                            "availablePublicationsCount": {
+                              "count": 4
+                            },
+                            "publishedAt": "2005-01-02T00:00:00Z",
+                            "resourcePublications": {},
+                            "resourcePublicationOnCurrentPublication": {
+                              "publication": {
+                                "name": "Generic Channel",
+                                "id": "gid://shopify/Publication/762454635"
+                              },
+                              "publishDate": "2005-01-02T00:00:00Z",
+                              "isPublished": true
+                            },
+                            "seo": {
+                              "title": null
+                            },
+                            "storefrontId": "gid://shopify/Product/108828309",
+                            "tags": [
+                              "Deepsnow",
+                              "Dub Quote\"s",
+                              "quote\'s",
+                              "Wooden Core"
+                            ],
+                            "templateSuffix": null,
+                            "title": "Draft",
+                            "totalInventory": 1,
+                            "tracksInventory": true,
+                            "unpublishedPublications": {
+                              "edges": [
+                                {
+                                  "node": {
+                                    "name": ""
+                                  }
+                                },
+                                {
+                                  "node": {
+                                    "name": ""
+                                  }
+                                },
+                                {
+                                  "node": {
+                                    "name": ""
+                                  }
+                                },
+                                {
+                                  "node": {
+                                    "name": ""
+                                  }
+                                },
+                                {
+                                  "node": {
+                                    "name": "Private app with all permissions"
+                                  }
+                                }
+                              ]
+                            },
+                            "updatedAt": "2005-01-02T00:00:00Z",
+                            "variants": {
+                              "edges": [
+                                {
+                                  "node": {
+                                      "compareAtPrice": null,
+                                      "id": "gid://shopify/ProductVariant/1",
+                                      "inventoryItem": {
+                                        "measurement": {
+                                          "weight": {
+                                            "value": 0
+                                          }
+                                        },
+                                        "requiresShipping": true
+                                      },
+                                      "inventoryPolicy": "DENY",
+                                      "inventoryQuantity": 0,
+                                      "media": {
+                                        "edges": []
+                                      },
+                                      "metafields": {
+                                        "edges": []
+                                      },
+                                      "price": "23.00",
+                                      "selectedOptions": [
+                                        {
+                                          "name": "Colour",
+                                          "optionValue": {
+                                            "id": "gid://shopify/ProductOptionValue/3"
+                                          },
+                                          "value": "Oxford Navy"
+                                        },
+                                        {
+                                          "name": "Size",
+                                          "optionValue": {
+                                            "id": "gid://shopify/ProductOptionValue/2"
+                                          },
+                                          "value": "X Small (3-4yrs)"
+                                        }
+                                      ],
+                                      "sku": "",
+                                      "title": "Oxford Navy / X Small (3-4yrs)"
+                                  }
+                                }
+                              ]
+                            },
+                            "variantsCount": {
+                              "count": 1
+                            },
+                            "vendor": "Arbor"
+                          }
+                       }
+                    }';
     }
 }
