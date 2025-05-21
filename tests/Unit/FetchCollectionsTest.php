@@ -73,6 +73,7 @@ class FetchCollectionsTest extends TestCase
         $collections = $this->getSmartCollections();
 
         $this->assertCount(10, $collections);
+        $this->assertSame([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], $collections);
     }
 
     #[Test]

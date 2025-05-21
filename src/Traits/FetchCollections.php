@@ -4,6 +4,7 @@ namespace StatamicRadPack\Shopify\Traits;
 
 use Shopify\Clients\Graphql;
 use Statamic\Support\Arr;
+use Statamic\Support\Str;
 
 trait FetchCollections
 {
@@ -51,7 +52,7 @@ trait FetchCollections
             $data = $response->getDecodedBody();
 
             if ($collections = Arr::get($data, 'data.collections.nodes', [])) {
-                $items = array_merge($items, $collections);
+                $items = array_merge($items, collect($collections)->map(fn ($collection) => (int) Str::afterLast($collection['id'], '/'))->all());
             }
 
         } while (Arr::get($data, 'data.collections.pageInfo.hasNextPage', false));
