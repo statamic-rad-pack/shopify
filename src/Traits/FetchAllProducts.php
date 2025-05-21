@@ -33,7 +33,6 @@ trait FetchAllProducts
 
     private function callJob($response)
     {
-        ImportAllProductsJob::dispatch(Arr::get($response->getDecodedBody(), 'products', []))
-            ->onQueue(config('shopify.queue'));
+        ImportAllProductsJob::dispatch(Arr::get($response->getDecodedBody(), 'products', []));
     }
 }

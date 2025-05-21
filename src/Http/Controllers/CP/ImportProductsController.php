@@ -4,9 +4,7 @@ namespace StatamicRadPack\Shopify\Http\Controllers\CP;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Shopify\Clients\Rest;
 use Statamic\Http\Controllers\CP\CpController;
-use Statamic\Support\Arr;
 use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 use StatamicRadPack\Shopify\Traits\FetchAllProducts;
 

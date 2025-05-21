@@ -3,9 +3,7 @@
 namespace StatamicRadPack\Shopify\Commands;
 
 use Illuminate\Console\Command;
-use Shopify\Clients\Rest;
 use Statamic\Console\RunsInPlease;
-use Statamic\Support\Arr;
 use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 
 class ShopifyImportSingleProduct extends Command

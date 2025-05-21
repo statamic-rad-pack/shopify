@@ -20,6 +20,10 @@ class ImportAllProductsJob implements ShouldQueue
     public function __construct($data)
     {
         $this->data = $data;
+
+        if ($queue = config('shopify.queue')) {
+            $this->onQueue($queue);
+        }
     }
 
     public function handle()
