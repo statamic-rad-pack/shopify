@@ -5,7 +5,6 @@ namespace StatamicRadPack\Shopify;
 use Illuminate\Support\Facades\Artisan;
 use Shopify\Auth\FileSessionStorage;
 use Shopify\Clients\Graphql;
-use Shopify\Clients\Rest;
 use Shopify\Context;
 use Statamic\Events;
 use Statamic\Facades;
@@ -160,14 +159,10 @@ class ServiceProvider extends AddonServiceProvider
             scopes: ['read_metaobjects', 'read_products'],
             hostName: config('shopify.url'),
             sessionStorage: new FileSessionStorage(config('shopify.session_storage_path', '/tmp/php_sessions')),
-            apiVersion: config('shopify.api_version') ?? '2024-07',
+            apiVersion: config('shopify.api_version') ?? '2025-04',
             isEmbeddedApp: false,
             isPrivateApp: config('shopify.api_private_app') ?? false,
         );
-
-        $this->app->bind(Rest::class, function ($app) {
-            return new Rest(config('shopify.url'), config('shopify.admin_token'));
-        });
 
         $this->app->bind(Graphql::class, function ($app) {
             return new Graphql(config('shopify.url'), config('shopify.admin_token'));
