@@ -2,6 +2,7 @@
 
 namespace StatamicRadPack\Shopify\Tags;
 
+use Shopify\Clients\Graphql;
 use Shopify\Clients\Rest;
 use Statamic\Extensions\Pagination\LengthAwarePaginator;
 use Statamic\Facades\Entry;
@@ -374,10 +375,28 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             }
         }
 
-        $response = app(Rest::class)->get(path: 'customers/'.($user->get('shopify_id') ?? 'none'));
+        $customerId = $user->get('shopify_id') ?? 'none';
 
-        if ($response->getStatusCode() == 200) {
-            $data = Arr::get($response->getDecodedBody(), 'customer', []);
+        $query = <<<QUERY
+            {
+              customer(id: "gid://shopify/Customer/{$customerId}") {
+                displayName
+                note
+                lastOrder {
+                    id
+                }
+              }
+            }
+            QUERY;
+
+        $response = app(Graphql::class)->query(['query' => $query]);
+
+        if ($data = Arr::get($response->getDecodedBody() ?? [], 'data.customer', [])) {
+            $data = [
+                'name' => $data['displayName'],
+                'last_order_id' => Arr::get($data, 'lastOrder.id'),
+                'note' => $data['note'],
+            ];
         }
 
         return array_merge($data, $user?->data()->all() ?? []);
@@ -411,10 +430,40 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             }
         }
 
-        $response = app(Rest::class)->get(path: 'customers/'.($user->get('shopify_id') ?? 'none').'/addresses.json');
+        $customerId = $user->get('shopify_id') ?? 'none';
 
-        if ($response->getStatusCode() == 200) {
-            $data = Arr::get($response->getDecodedBody(), 'addresses', []);
+        $query = <<<QUERY
+            {
+              customer(id: "gid://shopify/Customer/{$customerId}") {
+                addresses {
+                  id
+                  firstName
+                  lastName
+                  company
+                  address1
+                  address2
+                  city
+                  province
+                  country
+                  zip
+                  phone
+                  name
+                }
+              }
+            }
+            QUERY;
+
+        $response = app(Graphql::class)->query(['query' => $query]);
+
+        if ($data = Arr::get($response->getDecodedBody() ?? [], 'data.customer.addresses', [])) {
+            $data = collect($data)
+                ->map(function ($address) {
+                    $address['id'] = Str::of($address['id'])->afterLast('/')->before('?');
+
+                    return $address;
+                })
+                ->values()
+                ->all();
         }
 
         return ['addresses' => $data ?? [], 'addresses_count' => count($data ?? [])];

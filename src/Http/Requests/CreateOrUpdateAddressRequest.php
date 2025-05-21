@@ -14,8 +14,8 @@ class CreateOrUpdateAddressRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => ['required', 'string'],
-            'last_name' => ['required', 'string'],
+            'firstName' => ['required', 'string'],
+            'lastName' => ['required', 'string'],
             'company' => ['nullable', 'string'],
             'address1' => ['required', 'string'],
             'address2' => ['nullable', 'string'],
@@ -24,9 +24,9 @@ class CreateOrUpdateAddressRequest extends FormRequest
             'zip' => ['required', 'string'],
             'phone' => ['nullable', 'string'],
             'name' => ['nullable', 'string'],
-            'province_code' => ['nullable', 'string'],
+            'provinceCode' => ['nullable', 'string'],
             'country' => ['required', 'string'],
-            'country_code' => ['required_without:country', 'string', 'size:2'],
+            'countryCode' => ['required_without:country', 'string', 'size:2'],
             'default' => ['nullable', 'boolean'],
         ];
     }
