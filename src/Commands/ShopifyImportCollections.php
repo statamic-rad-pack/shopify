@@ -22,11 +22,10 @@ class ShopifyImportCollections extends Command
         $this->info('================= IMPORT SHOPIFY COLLECTIONS ===================');
         $this->info('================================================================');
 
-        collect([])
-            ->merge($this->getManualCollections())
+        collect($this->getManualCollections())
             ->merge($this->getSmartCollections())
-            ->each(function ($collection) {
-                ImportCollectionJob::dispatch($collection)->onQueue(config('shopify.queue'));
+            ->each(function ($collectionId) {
+                ImportCollectionJob::dispatch($collectionId);
             });
 
         $this->info('Collections have been dispatched for import');

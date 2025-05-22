@@ -158,7 +158,7 @@ const createData = (Alpine) => {
         },
 
         outOfStock(variant) {
-            return variant.inventory_policy == 'deny' && variant.inventory_management == 'shopify' && variant.inventory_quantity <= 0;
+            return variant.inventory_policy == 'deny' && variant.inventory_quantity <= 0;
         },
 
         variantExistsAndIsInStock() {

@@ -12,19 +12,19 @@
     @if ($can_run_import)
         <div class="card">
             <h2 class="mb-2">Import Products</h2>
-            <p class="max-w-md mb-2 text-sm leading-loose">This will fetch all of your product data from Shopify. Please note if you have any `overwrite` option set to true in the config product data will be replaced.</p>
+            <p class="max-w-md mb-4 text-sm">This will fetch all of your product data from Shopify. Please note if you have any `overwrite` option set to true in the config product data will be replaced.</p>
             <shopify-import-button url="{{ cp_route('shopify.products.fetchAll') }}"></shopify-import-button>
         </div>
 
         <div class="mt-4 card">
             <h2 class="mb-2">Import Single Product</h2>
-            <p class="max-w-md mb-2 text-sm leading-loose">Fetch a single product's data from Shopify. Please note if you have any `overwrite` option set to true in the config product data will be replaced.</p>
+            <p class="max-w-md mb-4 text-sm">Fetch a single product's data from Shopify. Please note if you have any `overwrite` option set to true in the config product data will be replaced.</p>
             <shopify-import-product-button url="{{ cp_route('shopify.products.fetch') }}"></shopify-import-product-button>
         </div>
 
         <div class="mt-4 card">
             <h2 class="mb-2">Import Collections</h2>
-            <p class="max-w-md mb-2 text-sm leading-loose">Fetch the collections data from Shopify - these will be imported as taxonomies and assigned to the products.</p>
+            <p class="max-w-md mb-4 text-sm">Fetch the collections data from Shopify - these will be imported as taxonomies and assigned to the products.</p>
             <shopify-import-button url="{{ cp_route('shopify.collections.fetchAll') }}"></shopify-import-button>
         </div>
     @else

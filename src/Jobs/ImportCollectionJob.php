@@ -6,13 +6,11 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 use Shopify\Clients\Graphql;
-use Shopify\Clients\Rest;
 use Statamic\Facades\Site;
 use Statamic\Facades\Term;
 use Statamic\Support\Arr;
+use Statamic\Support\Str;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
 
 class ImportCollectionJob implements ShouldQueue
@@ -21,12 +19,48 @@ class ImportCollectionJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SavesImagesAndMetafields;
-    use SerializesModels;
 
-    public function __construct(public array $collection) {}
+    private array $collection = [];
+
+    public function __construct(public int $collectionId)
+    {
+        if ($queue = config('shopify.queue')) {
+            $this->onQueue($queue);
+        }
+    }
 
     public function handle()
     {
+        $query = <<<QUERY
+            {
+              collection(id: "gid://shopify/Collection/{$this->collectionId}") {
+                descriptionHtml
+                handle
+                id
+                image {
+                  url
+                }
+                metafields(first: 100) {
+                  edges {
+                    node {
+                      id
+                      jsonValue
+                      key
+                      value
+                    }
+                  }
+                }
+                title
+              }
+            }
+            QUERY;
+
+        $response = app(Graphql::class)->query(['query' => $query]);
+
+        if (! $this->collection = Arr::get($response->getDecodedBody(), 'data.collection', [])) {
+            return;
+        }
+
         $term = Term::query()
             ->where('slug', $this->collection['handle'])
             ->where('taxonomy', config('shopify.taxonomies.collections'))
@@ -40,8 +74,8 @@ class ImportCollectionJob implements ShouldQueue
 
         $data = [
             'title' => $this->collection['title'],
-            'collection_id' => $this->collection['id'],
-            'content' => $this->collection['body_html'],
+            'collection_id' => (int) Str::afterLast($this->collection['id'], '/'),
+            'content' => $this->collection['descriptionHtml'],
         ];
 
         // Import Images
@@ -51,22 +85,14 @@ class ImportCollectionJob implements ShouldQueue
             }
         }
 
-        try {
-            $response = app(Rest::class)->get(path: 'metafields', query: ['metafield' => ['owner_id' => $this->collection['id'], 'owner_resource' => 'collection']]);
+        $metafields = collect(Arr::get($this->collection, 'metafields.edges', []))->map(fn ($metafield) => $metafield['node'] ?? [])->filter()->all();
 
-            if ($response->getStatusCode() == 200) {
-                $metafields = Arr::get($response->getDecodedBody(), 'metafields', []);
+        if ($metafields) {
+            $metafields = $this->parseMetafields($metafields, 'collection');
 
-                if ($metafields) {
-                    $metafields = $this->parseMetafields($metafields, 'collection');
-
-                    if ($metafields) {
-                        $data = array_merge($metafields, $data);
-                    }
-                }
+            if ($metafields) {
+                $data = array_merge($metafields, $data);
             }
-        } catch (\Throwable $e) {
-            Log::error('Could not retrieve metafields for collection '.$this->collection['id']);
         }
 
         // if we are multisite, get translations
@@ -99,8 +125,6 @@ class ImportCollectionJob implements ShouldQueue
                 $translations = Arr::get($response->getDecodedBody(), 'translatableResource.translatableContent', []);
 
                 if ($translations) {
-                    $localizedEntry = $term->in($site);
-
                     $data = collect($translations)->mapWithKeys(fn ($row) => [$row['key'] => $row['value']]);
 
                     $term->dataForLocale($site->handle(), $data->filter()->all());

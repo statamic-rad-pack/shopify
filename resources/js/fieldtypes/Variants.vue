@@ -5,6 +5,7 @@
                 <thead>
                     <tr>
                         <th>Title</th>
+                        <th>SKU</th>
                         <th>Price</th>
                         <th>Stock</th>
                     </tr>
@@ -13,6 +14,9 @@
                     <tr v-for="(variant, index) in variants" :key="index" class="cursor-pointer" @click="openEditVariantStack(variant)">
                         <td class="text-base">
                             {{ variant.title }}
+                        </td>
+                        <td class="text-sm">
+                            {{ variant.sku }}
                         </td>
                         <td class="text-sm">
                             {{ currencyFormat(variant.price) }}

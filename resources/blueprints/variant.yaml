@@ -68,13 +68,13 @@ sections:
             - numeric
           width: 50
       -
-        handle: grams
+        handle: requires_shipping
         field:
-          display: 'Weight (Grams)'
-          type: disabled_text
-          icon: disabled_text
-          width: 50
+          display: 'Requires Shipping'
+          type: toggle
+          icon: toggle
           listable: hidden
+          width: 50
       -
         handle: option1
         field:
@@ -102,16 +102,33 @@ sections:
           width: 33
           listable: hidden
       -
-        handle: requires_shipping
+        handle: weight
         field:
-          display: 'Requires Shipping'
-          type: toggle
-          icon: toggle
-          listable: hidden
+          fullscreen: false
+          border: false
+          type: group
+          width: 66
+          sortable: false
+          replicator_preview: false
+          fields:
+            -
+              handle: value
+              field:
+                hide_display: true
+                type: disabled_text
+                display: Amount
+                width: 33
+            -
+              handle: unit
+              field:
+                hide_display: true
+                type: disabled_text
+                display: Unit
+                width: 33
       -
-        handle: storefront_id
+        handle: variant_id
         field:
-          display: 'Storefront ID'
+          display: 'Variant ID'
           type: hidden
           icon: hidden
           listable: hidden
@@ -144,3 +161,14 @@ sections:
           listable: hidden
           container: shopify
           max_files: 1
+      -
+        handle: gallery
+        field:
+          mode: grid
+          restrict: false
+          allow_uploads: true
+          display: 'Gallery'
+          type: assets
+          icon: assets
+          listable: hidden
+          container: shopify

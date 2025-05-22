@@ -13,11 +13,10 @@ class ImportCollectionsController extends CpController
 
     public function fetchAll(): JsonResponse
     {
-        collect([])
-            ->merge($this->getManualCollections())
+        collect($this->getManualCollections())
             ->merge($this->getSmartCollections())
-            ->each(function ($collection) {
-                Jobs\ImportCollectionJob::dispatch($collection)->onQueue(config('shopify.queue'));
+            ->each(function ($collectionId) {
+                Jobs\ImportCollectionJob::dispatch($collectionId);
             });
 
         return response()->json([

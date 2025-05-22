@@ -22,11 +22,10 @@ class CollectionCreateUpdateController extends WebhooksController
     private function processWebhook(Request $request, Closure $eventCallback)
     {
         // Decode data
-        $dataArray = json_decode($request->getContent(), true);
         $data = json_decode($request->getContent());
 
         // Dispatch job
-        Jobs\ImportCollectionJob::dispatch($dataArray)->onQueue(config('shopify.queue'));
+        Jobs\ImportCollectionJob::dispatch($data->id);
 
         $eventCallback($data);
 

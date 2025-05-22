@@ -15,7 +15,7 @@ trait SavesImagesAndMetafields
      */
     private function importImages(array $image)
     {
-        if (! $url = $this->cleanImageURL($image['src'])) {
+        if (! $url = $this->cleanImageURL($image['url'])) {
             return;
         }
 
