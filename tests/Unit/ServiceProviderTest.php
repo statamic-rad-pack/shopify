@@ -14,7 +14,7 @@ class ServiceProviderTest extends TestCase
     {
         ServiceProvider::installCollectionsTaxonomiesAssetsAndBlueprints();
 
-        $this->assertNotNull(Facades\Collection::find('products'));
+        $this->assertNotNull(Facades\Collection::find(config('shopify.collection_handle', 'products')));
         $this->assertNotNull(Facades\Collection::find('variants'));
         $this->assertNotNull(Facades\Taxonomy::find('collections'));
         $this->assertNotNull(Facades\Taxonomy::find('tags'));

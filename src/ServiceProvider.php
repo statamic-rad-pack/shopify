@@ -102,7 +102,7 @@ class ServiceProvider extends AddonServiceProvider
 
             $user = Facades\User::current();
 
-            $canViewSomething = $user->can('view', Facades\Collection::find('products'))
+            $canViewSomething = $user->can('view', Facades\Collection::find(config('shopify.collection_handle', 'products')))
                 || $user->can('view', Facades\Taxonomy::find(config('shopify.taxonomies.collections')))
                 || $user->can('view', Facades\Taxonomy::find(config('shopify.taxonomies.tags')))
                 || $user->can('view', Facades\Taxonomy::find(config('shopify.taxonomies.type')))
@@ -116,12 +116,12 @@ class ServiceProvider extends AddonServiceProvider
             $nav->create(__('Shopify'))
                 ->section('Shopify')
                 ->icon($shopifySvg)
-                ->route('collections.show', 'products')
+                ->route('collections.show', config('shopify.collection_handle', 'products'))
                 ->children(function () use ($nav) {
                     return [
                         $nav->create(__('Products'))
-                            ->route('collections.show', 'products')
-                            ->can('view', Facades\Collection::find('products')),
+                            ->route('collections.show', config('shopify.collection_handle', 'products'))
+                            ->can('view', Facades\Collection::find(config('shopify.collection_handle', 'products'))),
 
                         $nav->create(__('Collections'))
                             ->route('taxonomies.show', 'collections')
@@ -228,9 +228,9 @@ class ServiceProvider extends AddonServiceProvider
                 ->save();
         }
 
-        if (! Facades\Collection::find('products')) {
+        if (! Facades\Collection::find(config('shopify.collection_handle', 'products'))) {
             $collection = tap(Facades\Collection::make()
-                ->handle('products')
+                ->handle(config('shopify.collection_handle', 'products'))
                 ->title('Products')
                 ->routes('/products/{slug}')
                 ->template('product')

@@ -158,7 +158,7 @@ class ImportSingleProductJob implements ShouldQueue
         $this->data['id'] = Str::afterLast($this->data['id'], '/');
 
         $entry = Entry::query()
-            ->where('collection', 'products')
+            ->where('collection', config('shopify.collection_handle', 'products'))
             ->where('site', Site::default()->handle())
             ->where('product_id', $this->data['id'])
             ->first();
@@ -197,7 +197,7 @@ class ImportSingleProductJob implements ShouldQueue
 
         if (! $entry) {
             $entry = Entry::make()
-                ->collection('products')
+                ->collection(config('shopify.collection_handle', 'products'))
                 ->locale(Site::default()->handle())
                 ->slug($this->data['handle']);
         }

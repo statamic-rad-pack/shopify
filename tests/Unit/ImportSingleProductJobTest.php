@@ -15,7 +15,7 @@ class ImportSingleProductJobTest extends TestCase
     #[Test]
     public function imports_product()
     {
-        Facades\Collection::make('products')->save();
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
         Facades\Taxonomy::make()->handle('collections')->save();
         Facades\Taxonomy::make()->handle('tags')->save();
         Facades\Taxonomy::make()->handle('type')->save();
@@ -38,7 +38,7 @@ class ImportSingleProductJobTest extends TestCase
 
         Jobs\ImportSingleProductJob::dispatch(1);
 
-        $entry = Facades\Entry::whereCollection('products')->first();
+        $entry = Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->first();
 
         $this->assertSame($entry->product_id, '108828309');
         $this->assertSame($entry->get('vendor'), ['arbor']);
@@ -54,7 +54,7 @@ class ImportSingleProductJobTest extends TestCase
             'fr' => ['url' => '/fr/', 'locale' => 'fr_FR'],
         ]]);
 
-        Facades\Collection::make('products')->sites(['en', 'fr'])->save();
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->sites(['en', 'fr'])->save();
         Facades\Taxonomy::make()->handle('collections')->save();
         Facades\Taxonomy::make()->handle('tags')->save();
         Facades\Taxonomy::make()->handle('type')->save();
@@ -108,7 +108,7 @@ class ImportSingleProductJobTest extends TestCase
 
         Jobs\ImportSingleProductJob::dispatch(1);
 
-        $entry = Facades\Entry::whereCollection('products')->firstWhere('locale', 'fr');
+        $entry = Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->firstWhere('locale', 'fr');
 
         $this->assertNotNull($entry);
         $this->assertSame($entry->title, 'Featured items');
@@ -117,7 +117,7 @@ class ImportSingleProductJobTest extends TestCase
     #[Test]
     public function updates_metafield_data()
     {
-        Facades\Collection::make('products')->sites(['en', 'fr'])->dated(true)->save();
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->sites(['en', 'fr'])->dated(true)->save();
         Facades\Taxonomy::make()->handle('collections')->save();
         Facades\Taxonomy::make()->handle('tags')->save();
         Facades\Taxonomy::make()->handle('type')->save();
@@ -134,7 +134,7 @@ class ImportSingleProductJobTest extends TestCase
 
         Jobs\ImportSingleProductJob::dispatch(1072481042);
 
-        $entry = Facades\Entry::whereCollection('products')->first();
+        $entry = Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->first();
 
         $this->assertNotNull($entry);
         $this->assertSame($entry->get('some_metafield'), 'this is a value');
@@ -143,7 +143,7 @@ class ImportSingleProductJobTest extends TestCase
     #[Test]
     public function updates_publish_status_based_on_shopify_resource_publications()
     {
-        Facades\Collection::make('products')->sites(['en', 'fr'])->dated(true)->save();
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->sites(['en', 'fr'])->dated(true)->save();
         Facades\Taxonomy::make()->handle('collections')->save();
         Facades\Taxonomy::make()->handle('tags')->save();
         Facades\Taxonomy::make()->handle('type')->save();
@@ -195,7 +195,7 @@ class ImportSingleProductJobTest extends TestCase
 
         Jobs\ImportSingleProductJob::dispatch(1);
 
-        $entry = Facades\Entry::whereCollection('products')->first();
+        $entry = Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->first();
 
         $this->assertNotNull($entry);
         $this->assertSame($entry->published(), false);

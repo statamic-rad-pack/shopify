@@ -39,7 +39,7 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
             'slug' => 'obi-wan',
             'product_id' => 1,
         ])
-            ->collection('products');
+            ->collection(config('shopify.collection_handle', 'products'));
 
         $product->save();
 
@@ -91,7 +91,7 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
             'slug' => 'obi-wan',
             'product_id' => 1,
         ])
-            ->collection('products');
+            ->collection(config('shopify.collection_handle', 'products'));
 
         $product->save();
 
@@ -128,7 +128,7 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
             'slug' => 'obi-wan',
             'product_id' => 1,
         ])
-            ->collection('products');
+            ->collection(config('shopify.collection_handle', 'products'));
 
         $product->save();
 
@@ -164,7 +164,7 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
             'slug' => 'obi-wan',
             'product_id' => 1,
         ])
-            ->collection('products');
+            ->collection(config('shopify.collection_handle', 'products'));
 
         $product->save();
 
@@ -229,7 +229,7 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
             'slug' => 'obi-wan',
             'product_id' => 1,
         ])
-            ->collection('products');
+            ->collection(config('shopify.collection_handle', 'products'));
 
         $product->save();
 

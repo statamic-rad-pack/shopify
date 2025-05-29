@@ -38,7 +38,7 @@ class TestCase extends AddonTestCase
                 ->setContents($blueprintContents)
                 ->save();
 
-            Facades\Collection::make('products')
+            Facades\Collection::make(config('shopify.collection_handle', 'products'))
                 ->save();
 
             $blueprintContents = Facades\YAML::parse(file_get_contents(__DIR__.'/../resources/blueprints/variant.yaml'));

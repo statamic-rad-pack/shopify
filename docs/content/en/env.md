@@ -35,6 +35,7 @@ If you are using the webhook handlers you'll need the following.
 
 These allow you to tweak how the system works. Please check out the `config/shopify.php` for a full list of options.
 
-| Value             | Description  |
-| -------------------| ------------- |
-| `SHOPIFY_JOB_QUEUE`  | The queue to run the shopify jobs on. Allows you to set it to a different one than the default.  |
+| Value             | Description                                                                                     |
+| -------------------|-------------------------------------------------------------------------------------------------|
+| `SHOPIFY_JOB_QUEUE`  | The queue to run the shopify jobs on. Allows you to set it to a different one than the default. |
+| `SHOPIFY_COLLECTION_HANDLE`  | The handle of the collection that contains your Shopify products, defaults to 'products'.        |

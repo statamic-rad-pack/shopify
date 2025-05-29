@@ -126,4 +126,9 @@ return [
      * Where should the Shopify API client store its session data
      */
     'session_storage_path' => env('SHOPIFY_SESSION_STORAGE_PATH', '/tmp/php_sessions'),
+
+    /**
+     * In which collection should the Shopify products be created
+     */
+    'collection_handle' => env('SHOPIFY_COLLECTION_HANDLE', 'products'),
 ];
