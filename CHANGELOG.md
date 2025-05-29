@@ -1,5 +1,12 @@
 # Changelog
 
+## v6.0.0 - 2025-05-29
+
+### 🚀 New
+
+- Remove RestAPI calls and move entirely to GraphQL [@ryanmitchell](https://github.com/ryanmitchell) (#290)
+- Configurable Statamic collection handle [@johncarter-](https://github.com/johncarter-) (#283)
+
 ## v5.3.1 - 2025-05-20
 
 ### 🐛 Fixed
@@ -488,6 +495,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
