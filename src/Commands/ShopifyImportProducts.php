@@ -20,7 +20,10 @@ class ShopifyImportProducts extends Command
         $this->info('=================== IMPORT SHOPIFY PRODUCTS ====================');
         $this->info('================================================================');
 
-        $this->fetchProducts();
+        collect($this->fetchProducts())
+            ->each(function ($productId) {
+                $this->callJob($productId);
+            });
 
         $this->info('Products have been dispatched for import');
     }

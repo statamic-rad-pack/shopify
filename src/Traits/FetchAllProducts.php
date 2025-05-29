@@ -2,38 +2,57 @@
 
 namespace StatamicRadPack\Shopify\Traits;
 
-use Shopify\Clients\Rest;
+use Shopify\Clients\Graphql;
 use Statamic\Support\Arr;
-use StatamicRadPack\Shopify\Jobs\ImportAllProductsJob;
+use Statamic\Support\Str;
+use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 
 trait FetchAllProducts
 {
+    private int $loopProductsPaginationCount = 100;
+
     public function fetchProducts()
     {
-        $client = app(Rest::class);
-        $response = $client->get(path: 'products', query: ['limit' => config('shopify.api_limit')]);
+        $items = [];
 
-        $nextPage = ($response->getPageInfo()?->getNextPageUrl() ?? false) ? $response->getPageInfo() : false;
+        $query = <<<'QUERY'
+            query ($numItems: Int!, $cursor: String) {
+              products(first: $numItems, after: $cursor) {
+                nodes {
+                  id
+                }
+                pageInfo {
+                  hasNextPage
+                  endCursor
+                }
+              }
+            }
+            QUERY;
 
-        if ($response->getStatusCode() == 200) {
+        $data = [];
 
-            // Initial Loop
-            $this->callJob($response);
+        do {
+            $response = app(Graphql::class)->query([
+                'query' => $query,
+                'variables' => [
+                    'numItems' => $this->loopProductsPaginationCount,
+                    'cursor' => Arr::get($data, 'data.products.pageInfo.endCursor', null),
+                ],
+            ]);
 
-            // Recursively loop.
-            while ($nextPage) {
-                $response = $client->get(path: 'products', query: $nextPage->getNextPageQuery());
-                $nextPage = ($response->getPageInfo()?->getNextPageUrl() ?? false) ? $response->getPageInfo() : false;
+            $data = $response->getDecodedBody();
 
-                $this->callJob($response);
+            if ($products = Arr::get($data, 'data.products.nodes', [])) {
+                $items = array_merge($items, collect($products)->map(fn ($product) => (int) Str::afterLast($product['id'], '/'))->all());
             }
 
-        }
+        } while (Arr::get($data, 'data.products.pageInfo.hasNextPage', false));
+
+        return $items;
     }
 
-    private function callJob($response)
+    private function callJob(int $productId)
     {
-        ImportAllProductsJob::dispatch(Arr::get($response->getDecodedBody(), 'products', []))
-            ->onQueue(config('shopify.queue'));
+        ImportSingleProductJob::dispatch($productId);
     }
 }

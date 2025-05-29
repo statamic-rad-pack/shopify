@@ -21,12 +21,10 @@ class ProductCreateUpdateController extends WebhooksController
 
     private function processWebhook(Request $request, Closure $eventCallback)
     {
-        // Decode data
-        $dataArray = json_decode($request->getContent(), true);
         $data = json_decode($request->getContent());
 
         // Dispatch job
-        ImportSingleProductJob::dispatch($dataArray)->onQueue(config('shopify.queue'));
+        ImportSingleProductJob::dispatch($data->id);
 
         $eventCallback($data);
 

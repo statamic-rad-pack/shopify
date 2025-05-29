@@ -4,8 +4,8 @@ namespace StatamicRadPack\Shopify\Tests\Unit;
 
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use Shopify\Clients\Rest;
-use Shopify\Clients\RestResponse;
+use Shopify\Clients\Graphql;
+use Shopify\Clients\HttpResponse;
 use Statamic\Facades;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
@@ -33,7 +33,7 @@ class ActionsTest extends TestCase
                 'product_slug' => 'obi-wan',
                 'price' => 9.99,
                 'inventory_quantity' => 10,
-                'storefront_id' => 'abc',
+                'variant_id' => 'abc',
                 'option1' => 'a',
             ])
             ->collection('variants');
@@ -48,7 +48,7 @@ class ActionsTest extends TestCase
                 'product_slug' => 'obi-wan',
                 'price' => 10.99,
                 'inventory_quantity' => 5,
-                'storefront_id' => 'def',
+                'variant_id' => 'def',
                 'option1' => 'b',
             ])
             ->collection('variants');
@@ -56,21 +56,41 @@ class ActionsTest extends TestCase
         $variant2->save();
 
         $response = $this->get('/!/shopify/variants/obi-wan');
-        $this->assertSame('[{"title":"T-shirt","storefront_id":"abc","price":9.99,"inventory_quantity":10},{"title":"Another T-shirt","storefront_id":"def","price":10.99,"inventory_quantity":5}]', $response->getContent());
+        $this->assertSame('[{"title":"T-shirt","id":"abc","price":9.99,"inventory_quantity":10},{"title":"Another T-shirt","id":"def","price":10.99,"inventory_quantity":5}]', $response->getContent());
 
         $response = $this->get('/!/shopify/variants/obi-wan?option1=a');
-        $this->assertSame('[{"title":"T-shirt","storefront_id":"abc","price":9.99,"inventory_quantity":10}]', $response->getContent());
+        $this->assertSame('[{"title":"T-shirt","id":"abc","price":9.99,"inventory_quantity":10}]', $response->getContent());
     }
 
     #[Test]
     public function creates_an_address()
     {
-        $this->mock(Rest::class, function (MockInterface $mock) {
+        $this->mock(Graphql::class, function (MockInterface $mock) {
             $mock
-                ->shouldReceive('post')
-                ->andReturn(new RestResponse(
-                    status: 201,
-                    body: '{"customer_address":{"id": 706405506930370000,"email": "bob@biller.com","accepts_marketing": true,"created_at": "2021-12-31T19:00:00-05:00","updated_at": "2021-12-31T19:00:00-05:00","first_name": "Bob","last_name": "Biller","orders_count": 0,"state": "disabled","total_spent": "0.00","last_order_id": null,"note": "This customer loves ice cream","verified_email": true,"multipass_identifier": null,"tax_exempt": false,"tags": "","last_order_name": null,"currency": "USD","phone": null,"addresses": [],"accepts_marketing_updated_at": "2021-12-31T19:00:00-05:00","marketing_opt_in_level": null,"tax_exemptions": [],"email_marketing_consent": null,"sms_marketing_consent": null,"admin_graphql_api_id": "gid://shopify/Customer/706405506930370084"}}'
+                ->shouldReceive('query')
+                ->andReturn(new HttpResponse(
+                    status: 200,
+                    body: '{
+                      "data": {
+                        "customerAddressCreate": {
+                          "address": {
+                            "id": "gid://shopify/MailingAddress/1?model_name=CustomerAddress",
+                            "firstName": "First",
+                            "lastName": "Name",
+                            "company": "Company",
+                            "address1": "Line 1",
+                            "address2": "Line 2",
+                            "city": "City",
+                            "province": "Province",
+                            "country": "Country",
+                            "zip": "Zip",
+                            "phone": "Phone",
+                            "name": "Name"
+                          },
+                          "userErrors": []
+                        }
+                      }
+                  }'
                 ));
         });
 
@@ -80,19 +100,39 @@ class ActionsTest extends TestCase
         $response = $this->postJson('/!/shopify/address', ['customer_id' => 1]);
         $response->assertStatus(422);
 
-        $response = $this->postJson('/!/shopify/address', ['customer_id' => 1, 'first_name' => 'a', 'last_name' => 'b', 'address1' => 'c', 'city' => 'd', 'province' => 'e', 'zip' => 'f', 'country' => 'g']);
+        $response = $this->postJson('/!/shopify/address', ['customer_id' => 1, 'firstName' => 'a', 'lastName' => 'b', 'address1' => 'c', 'city' => 'd', 'province' => 'e', 'zip' => 'f', 'country' => 'g']);
         $response->assertStatus(200);
     }
 
     #[Test]
     public function updates_an_address()
     {
-        $this->mock(Rest::class, function (MockInterface $mock) {
+        $this->mock(Graphql::class, function (MockInterface $mock) {
             $mock
-                ->shouldReceive('put')
-                ->andReturn(new RestResponse(
+                ->shouldReceive('query')
+                ->andReturn(new HttpResponse(
                     status: 200,
-                    body: '{"customer_address":{"id": 706405506930370000,"email": "bob@biller.com","accepts_marketing": true,"created_at": "2021-12-31T19:00:00-05:00","updated_at": "2021-12-31T19:00:00-05:00","first_name": "Bob","last_name": "Biller","orders_count": 0,"state": "disabled","total_spent": "0.00","last_order_id": null,"note": "This customer loves ice cream","verified_email": true,"multipass_identifier": null,"tax_exempt": false,"tags": "","last_order_name": null,"currency": "USD","phone": null,"addresses": [],"accepts_marketing_updated_at": "2021-12-31T19:00:00-05:00","marketing_opt_in_level": null,"tax_exemptions": [],"email_marketing_consent": null,"sms_marketing_consent": null,"admin_graphql_api_id": "gid://shopify/Customer/706405506930370084"}}'
+                    body: '{
+                      "data": {
+                        "customerAddressUpdate": {
+                          "address": {
+                            "id": "gid://shopify/MailingAddress/1?model_name=CustomerAddress",
+                            "firstName": "First",
+                            "lastName": "Name",
+                            "company": "Company",
+                            "address1": "Line 1",
+                            "address2": "Line 2",
+                            "city": "City",
+                            "province": "Province",
+                            "country": "Country",
+                            "zip": "Zip",
+                            "phone": "Phone",
+                            "name": "Name"
+                          },
+                          "userErrors": []
+                        }
+                      }
+                  }'
                 ));
         });
 
@@ -102,19 +142,26 @@ class ActionsTest extends TestCase
         $response = $this->postJson('/!/shopify/address/1', ['customer_id' => 1]);
         $response->assertStatus(422);
 
-        $response = $this->postJson('/!/shopify/address/1', ['customer_id' => 1, 'first_name' => 'a', 'last_name' => 'b', 'address1' => 'c', 'city' => 'd', 'province' => 'e', 'zip' => 'f', 'country' => 'g']);
+        $response = $this->postJson('/!/shopify/address/1', ['customer_id' => 1, 'firstName' => 'a', 'lastName' => 'b', 'address1' => 'c', 'city' => 'd', 'province' => 'e', 'zip' => 'f', 'country' => 'g']);
         $response->assertStatus(200);
     }
 
     #[Test]
     public function deletes_an_address()
     {
-        $this->mock(Rest::class, function (MockInterface $mock) {
+        $this->mock(Graphql::class, function (MockInterface $mock) {
             $mock
-                ->shouldReceive('delete')
-                ->andReturn(new RestResponse(
+                ->shouldReceive('query')
+                ->andReturn(new HttpResponse(
                     status: 200,
-                    body: '{"customer_address":{"id": 706405506930370000,"email": "bob@biller.com","accepts_marketing": true,"created_at": "2021-12-31T19:00:00-05:00","updated_at": "2021-12-31T19:00:00-05:00","first_name": "Bob","last_name": "Biller","orders_count": 0,"state": "disabled","total_spent": "0.00","last_order_id": null,"note": "This customer loves ice cream","verified_email": true,"multipass_identifier": null,"tax_exempt": false,"tags": "","last_order_name": null,"currency": "USD","phone": null,"addresses": [],"accepts_marketing_updated_at": "2021-12-31T19:00:00-05:00","marketing_opt_in_level": null,"tax_exemptions": [],"email_marketing_consent": null,"sms_marketing_consent": null,"admin_graphql_api_id": "gid://shopify/Customer/706405506930370084"}}'
+                    body: '{
+                      "data": {
+                        "customerAddressDelete": {
+                          "deletedAddressId":  "gid://shopify/MailingAddress/1?model_name=CustomerAddress",
+                          "userErrors": []
+                        }
+                      }
+                  }'
                 ));
         });
 

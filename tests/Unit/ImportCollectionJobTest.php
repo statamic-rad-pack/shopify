@@ -6,8 +6,6 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Shopify\Clients\Graphql;
 use Shopify\Clients\HttpResponse;
-use Shopify\Clients\Rest;
-use Shopify\Clients\RestResponse;
 use Statamic\Facades;
 use StatamicRadPack\Shopify\Jobs;
 use StatamicRadPack\Shopify\Tests\TestCase;
@@ -15,48 +13,52 @@ use StatamicRadPack\Shopify\Tests\TestCase;
 class ImportCollectionJobTest extends TestCase
 {
     #[Test]
-    public function imports_collections()
+    public function imports_a_collection()
     {
         Facades\Taxonomy::make()->handle('collections')->save();
 
-        $product = tap(Facades\Entry::make()
+        Facades\Entry::make()
             ->collection(config('shopify.collection_handle', 'products'))
             ->id('product-1')
             ->slug('product-1')
-        )->save();
+            ->save();
 
-        $this->mock(Rest::class, function (MockInterface $mock) {
+        $this->mock(Graphql::class, function (MockInterface $mock) {
             $mock
-                ->shouldReceive('get')
-                ->andReturn(new RestResponse(
+                ->shouldReceive('query')
+                ->andReturn(new HttpResponse(
                     status: 200,
                     body: '{
-                      "metafields": [
-                        {
-                          "id": 1069228981,
-                          "namespace": "my_fields",
-                          "key": "sponsor",
-                          "value": "Shopify",
-                          "description": null,
-                          "owner_id": 382285388,
-                          "created_at": "2023-10-03T13:26:51-04:00",
-                          "updated_at": "2023-10-03T13:26:51-04:00",
-                          "owner_resource": "blog",
-                          "type": "single_line_text_field",
-                          "admin_graphql_api_id": "gid://shopify/Metafield/1069228981"
+                      "data": {
+                        "collection": {
+                          "descriptionHtml": "<p>Test description.</p>",
+                          "handle": "test-title",
+                          "id": "gid://shopify/Collection/841564295",
+                          "image": null,
+                          "metafields": {
+                            "edges": [
+                              {
+                                "node": {
+                                  "id": "gid://shopify/Metafield/1069228981",
+                                  "jsonValue": true,
+                                  "key": "sponsor",
+                                  "value": "Shopify"
+                                }
+                              }
+                            ]
+                          },
+                          "title": "Test title"
                         }
-                      ]
+                      }
                     }'
                 ));
         });
 
-        $collections = json_decode('[{"id": 841564295,"handle": "ipods","title": "IPods","updated_at": "2008-02-01T19:00:00-05:00","body_html": "<p>The best selling ipod ever</p>","published_at": "2008-02-01T19:00:00-05:00","sort_order": "manual","template_suffix": null,"published_scope": "web","admin_graphql_api_id": "gid://shopify/Collection/841564295"},{"id": 395646240,"handle": "ipods_two","title": "IPods Two","updated_at": "2008-02-01T19:00:00-05:00","body_html": "<p>The best selling ipod ever. Again</p>","published_at": "2008-02-01T19:00:00-05:00","sort_order": "manual","template_suffix": null,"published_scope": "web","admin_graphql_api_id": "gid://shopify/Collection/395646240"},{"id": 691652237,"handle": "non-ipods","title": "Non Ipods","updated_at": "2013-02-01T19:00:00-05:00","body_html": "<p>No ipods here</p>","published_at": "2013-02-01T19:00:00-05:00","sort_order": "manual","template_suffix": null,"published_scope": "web","admin_graphql_api_id": "gid://shopify/Collection/691652237"}]', true);
+        $this->assertSame(0, Facades\Term::query()->where('taxonomy', 'collections')->count());
 
-        foreach ($collections as $collection) {
-            Jobs\ImportCollectionJob::dispatch($collection);
-        }
+        Jobs\ImportCollectionJob::dispatch(841564295);
 
-        $this->assertSame(3, Facades\Term::query()->where('taxonomy', 'collections')->count());
+        $this->assertSame(1, Facades\Term::query()->where('taxonomy', 'collections')->count());
 
         // check term data is added
         $term = Facades\Term::query()->where('taxonomy', 'collections')->first();
@@ -79,6 +81,41 @@ class ImportCollectionJobTest extends TestCase
         $this->mock(Graphql::class, function (MockInterface $mock) {
             $mock
                 ->shouldReceive('query')
+                ->withArgs(function ($query) {
+                    return str_contains($query['query'], 'collection(id:');
+                })
+                ->andReturn(new HttpResponse(
+                    status: 200,
+                    body: '{
+                      "data": {
+                        "collection": {
+                          "descriptionHtml": "<p>Test description.</p>",
+                          "handle": "test-title",
+                          "id": "gid://shopify/Collection/841564295",
+                          "image": null,
+                          "metafields": {
+                            "edges": [
+                              {
+                                "node": {
+                                  "id": "gid://shopify/Metafield/1069228981",
+                                  "jsonValue": true,
+                                  "key": "sponsor",
+                                  "value": "Shopify"
+                                }
+                              }
+                            ]
+                          },
+                          "title": "Test title"
+                        }
+                      }
+                    }'
+                ));
+
+            $mock
+                ->shouldReceive('query')
+                ->withArgs(function ($query) {
+                    return str_contains($query['query'], 'translatableResource(resourceId:');
+                })
                 ->andReturn(new HttpResponse(
                     status: 200,
                     body: '{
@@ -115,11 +152,7 @@ class ImportCollectionJobTest extends TestCase
                 ));
         });
 
-        $collections = json_decode('[{"id": 841564295,"handle": "ipods","title": "IPods","updated_at": "2008-02-01T19:00:00-05:00","body_html": "<p>The best selling ipod ever</p>","published_at": "2008-02-01T19:00:00-05:00","sort_order": "manual","template_suffix": null,"published_scope": "web","admin_graphql_api_id": "gid://shopify/Collection/841564295"},{"id": 395646240,"handle": "ipods_two","title": "IPods Two","updated_at": "2008-02-01T19:00:00-05:00","body_html": "<p>The best selling ipod ever. Again</p>","published_at": "2008-02-01T19:00:00-05:00","sort_order": "manual","template_suffix": null,"published_scope": "web","admin_graphql_api_id": "gid://shopify/Collection/395646240"},{"id": 691652237,"handle": "non-ipods","title": "Non Ipods","updated_at": "2013-02-01T19:00:00-05:00","body_html": "<p>No ipods here</p>","published_at": "2013-02-01T19:00:00-05:00","sort_order": "manual","template_suffix": null,"published_scope": "web","admin_graphql_api_id": "gid://shopify/Collection/691652237"}]', true);
-
-        foreach ($collections as $collection) {
-            Jobs\ImportCollectionJob::dispatch($collection);
-        }
+        Jobs\ImportCollectionJob::dispatch(841564295);
 
         // check term data is added
         $term = Facades\Term::query()->where('taxonomy', 'collections')->first()->in('fr');
