@@ -20,7 +20,7 @@ class ProductDeleteController extends WebhooksController
         Events\ProductDelete::dispatch($data);
 
         $productEntry = Entry::query()
-            ->where('collection', config('shopify.collection_handle'))
+            ->where('collection', config('shopify.collection_handle', 'products'))
             ->where('product_id', $data->id)
             ->first();
 

@@ -131,5 +131,4 @@ return [
      * In which collection should the Shopify products be created
      */
     'collection_handle' => env('SHOPIFY_COLLECTION_HANDLE', 'products'),
-
 ];
