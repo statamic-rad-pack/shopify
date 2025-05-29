@@ -2,7 +2,7 @@
 
 namespace StatamicRadPack\Shopify\Tags;
 
-use Shopify\Clients\Rest;
+use Shopify\Clients\Graphql;
 use Statamic\Extensions\Pagination\LengthAwarePaginator;
 use Statamic\Facades\Entry;
 use Statamic\Facades\User;
@@ -130,10 +130,9 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             'variants' => $variants->map(function ($variant) {
                 $out_of_stock = false;
 
-                if (isset($variant['inventory_policy']) && isset($variant['inventory_management'])) {
+                if (isset($variant['inventory_policy'])) {
                     if (
                         $variant['inventory_policy'] === 'deny' &&
-                        $variant['inventory_management'] === 'shopify' &&
                         $variant['inventory_quantity'] <= 0
                     ) {
                         $out_of_stock = true;
@@ -207,10 +206,9 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             $title = $variant['title'];
             $out_of_stock = false;
 
-            if (isset($variant['inventory_policy']) && isset($variant['inventory_management'])) {
+            if (isset($variant['inventory_policy'])) {
                 if (
                     $variant['inventory_policy'] === 'deny' &&
-                    $variant['inventory_management'] === 'shopify' &&
                     $variant['inventory_quantity'] <= 0
                 ) {
                     $out_of_stock = true;
@@ -282,8 +280,8 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
         foreach ($variants as $variant) {
             $stock += $variant['inventory_quantity'];
 
-            if (isset($variant['inventory_policy']) && isset($variant['inventory_management'])) {
-                $deny = $variant['inventory_policy'] === 'deny' && $variant['inventory_management'] === 'shopify';
+            if (isset($variant['inventory_policy'])) {
+                $deny = $variant['inventory_policy'] === 'deny';
             }
         }
 
@@ -376,10 +374,30 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             }
         }
 
-        $response = app(Rest::class)->get(path: 'customers/'.($user->get('shopify_id') ?? 'none'));
+        $customerId = $user->get('shopify_id') ?? 'none';
 
-        if ($response->getStatusCode() == 200) {
-            $data = Arr::get($response->getDecodedBody(), 'customer', []);
+        $query = <<<QUERY
+            {
+              customer(id: "gid://shopify/Customer/{$customerId}") {
+                email
+                displayName
+                note
+                lastOrder {
+                    id
+                }
+              }
+            }
+            QUERY;
+
+        $response = app(Graphql::class)->query(['query' => $query]);
+
+        if ($data = Arr::get($response->getDecodedBody() ?? [], 'data.customer', [])) {
+            $data = [
+                'email' => $data['email'],
+                'name' => $data['displayName'],
+                'last_order_id' => Arr::get($data, 'lastOrder.id'),
+                'note' => $data['note'],
+            ];
         }
 
         return array_merge($data, $user?->data()->all() ?? []);
@@ -413,10 +431,40 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             }
         }
 
-        $response = app(Rest::class)->get(path: 'customers/'.($user->get('shopify_id') ?? 'none').'/addresses.json');
+        $customerId = $user->get('shopify_id') ?? 'none';
 
-        if ($response->getStatusCode() == 200) {
-            $data = Arr::get($response->getDecodedBody(), 'addresses', []);
+        $query = <<<QUERY
+            {
+              customer(id: "gid://shopify/Customer/{$customerId}") {
+                addresses {
+                  id
+                  firstName
+                  lastName
+                  company
+                  address1
+                  address2
+                  city
+                  province
+                  country
+                  zip
+                  phone
+                  name
+                }
+              }
+            }
+            QUERY;
+
+        $response = app(Graphql::class)->query(['query' => $query]);
+
+        if ($data = Arr::get($response->getDecodedBody() ?? [], 'data.customer.addresses', [])) {
+            $data = collect($data)
+                ->map(function ($address) {
+                    $address['id'] = Str::of($address['id'])->afterLast('/')->before('?');
+
+                    return $address;
+                })
+                ->values()
+                ->all();
         }
 
         return ['addresses' => $data ?? [], 'addresses_count' => count($data ?? [])];
@@ -450,22 +498,135 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             }
         }
 
-        $status = $this->context->get('status');
-        if (! in_array($status, ['any', 'open', 'closed', 'cancelled'])) {
-            $status = 'any';
+        $status = '';
+        if (! in_array($this->context->get('status'), ['not_closed', 'open', 'closed', 'cancelled'])) {
+            $status = ' AND status = '.$this->context->get('status');
         }
 
-        $response = app(Rest::class)->get(path: 'customers/'.($user->get('shopify_id') ?? 'none').'/orders', query: ['status' => $status]);
+        $userId = ($user->get('shopify_id') ?? 'none');
 
-        if ($response->getStatusCode() == 200) {
-            $data = Arr::get($response->getDecodedBody(), 'orders', []);
-        }
+        $query = <<<QUERY
+            query (\$numItems: Int!, \$cursor: String) {
+              orders(first: \$numItems, after: \$cursor, query: "customer_id:$userId $status") {
+                nodes {
+                  id
+                  billingAddress {
+                    address1
+                    address2
+                    name
+                    company
+                    city
+                    country
+                    phone
+                    province
+                    zip
+                  }
+                  shippingAddress {
+                    address1
+                    address2
+                    name
+                    company
+                    city
+                    country
+                    phone
+                    province
+                    zip
+                  }
+                  lineItems(first: 250) {
+                    nodes {
+                      id
+                      quantity
+                      sku
+                      title
+                      image {
+                        url
+                      }
+                      discountedUnitPriceSet {
+                        presentmentMoney {
+                          currencyCode
+                          amount
+                        }
+                      }
+                      originalUnitPriceSet {
+                        presentmentMoney {
+                          currencyCode
+                          amount
+                        }
+                      }
+                    }
+                  }
+                  totalPriceSet {
+                    presentmentMoney {
+                      currencyCode
+                      amount
+                    }
+                  }
+                  totalReceivedSet {
+                    presentmentMoney {
+                      currencyCode
+                      amount
+                    }
+                  }
+                  totalDiscountsSet {
+                    presentmentMoney {
+                      currencyCode
+                      amount
+                    }
+                  }
+                  requiresShipping
+                  cancelledAt
+                  cancelReason
+                  createdAt
+                  discountCodes
+                }
+                pageInfo {
+                  hasNextPage
+                  endCursor
+                }
+              }
+            }
+            QUERY;
+
+        $data = [];
+        $items = [];
+
+        do {
+            $response = app(Graphql::class)->query([
+                'query' => $query,
+                'variables' => [
+                    'numItems' => 100,
+                    'cursor' => Arr::get($data, 'data.orders.pageInfo.endCursor', null),
+                ],
+            ]);
+
+            $data = $response->getDecodedBody();
+
+            if ($orders = Arr::get($data, 'data.orders.nodes', [])) {
+                $items = array_merge($items, collect($orders)->map(function ($order) {
+                    $order['id'] = (int) Str::afterLast($order['id'], '/');
+
+                    Arr::set(
+                        $order,
+                        'lineItems.nodes',
+                        collect(Arr::get($order, 'lineItems.nodes'))
+                            ->map(function ($lineItem) {
+                                $lineItem['id'] = (int) Str::afterLast($lineItem['id'], '/');
+
+                                return $lineItem;
+                            })->all()
+                    );
+
+                    return $order;
+                })->all());
+            }
+
+        } while (Arr::get($data, 'data.orders.pageInfo.hasNextPage', false));
 
         if (! $this->params->get('as')) {
             $this->params->put('as', 'orders');
         }
 
-        $data = collect($data ?? []);
+        $data = collect($items ?? []);
 
         if ($paginate = $this->params->int('paginate')) {
             $data = new LengthAwarePaginator(

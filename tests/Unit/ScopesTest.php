@@ -47,7 +47,6 @@ class ScopesTest extends TestCase
             'product_slug' => 'not-obi-wan',
             'price' => 10.99,
             'inventory_quantity' => 5,
-            'storefront_id' => 'def',
         ])
             ->collection('variants');
 
@@ -93,7 +92,6 @@ class ScopesTest extends TestCase
             'compare_at_price' => 12.99,
             'price' => 10.99,
             'inventory_quantity' => 5,
-            'storefront_id' => 'def',
         ])
             ->collection('variants');
 

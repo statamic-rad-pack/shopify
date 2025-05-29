@@ -5,6 +5,26 @@ position: 3
 category: Installation
 ---
 
+## Upgrading from 5.x to 6.x
+
+This release contains a number of breaking changes to the integration code and data. After updating you should re-sync all products to ensure the data is in the most up to date format.
+
+We have removed support for connections to the deprecated REST API, replacing all calls with GraphQL. If you were using the REST API in your own code it will no longer work. We now target api version `2025-04` by default.
+
+If you were using the `{{ shopify:address_form }}` tag, any form fields names should now be camelCase, not snake_case, in line with what Shopify's GraphQL mutations expect: https://shopify.dev/docs/api/storefront/2024-10/input-objects/MailingAddressInput
+
+`storefront_id` is no longer available on variants, please use `variant_id` instead.
+
+`inventory_management` is no longer taken into consideration for stock levels as it is not returned by GraphQL.
+
+`grams` is no longer available on variants, instead use `weight` which contains `unit` and `value` subfields.
+
+`ImportCollectionJob` and `ImportSingleProductJob` no longer accept arrays, instead they accept the unique ID of the product you want to update.
+
+`ImportAllProductsJob` has been removed entirely.
+
+
+
 ## Upgrading from 4.x to 5.x
 
 Due to the essential migration to the Shopify Storefront Checkout API, any previous Javascript integrations that relied on the supplied Javascript files will no longer continue to work. Code updates will be required. We strongly recommend taking this opportunity to move to the newly provided Alpine.js integration (See the [Storefront API](frontend/storefront-api) documentation for details on this). If however you want a like for like replacement, you can [find updated JS files here](https://github.com/statamic-rad-pack/shopify/pull/241/commits/d87038ed85d99daa62066b5cc277e51d1d688bef). You will still need to make code changes, however these Javascript files are in line with what was previously supplied.
