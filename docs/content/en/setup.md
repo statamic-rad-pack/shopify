@@ -7,8 +7,8 @@ category: Installation
 
 You need to be running:
 
-- Statamic 3.0+
-- PHP 7.4+
+- Statamic 5.0+
+- PHP 8.1+
 
 It's advisable you also use a queue system that is _not_ sync, for those options you can view the [Laravel docs](https://laravel.com/docs/8.x/queues#driver-prerequisites).
 
@@ -21,6 +21,8 @@ Add `statamic-rad-pack/shopify` as a dependency to your project:
 ```bash
 composer require statamic-rad-pack/shopify
 ```
+
+If you are on a Windows environment, please set the `SHOPIFY_SESSION_STORAGE_PATH` .env value to a writeable path.
 
 ## Creating a Shopify App
 

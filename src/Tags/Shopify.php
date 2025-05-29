@@ -8,6 +8,7 @@ use Statamic\Facades\Entry;
 use Statamic\Facades\User;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use Statamic\Support\Traits\Hookable;
 use Statamic\Tags\Concerns\GetsRedirects;
 use Statamic\Tags\Concerns\OutputsItems;
 use Statamic\Tags\Concerns\QueriesConditions;
@@ -17,7 +18,7 @@ use Statamic\Tags\Tags;
 
 class Shopify extends Tags
 {
-    use GetsRedirects, OutputsItems, QueriesConditions, QueriesOrderBys, RendersForms;
+    use GetsRedirects, Hookable, OutputsItems, QueriesConditions, QueriesOrderBys, RendersForms;
 
     /**
      * @return string|array
@@ -52,8 +53,6 @@ class Shopify extends Tags
             return null;
         }
 
-        $html = '';
-
         // Out of Stock
         if (! $this->isInStock($variants)) {
             return __('shopify::messages.out_of_stock');
@@ -62,13 +61,18 @@ class Shopify extends Tags
         // Lowest Price
         $pricePluck = $variants->pluck('price');
 
-        $price = $pricePluck->sort()->splice(0, 1)[0];
+        $price = $pricePluck->sort()->first();
+
+        $payload = $this->runHooksWith('product-price', [
+            'currency' => config('shopify.currency'),
+            'price' => $price,
+        ]);
 
         if ($pricePluck->count() > 1 && $this->params->get('show_from') === true) {
-            return __('shopify::messages.display_price_from', ['currency' => config('shopify.currency'), 'price' => $price]);
+            return __('shopify::messages.display_price_from', ['currency' => $payload->currency, 'price' => $payload->price]);
         }
 
-        return __('shopify::messages.display_price', ['currency' => config('shopify.currency'), 'price' => $price]);
+        return __('shopify::messages.display_price', ['currency' => $payload->currency, 'price' => $payload->price]);
     }
 
     /**

@@ -522,7 +522,7 @@ class ImportSingleProductJobTest extends TestCase
                                     "id": "gid://shopify/Publication/123756183775",
                                     "name": "Online Store"
                                   },
-                                  "publishDate": "2024-05-13T14:06:54Z"
+                                  "publishDate": "2064-05-13T14:06:54Z"
                                 }
                               },
                               {
@@ -537,7 +537,7 @@ class ImportSingleProductJobTest extends TestCase
                               },
                               {
                                 "node": {
-                                  "isPublished": true,
+                                  "isPublished": false,
                                   "publication": {
                                     "id": "gid://shopify/Publication/123756380383",
                                     "name": "Shop"
@@ -559,6 +559,6 @@ class ImportSingleProductJobTest extends TestCase
 
         $this->assertNotNull($entry);
         $this->assertSame($entry->published(), false);
-        $this->assertSame($entry->date()->format('Y-m-d'), '2024-05-13');
+        $this->assertSame($entry->date()->format('Y-m-d'), '2064-05-13');
     }
 }
