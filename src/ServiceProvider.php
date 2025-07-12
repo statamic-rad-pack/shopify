@@ -124,19 +124,19 @@ class ServiceProvider extends AddonServiceProvider
                             ->can('view', Facades\Collection::find(config('shopify.collection_handle', 'products'))),
 
                         $nav->create(__('Collections'))
-                            ->route('taxonomies.show', 'collections')
+                            ->route('taxonomies.show', config('shopify.taxonomies.collections'))
                             ->can('view', Facades\Taxonomy::find(config('shopify.taxonomies.collections'))),
 
                         $nav->create(__('Tags'))
-                            ->route('taxonomies.show', 'tags')
+                            ->route('taxonomies.show', config('shopify.taxonomies.tags'))
                             ->can('view', Facades\Taxonomy::find(config('shopify.taxonomies.tags'))),
 
                         $nav->create(__('Product Types'))
-                            ->route('taxonomies.show', 'type')
+                            ->route('taxonomies.show', config('shopify.taxonomies.type'))
                             ->can('view', Facades\Taxonomy::find(config('shopify.taxonomies.type'))),
 
                         $nav->create(__('Vendors'))
-                            ->route('taxonomies.show', 'vendor')
+                            ->route('taxonomies.show', config('shopify.taxonomies.vendor'))
                             ->can('view', Facades\Taxonomy::find(config('shopify.taxonomies.vendor'))),
 
                         $nav->create(__('Settings'))
