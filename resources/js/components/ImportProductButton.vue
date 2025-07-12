@@ -22,6 +22,7 @@ import axios from "axios";
 export default {
     props: {
         url: String,
+        listUrl: String,
         product: String
     },
 
@@ -40,7 +41,7 @@ export default {
 
     methods: {
         fetch() {
-            axios.get('/cp/shopify/products')
+            axios.get(this.listUrl)
                 .then(res => {
                     console.log(res)
                     this.products = res.data.products
