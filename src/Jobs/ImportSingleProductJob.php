@@ -339,7 +339,7 @@ class ImportSingleProductJob implements ShouldQueue
                   query {
                     translatableResource(resourceId: "gid://shopify/Product/{$this->data['id']}") {
                       resourceId
-                      translations(locale: "{$site->locale()}") {
+                      translations(locale: "{$site->lang()}") {
                         key
                         value
                       }
@@ -491,7 +491,7 @@ class ImportSingleProductJob implements ShouldQueue
                       query {
                         translatableResource(resourceId: "gid://shopify/ProductVariant/{$variant['id']}") {
                           resourceId
-                          translations(locale: "{$site->locale()}") {
+                          translations(locale: "{$site->lang()}") {
                             key
                             value
                           }
