@@ -121,7 +121,7 @@ class ImportCollectionJobTest extends TestCase
                     body: '{
                       "translatableResource": {
                         "resourceId": "gid://shopify/Collection/1007901140",
-                        "translatableContent": [
+                        "translations": [
                           {
                             "key": "title",
                             "value": "Featured items",
