@@ -22,6 +22,7 @@ import axios from "axios";
 export default {
     props: {
         url: String,
+        listUrl: String,
         product: String
     },
 
@@ -40,9 +41,8 @@ export default {
 
     methods: {
         fetch() {
-            axios.get('/cp/shopify/products')
+            axios.get(this.listUrl)
                 .then(res => {
-                    console.log(res)
                     this.products = res.data.products
                 })
         },
@@ -57,7 +57,6 @@ export default {
 
             axios.get(`${this.url}?product=${this.selectedProduct.product_id}`)
                 .then(res => {
-                    console.log(res)
                     this.message = res.data.message
                     this.messageColor = 'text-green'
 
