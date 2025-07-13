@@ -19,7 +19,7 @@
         <div class="mt-4 card">
             <h2 class="mb-2">Import Single Product</h2>
             <p class="max-w-md mb-4 text-sm">Fetch a single product's data from Shopify. Please note if you have any `overwrite` option set to true in the config product data will be replaced.</p>
-            <shopify-import-product-button url="{{ cp_route('shopify.products.fetch') }}"></shopify-import-product-button>
+            <shopify-import-product-button url="{{ cp_route('shopify.products.fetch') }}" list-url="{{ cp_route('shopify.products') }}"></shopify-import-product-button>
         </div>
 
         <div class="mt-4 card">
