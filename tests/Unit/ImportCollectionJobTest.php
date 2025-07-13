@@ -119,9 +119,10 @@ class ImportCollectionJobTest extends TestCase
                 ->andReturn(new HttpResponse(
                     status: 200,
                     body: '{
+                    "data": {
                       "translatableResource": {
                         "resourceId": "gid://shopify/Collection/1007901140",
-                        "translatableContent": [
+                        "translations": [
                           {
                             "key": "title",
                             "value": "Featured items",
@@ -148,7 +149,8 @@ class ImportCollectionJobTest extends TestCase
                           }
                         ]
                       }
-                    }'
+                    }
+                  }'
                 ));
         });
 

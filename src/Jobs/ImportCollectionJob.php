@@ -110,9 +110,9 @@ class ImportCollectionJob implements ShouldQueue
 
                 $query = <<<QUERY
                   query {
-                    translatableResource(resourceId: "gid://shopify/Collection/{$this->collection['id']}") {
+                    translatableResource(resourceId: "gid://shopify/Collection/{$this->collectionId}") {
                       resourceId
-                      translations(locale: "{$site->locale()}") {
+                      translations(locale: "{$site->lang()}") {
                         key
                         value
                       }
@@ -122,12 +122,12 @@ class ImportCollectionJob implements ShouldQueue
 
                 $response = app(Graphql::class)->query(['query' => $query]);
 
-                $translations = Arr::get($response->getDecodedBody(), 'translatableResource.translatableContent', []);
+                $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
 
                 if ($translations) {
                     $data = collect($translations)->mapWithKeys(fn ($row) => [$row['key'] => $row['value']]);
 
-                    $term->dataForLocale($site->handle(), $data->filter()->all());
+                    $term->in($site->handle())->data($data->filter()->all());
                 }
             });
         }
