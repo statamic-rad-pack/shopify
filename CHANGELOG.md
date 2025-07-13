@@ -1,5 +1,20 @@
 # Changelog
 
+## v6.1.0 - 2025-07-13
+
+### What's Changed
+
+* Use actual CP url for fetching product list by @daun in https://github.com/statamic-rad-pack/shopify/pull/296
+* Adjust CP nav to work with customized taxonomy handles and names by @daun in https://github.com/statamic-rad-pack/shopify/pull/295
+* Filter taxonomies before importing by @daun in https://github.com/statamic-rad-pack/shopify/pull/297
+* Get multisite product collection import working by @daun in https://github.com/statamic-rad-pack/shopify/pull/294
+
+### New Contributors
+
+* @daun made their first contribution in https://github.com/statamic-rad-pack/shopify/pull/296
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v6.0.0...v6.1.0
+
 ## v6.0.0 - 2025-05-29
 
 ### 🚀 New
@@ -495,6 +510,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
