@@ -3,6 +3,7 @@ name: Release Drafter
 on:
   pull_request:
     types: [closed]
+  workflow_dispatch:
 permissions:
   contents: read
 
