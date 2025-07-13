@@ -94,7 +94,7 @@ class ServiceProvider extends AddonServiceProvider
         Facades\CP\Nav::extend(function ($nav) use ($shopifySvg) {
             $collections = [
                 config('shopify.collection_handle', 'products'),
-                'variants'
+                'variants',
             ];
             $taxonomies = [
                 config('shopify.taxonomies.collections'),
