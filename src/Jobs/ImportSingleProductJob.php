@@ -374,6 +374,7 @@ class ImportSingleProductJob implements ShouldQueue
 
         // 'Tag foo, Tag bar' => ['tag-foo' => 'Tag foo', 'tag-bar' => 'Tag bar']
         $tags = collect($tags)
+            ->filter()
             ->mapWithKeys(fn ($tagTitle) => [Str::slug($tagTitle) => $tagTitle])
             ->each(function ($tagTitle, $tagSlug) use ($taxonomyHandle) {
                 $term = Term::query()
