@@ -1,5 +1,17 @@
 # Changelog
 
+## v6.2.0 - 2025-07-15
+
+### What's New
+
+* Apply price hook across products and variants by @daun in https://github.com/statamic-rad-pack/shopify/pull/300
+
+### What's Fixed
+
+* Enable variants fieldtype for entries stored in database by @daun in https://github.com/statamic-rad-pack/shopify/pull/299
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v6.1.0...v6.2.0
+
 ## v6.1.0 - 2025-07-13
 
 ### What's Changed
@@ -510,6 +522,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
