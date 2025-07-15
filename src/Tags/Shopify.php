@@ -63,10 +63,7 @@ class Shopify extends Tags
 
         $price = $pricePluck->sort()->first();
 
-        $payload = $this->runHooksWith('product-price', [
-            'currency' => config('shopify.currency'),
-            'price' => $price,
-        ]);
+        $payload = $this->formatPrice($price);
 
         if ($pricePluck->count() > 1 && $this->params->get('show_from') === true) {
             return __('shopify::messages.display_price_from', ['currency' => $payload->currency, 'price' => $payload->price]);
@@ -144,7 +141,8 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
 
                 if ($this->params->bool('show_price')) {
                     $langKey .= '_price';
-                    $langParams['price'] = __('shopify::messages.display_price', ['currency' => config('shopify.currency'), 'price' => $variant['price']]);
+                    $payload = $this->formatPrice($variant['price']);
+                    $langParams['price'] = __('shopify::messages.display_price', ['currency' => $payload->currency, 'price' => $payload->price]);
                 }
 
                 if ($this->params->bool('show_out_of_stock') && $out_of_stock) {
@@ -220,7 +218,8 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
 
             if ($this->params->get('show_price')) {
                 $langKey .= '_price';
-                $langParams['price'] = __('shopify::messages.display_price', ['currency' => config('shopify.currency'), 'price' => $variant['price']]);
+                $payload = $this->formatPrice($variant['price']);
+                $langParams['price'] = __('shopify::messages.display_price', ['currency' => $payload->currency, 'price' => $payload->price]);
             }
 
             if ($this->params->get('show_out_of_stock') && $out_of_stock) {
@@ -658,5 +657,13 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             $as => $items,
             'paginate' => $this->getPaginationData($paginator),
         ], $this->extraOutput($items));
+    }
+
+    protected function formatPrice($price)
+    {
+        return $this->runHooksWith('product-price', [
+            'currency' => config('shopify.currency'),
+            'price' => $price,
+        ]);
     }
 }
