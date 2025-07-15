@@ -216,7 +216,7 @@ const updateLineQuantity = async (cartId, lineId, quantity) => {
     quantity = parseInt(quantity);
 
     if (quantity < 1) {
-        return removeLine(lineId);
+        return removeLine(cartId, lineId);
     }
 
     const operation = `mutation cartLinesUpdate($lines: [CartLineUpdateInput!]!) {
