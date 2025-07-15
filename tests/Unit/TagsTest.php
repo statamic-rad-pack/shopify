@@ -268,6 +268,63 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
         $this->assertEquals('abc', $this->tag('{{ shopify:variants variant_id:is="abc" }}{{ variant_id }}{{ /shopify:variants }}', ['slug' => 'obi-wan']));
     }
 
+
+    #[Test]
+    public function runs_hooks_on_variant_price()
+    {
+        $product = Facades\Entry::make()->data([
+            'title' => 'Obi wan',
+            'vendor' => 'Kenobe',
+            'slug' => 'obi-wan',
+            'product_id' => 1,
+        ])
+            ->collection(config('shopify.collection_handle', 'products'));
+
+        $product->save();
+
+        $variant = Facades\Entry::make()->data([
+            'title' => 'T-shirt',
+            'slug' => 'obi-wan-tshirt',
+            'sku' => 'obi-wan-tshirt',
+            'product_slug' => 'obi-wan',
+            'price' => 9.99,
+            'inventory_quantity' => 10,
+            'inventory_policy' => 'deny',
+            'inventory_management' => 'shopify',
+        ])
+            ->collection('variants');
+
+        $variant->save();
+
+        $variant2 = Facades\Entry::make()->data([
+            'title' => 'Another T-shirt',
+            'slug' => 'obi-wan-tshirt-2',
+            'sku' => 'obi-wan-tshirt-2',
+            'product_slug' => 'obi-wan',
+            'price' => 10.99,
+            'inventory_quantity' => 5,
+            'variant_id' => 'def',
+            'inventory_policy' => 'deny',
+            'inventory_management' => 'shopify',
+        ])
+            ->collection('variants');
+
+        $variant2->save();
+
+        Shopify::hook('product-price', function ($payload, $next) {
+            $payload->price = floor($payload->price);
+            $payload->currency = '€';
+
+            return $next($payload);
+        });
+
+        $tagOutput = $this->tag('{{ shopify:variants:generate show_price="true" }}', ['slug' => 'obi-wan']);
+        $tagOutput = str_replace(["\r", "\n", "\t"], '', $tagOutput);
+        $tagOutput = preg_replace('/\>\s+\</m', '><', trim($tagOutput));
+
+        $this->assertEquals('<select name="ss-product-variant" class="ss-variant-select "><option value="obi-wan-tshirt" data-in-stock="true">T-shirt - €9</option><option value="obi-wan-tshirt-2" data-in-stock="true">Another T-shirt - €10</option></select>', $tagOutput);
+    }
+
     #[Test]
     public function outputs_an_address_form()
     {
