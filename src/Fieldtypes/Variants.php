@@ -15,7 +15,7 @@ class Variants extends Fieldtype
     {
         $product = $this->field()->parent();
 
-        if (! $product->initialPath()) {
+        if (! $product->slug()) {
             return;
         }
 
