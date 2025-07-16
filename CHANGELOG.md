@@ -1,5 +1,13 @@
 # Changelog
 
+## v6.2.1 - 2025-07-16
+
+### What's Fixed
+
+* Update frontend examples by @daun in https://github.com/statamic-rad-pack/shopify/pull/301
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v6.2.0...v6.2.1
+
 ## v6.2.0 - 2025-07-15
 
 ### What's New
@@ -522,6 +530,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
