@@ -73,7 +73,9 @@ export default {
     },
 
     mounted() {
-        this.fetch()
+        if (this.productSlug) {
+            this.fetch();
+        }
     },
 
     methods: {
