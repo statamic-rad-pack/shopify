@@ -129,7 +129,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
 
                 if (isset($variant['inventory_policy'])) {
                     if (
-                        $variant['inventory_policy'] === 'deny' &&
+                        strtolower($variant['inventory_policy']) === 'deny' &&
                         $variant['inventory_quantity'] <= 0
                     ) {
                         $out_of_stock = true;
@@ -206,7 +206,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
 
             if (isset($variant['inventory_policy'])) {
                 if (
-                    $variant['inventory_policy'] === 'deny' &&
+                    strtolower($variant['inventory_policy']) === 'deny' &&
                     $variant['inventory_quantity'] <= 0
                 ) {
                     $out_of_stock = true;
@@ -280,7 +280,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             $stock += $variant['inventory_quantity'];
 
             if (isset($variant['inventory_policy'])) {
-                $deny = $variant['inventory_policy'] === 'deny';
+                $deny = strtolower($variant['inventory_policy']) === 'deny';
             }
         }
 
