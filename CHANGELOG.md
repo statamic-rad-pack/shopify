@@ -1,5 +1,14 @@
 # Changelog
 
+## v6.2.2 - 2025-07-21
+
+### What's Fixed
+
+* Fix entry creation errors by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/302
+* Ensure inventory_policy checks are lower cased by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/304
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v6.2.1...v6.2.2
+
 ## v6.2.1 - 2025-07-16
 
 ### What's Fixed
@@ -530,6 +539,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
