@@ -33,7 +33,8 @@ Allows you to output your Site URL and Storefront Token to the front end and bin
 {{ shopify:product_price show_from="true" }}
 ```
 
-- `show_from` will display a "From " prefix to the price if there are multiple variants.
+- `show_from`: display a "From " prefix to the price if there are multiple variants.
+- `show_out_of_stock`: show an "Out of Stock" message if the product is out of stock. Defaults to `true`. If set to `false`, it will return the price even if the product is out of stock.
 
 #### Output
 
