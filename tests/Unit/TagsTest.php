@@ -153,6 +153,18 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
         ])->save();
 
         $this->assertEquals('', $this->tag('{{ if {shopify:in_stock} }}Yes{{ /if }}', ['slug' => 'obi-wan']));
+
+        $variant->merge([
+            'inventory_quantity' => -1,
+        ])->save();
+
+        $this->assertEquals('', $this->tag('{{ if {shopify:in_stock} }}Yes{{ /if }}', ['slug' => 'obi-wan']));
+
+        $variant->merge([
+            'inventory_quantity' => null,
+        ])->save();
+
+        $this->assertEquals('', $this->tag('{{ if {shopify:in_stock} }}Yes{{ /if }}', ['slug' => 'obi-wan']));
     }
 
     #[Test]
