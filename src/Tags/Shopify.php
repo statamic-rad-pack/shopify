@@ -54,7 +54,7 @@ class Shopify extends Tags
         }
 
         // Out of Stock
-        if ($this->params->get('check_stock', true) !== false && ! $this->isInStock($variants)) {
+        if ($this->params->get('show_out_of_stock', true) !== false && ! $this->isInStock($variants)) {
             return __('shopify::messages.out_of_stock');
         }
 
