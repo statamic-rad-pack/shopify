@@ -80,6 +80,9 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
 
         $this->assertEquals('From £9.99', $this->tag('{{ shopify:product_price show_from="true" }}', ['slug' => 'obi-wan']));
 
+        $variant2->set('price', 9.99)->save();
+
+        $this->assertEquals('£9.99', $this->tag('{{ shopify:product_price show_from="true" }}', ['slug' => 'obi-wan']));
     }
 
     #[Test]
