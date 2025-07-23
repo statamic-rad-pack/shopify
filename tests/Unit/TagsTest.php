@@ -65,6 +65,8 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
 
         $this->assertEquals('Out of Stock', $this->tag('{{ shopify:product_price }}', ['slug' => 'obi-wan']));
 
+        $this->assertEquals('£9.99', $this->tag('{{ shopify:product_price check_stock="false" }}', ['slug' => 'obi-wan']));
+
         $variant2 = Facades\Entry::make()->data([
             'title' => 'Another T-shirt',
             'slug' => 'obi-wan-tshirt-2',
