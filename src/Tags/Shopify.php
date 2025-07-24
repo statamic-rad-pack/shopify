@@ -281,7 +281,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             }
         }
 
-        if ($stock === 0 and $deny) {
+        if ($stock <= 0 and $deny) {
             return false;
         }
 
