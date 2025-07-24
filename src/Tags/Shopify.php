@@ -62,7 +62,7 @@ class Shopify extends Tags
 
         $langKey = match (true) {
             ! $this->isInStock($variants) => 'out_of_stock',
-            $pricePluck->count() > 1 && $this->params->get('show_from') === true => 'display_price_from',
+            $pricePluck->unique()->count() > 1 && $this->params->get('show_from') === true => 'display_price_from',
             default => 'display_price',
         };
 
