@@ -1,5 +1,16 @@
 # Changelog
 
+## v6.3.0 - 2025-07-24
+
+### What's Changed
+
+* Only display `from` prefix if prices differ by @daun in https://github.com/statamic-rad-pack/shopify/pull/305
+* Count negative inventory values as out of stock by @daun in https://github.com/statamic-rad-pack/shopify/pull/307
+* Add .env var for api_version by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/308
+* Pass currency and price to out of stock message @daun in https://github.com/statamic-rad-pack/shopify/pull/306
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v6.2.2...v6.3.0
+
 ## v6.2.2 - 2025-07-21
 
 ### What's Fixed
@@ -539,6 +550,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
