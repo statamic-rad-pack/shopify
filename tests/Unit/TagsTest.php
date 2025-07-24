@@ -82,6 +82,9 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
 
         $this->assertEquals('From £9.99', $this->tag('{{ shopify:product_price show_from="true" }}', ['slug' => 'obi-wan']));
 
+        $variant2->set('price', 9.99)->save();
+
+        $this->assertEquals('£9.99', $this->tag('{{ shopify:product_price show_from="true" }}', ['slug' => 'obi-wan']));
     }
 
     #[Test]
@@ -152,6 +155,18 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2024-07' };
 
         $variant->merge([
             'inventory_quantity' => 0,
+        ])->save();
+
+        $this->assertEquals('', $this->tag('{{ if {shopify:in_stock} }}Yes{{ /if }}', ['slug' => 'obi-wan']));
+
+        $variant->merge([
+            'inventory_quantity' => -1,
+        ])->save();
+
+        $this->assertEquals('', $this->tag('{{ if {shopify:in_stock} }}Yes{{ /if }}', ['slug' => 'obi-wan']));
+
+        $variant->merge([
+            'inventory_quantity' => null,
         ])->save();
 
         $this->assertEquals('', $this->tag('{{ if {shopify:in_stock} }}Yes{{ /if }}', ['slug' => 'obi-wan']));

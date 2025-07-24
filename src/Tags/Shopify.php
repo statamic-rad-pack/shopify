@@ -65,7 +65,7 @@ class Shopify extends Tags
 
         $payload = $this->formatPrice($price);
 
-        if ($pricePluck->count() > 1 && $this->params->get('show_from') === true) {
+        if ($pricePluck->unique()->count() > 1 && $this->params->get('show_from') === true) {
             return __('shopify::messages.display_price_from', ['currency' => $payload->currency, 'price' => $payload->price]);
         }
 
@@ -284,7 +284,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             }
         }
 
-        if ($stock === 0 and $deny) {
+        if ($stock <= 0 and $deny) {
             return false;
         }
 
