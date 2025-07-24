@@ -53,11 +53,6 @@ class Shopify extends Tags
             return null;
         }
 
-        // Out of Stock
-        if (! $this->isInStock($variants)) {
-            return __('shopify::messages.out_of_stock');
-        }
-
         // Lowest Price
         $pricePluck = $variants->pluck('price');
 
@@ -65,11 +60,13 @@ class Shopify extends Tags
 
         $payload = $this->formatPrice($price);
 
-        if ($pricePluck->unique()->count() > 1 && $this->params->get('show_from') === true) {
-            return __('shopify::messages.display_price_from', ['currency' => $payload->currency, 'price' => $payload->price]);
-        }
+        $langKey = match (true) {
+            ! $this->isInStock($variants) => 'out_of_stock',
+            $pricePluck->unique()->count() > 1 && $this->params->get('show_from') === true => 'display_price_from',
+            default => 'display_price',
+        };
 
-        return __('shopify::messages.display_price', ['currency' => $payload->currency, 'price' => $payload->price]);
+        return __('shopify::messages.' . $langKey, ['currency' => $payload->currency, 'price' => $payload->price]);
     }
 
     /**

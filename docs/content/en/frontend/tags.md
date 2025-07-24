@@ -33,7 +33,7 @@ Allows you to output your Site URL and Storefront Token to the front end and bin
 {{ shopify:product_price show_from="true" }}
 ```
 
-- `show_from` will display a "From " prefix to the price if there are multiple variants.
+- `show_from`: display a "From " prefix to the price if there are multiple variants.
 
 #### Output
 
