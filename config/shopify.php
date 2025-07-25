@@ -46,7 +46,7 @@ return [
     /**
      * Admin API version - Set this to a fixed value (eg 2023-07) or null to let the library decide
      */
-    'api_version' => env('SHOPIFY_API_VERSION', null),
+    'api_version' => env('SHOPIFY_API_VERSION', '2025-04'),
 
     /**
      * Admin connection is a private app, defaults to false
