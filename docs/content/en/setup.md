@@ -54,12 +54,12 @@ Set up a private app on Shopify for this add-on using the following steps:
 6. Click the "API Credentials" tab. Add the `Admin API access token` to your `.env` as `SHOPIFY_ADMIN_TOKEN`.
 7. If you've configured the app properly you should see a button that says "Install App". Click this.
 
-### 3. Shopfront redirection
+### Step 3. Shopfront redirection
 If you are not intending to use the Shopify storefront you should perform redirection from any Shopify URLs to your website. 
 
 We recommend installing Shopify's [Hydrogen Redirect Theme](https://github.com/Shopify/hydrogen-redirect-theme), and following their setup instructions. 
 
-### 4. Finalise your .env
+### Step 4. Finalise your .env
 After completing steps 1 and 2 your .env should look as follows:
 
 ```bash

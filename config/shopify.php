@@ -39,11 +39,6 @@ return [
     ],
 
     /**
-     * Admin API Limit - Lower this if you bump into issues.
-     */
-    'api_limit' => 30,
-
-    /**
      * Admin API version - Set this to a fixed value (eg 2023-07) or null to let the library decide
      */
     'api_version' => env('SHOPIFY_API_VERSION', '2025-04'),
