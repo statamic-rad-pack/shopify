@@ -1,5 +1,13 @@
 # Changelog
 
+## v6.4.0 - 2025-07-25
+
+### What's Changed
+
+* Allow sales channel to be determined by a config value by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/309
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v6.3.0...v6.4.0
+
 ## v6.3.0 - 2025-07-24
 
 ### What's Changed
@@ -550,6 +558,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
