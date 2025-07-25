@@ -131,4 +131,10 @@ return [
      * In which collection should the Shopify products be created
      */
     'collection_handle' => env('SHOPIFY_COLLECTION_HANDLE', 'products'),
+
+    /**
+     * What Sales Channel in Shopify should be used to determine the product availablity
+     * (ensure this matches exactly)
+     */
+    'sales_channel' => env('SHOPIFY_SALES_CHANNEL', 'Online Store'),
 ];
