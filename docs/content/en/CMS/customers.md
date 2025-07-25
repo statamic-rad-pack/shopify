@@ -8,7 +8,7 @@ If you want Shopify and Statamic to sync users and customers you need to change 
 
 ## Link Statamic customers from Shopify
 
-To create a link between Shopify customers and Statamic users you need to ensure your Shopify app has `customer read` and `customer write` permissions.
+To create a link between Shopify customers and Statamic users you need to ensure your Private Shopify app has `customer read` and `customer write` permissions.
 
 You then need to set up the following webhooks:
 
