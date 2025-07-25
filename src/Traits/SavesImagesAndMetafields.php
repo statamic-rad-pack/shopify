@@ -24,7 +24,7 @@ trait SavesImagesAndMetafields
         // Check if it exists first - no point double importing.
         $asset = Asset::query()
             ->where('container', config('shopify.asset.container'))
-            ->where('path', config('shopify.asset.path').'/'.$name)
+            ->where('path', Str::replaceStart(config('shopify.asset.path').'/', '/', '').$name)
             ->first();
 
         if ($asset) {
@@ -104,7 +104,7 @@ trait SavesImagesAndMetafields
      */
     private function getPath(UploadedFile $file): string
     {
-        return Path::assemble(config('shopify.asset.path').'/', $file->getClientOriginalName());
+        return Path::assemble(config('shopify.asset.path'), $file->getClientOriginalName());
     }
 
     /**

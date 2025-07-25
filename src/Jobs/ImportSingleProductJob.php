@@ -261,7 +261,6 @@ class ImportSingleProductJob implements ShouldQueue
 
                 $entry->set(config('shopify.taxonomies.collections'), $collections)->save();
             } catch (\Throwable $e) {
-                dd($e);
                 Log::error('Could not retrieve collections for product '.$this->data['id']);
                 Log::error($e->getMessage());
             }

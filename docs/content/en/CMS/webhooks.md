@@ -13,6 +13,7 @@ There is a built method to listen for webhooks sent by Shopify back to your appl
 3. Scroll down to **Webhooks** and click **Create Webhook**
 4. Enter the URL as shown in the sections below.
 5. Leave the type as `JSON` and on the latest API.
+6. If this is your first webhook, you will be provided a secret which you should add to your .env as `SHOPIFY_WEBHOOK_SECRET`
 
 <alert type="info">
 

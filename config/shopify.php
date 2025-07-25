@@ -18,16 +18,6 @@ return [
     'storefront_token' => env('SHOPIFY_STOREFRONT_TOKEN'),
 
     /**
-     * Admin API Auth Key
-     */
-    'auth_key' => env('SHOPIFY_AUTH_KEY'),
-
-    /**
-     * Admin API Auth Password
-     */
-    'auth_password' => env('SHOPIFY_AUTH_PASSWORD'),
-
-    /**
      * Admin Access Token
      */
     'admin_token' => env('SHOPIFY_ADMIN_TOKEN'),
@@ -56,7 +46,7 @@ return [
     /**
      * Admin API version - Set this to a fixed value (eg 2023-07) or null to let the library decide
      */
-    'api_version' => env('SHOPIFY_API_VERSION', null),
+    'api_version' => env('SHOPIFY_API_VERSION', '2025-04'),
 
     /**
      * Admin connection is a private app, defaults to false
@@ -80,7 +70,7 @@ return [
      * Asset Container to Store the imported Assets
      */
     'asset' => [
-        'path' => env('SHOPIFY_ASSET_PATH', 'shopify'),
+        'path' => env('SHOPIFY_ASSET_PATH', ''),
         'container' => env('SHOPIFY_ASSET_CONTAINER', 'shopify'),
     ],
 
@@ -137,4 +127,16 @@ return [
      * (ensure this matches exactly)
      */
     'sales_channel' => env('SHOPIFY_SALES_CHANNEL', 'Online Store'),
+
+    /**
+     * Your App's Admin API Auth Key
+     * Note: this is not required unless you are doing custom integrations using the RestApi
+     */
+    'auth_key' => env('SHOPIFY_AUTH_KEY', 'api-key'),
+
+    /**
+     * Admin API Auth Password
+     * Note: this is not required unless you are doing custom integrations using the RestApi
+     */
+    'auth_password' => env('SHOPIFY_AUTH_PASSWORD', 'api-password'),
 ];

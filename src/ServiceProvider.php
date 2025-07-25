@@ -162,17 +162,17 @@ class ServiceProvider extends AddonServiceProvider
 
     private function setShopifyApiConfig(): void
     {
-        if (! $key = config('shopify.auth_key')) {
+        if (! $key = config('shopify.admin_token')) {
             return;
         }
 
         Context::initialize(
-            apiKey: $key,
+            apiKey: config('shopify.auth_key'),
             apiSecretKey: config('shopify.auth_password'),
             scopes: ['read_metaobjects', 'read_products'],
             hostName: config('shopify.url'),
             sessionStorage: new FileSessionStorage(config('shopify.session_storage_path', '/tmp/php_sessions')),
-            apiVersion: config('shopify.api_version') ?? '2025-04',
+            apiVersion: config('shopify.api_version'),
             isEmbeddedApp: false,
             isPrivateApp: config('shopify.api_private_app') ?? false,
         );
