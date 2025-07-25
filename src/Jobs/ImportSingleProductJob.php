@@ -285,7 +285,7 @@ class ImportSingleProductJob implements ShouldQueue
             // publication state
             try {
                 $publicationStatus = collect(Arr::get($this->data, 'resourcePublications.edges', []))
-                    ->where('node.publication.name', 'Online Store')
+                    ->where('node.publication.name', config('shopify.sales_channel', 'Online Store'))
                     ->map(function ($channel) {
                         if (! $node = $channel['node'] ?? []) {
                             return [];
