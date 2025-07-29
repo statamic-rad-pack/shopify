@@ -50,6 +50,15 @@ Your URL should point to the following endpoint:
 https://YOURSITE/!/shopify/webhook/collection/delete
 ```
 
+## Product Create
+
+You should add a webhook on **Product Creation** that sends the data to Statamic and queues the import of that one product.
+
+Your URL should point to the following endpoint:
+
+```bash
+https://YOURSITE/!/shopify/webhook/product/create
+```
 
 ## Product Update
 
