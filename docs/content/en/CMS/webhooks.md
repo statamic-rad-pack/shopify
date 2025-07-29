@@ -50,19 +50,11 @@ Your URL should point to the following endpoint:
 https://YOURSITE/!/shopify/webhook/collection/delete
 ```
 
-## Product Create
-
-You should add a webhook on **Product Creation** that sends the data to Statamic and queues the import of that one product.
-
-Your URL should point to the following endpoint:
-
-```bash
-https://YOURSITE/!/shopify/webhook/product/create
-```
-
 ## Product Update
 
 Similarly, rather than running the full import to catch any changes to products, you can add a webhook on **Product Update** that sends any updated data to Statamic and queues a refresh of that product.
+
+Note that Shopify will send the update hook on product creation as well, so no separate webhook is required for that.
 
 Your URL should point to the following endpoint:
 
@@ -110,4 +102,3 @@ StatamicRadPack\Shopify\Events\OrderCreate
 ```
 
 Each event has one property `$data` with the payload data decoded to a `stdClass`.
-
