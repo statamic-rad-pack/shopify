@@ -503,7 +503,6 @@ class ImportSingleProductJob implements ShouldQueue
                     $response = app(Graphql::class)->query(['query' => $query]);
 
                     $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
-                    ray($translations, $response->getDecodedBody());
 
                     if ($translations || $entry->collection()->propagate()) {
                         $localizedEntry = $entry->in($site->handle());
