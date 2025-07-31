@@ -249,18 +249,11 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             return null;
         }
 
-        return $entries->map(function ($variant) {
-            $values = [];
-            $values['id'] = $variant->id();
-            $values['slug'] = $variant->slug();
-
-            // Map all variant values to data to ensure we are getting everything.
-            foreach ($variant->data() as $key => $value) {
-                $values[$key] = $value;
-            }
-
-            return $values;
-        });
+        return $entries->map(fn ($variant) => [
+            'id' => $variant->id(),
+            'slug' => $variant->slug(),
+            ...$variant->values(),
+        ])->unique('variant_id')->values();
     }
 
     /**
