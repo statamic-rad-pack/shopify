@@ -14,7 +14,7 @@ Ensure your API key has enabled the `read_translations` permission for this feat
 
 You need to enable multi-site on the `Products` collection and `Collections`, `Product Types`, `Tags` and `Vendor` taxonomies. You can do this by editing the configuration and adding the sites you want to enable to the `sites` field.
 
-On the Products collection ensure that `Propogate` is toggled on, and that the `Origin Behaviour` is set to `Use the site the entry was created in`.
+On the Products collection ensure that `Propagate` is toggled on, and that the `Origin Behaviour` is set to `Use the site the entry was created in`.
 
 ## How it works
 
