@@ -350,7 +350,7 @@ class ImportSingleProductJob implements ShouldQueue
 
                 $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
 
-                if ($translations) {
+                if ($translations || $entry->collection()->propagate()) {
                     $localizedEntry = $entry->in($site->handle());
 
                     if (! $localizedEntry) {
@@ -503,7 +503,7 @@ class ImportSingleProductJob implements ShouldQueue
 
                     $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
 
-                    if ($translations) {
+                    if ($translations || $entry->collection()->propagate()) {
                         $localizedEntry = $entry->in($site->handle());
 
                         if (! $localizedEntry) {
