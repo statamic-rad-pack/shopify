@@ -1,5 +1,16 @@
 # Changelog
 
+## v6.4.1 - 2025-07-31
+
+### What's Fixed
+
+* Propagate Shopify translations to entry localizations by @daun in https://github.com/statamic-rad-pack/shopify/pull/313
+* Better setup docs by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/310
+* A bit more docs by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/311
+* Add docs section on product creation webhook by @daun in https://github.com/statamic-rad-pack/shopify/pull/312
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v6.4.0...v6.4.1
+
 ## v6.4.0 - 2025-07-25
 
 ### What's Changed
@@ -558,6 +569,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
