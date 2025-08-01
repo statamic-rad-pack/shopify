@@ -198,9 +198,11 @@ class ImportSingleProductJob implements ShouldQueue
         if (! $entry) {
             $entry = Entry::make()
                 ->collection(config('shopify.collection_handle', 'products'))
-                ->locale(Site::default()->handle())
-                ->slug($this->data['handle']);
+                ->locale(Site::default()->handle());
         }
+
+        // Update slug in case it has changed
+        $entry->slug($this->data['handle']);
 
         // Import Variant
         $this->importVariants($this->data['variants'], $this->data['handle']);
@@ -356,6 +358,9 @@ class ImportSingleProductJob implements ShouldQueue
                     if (! $localizedEntry) {
                         $localizedEntry = $entry->makeLocalization($site);
                     }
+
+                    // All localizations should have the same handle for correct connections to variants
+                    $localizedEntry->slug($entry->slug());
 
                     $data = collect($translations)->mapWithKeys(fn ($row) => [$row['key'] == 'body_html' ? 'content' : $row['key'] => $row['value']]);
 

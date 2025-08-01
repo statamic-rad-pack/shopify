@@ -202,6 +202,45 @@ class ImportSingleProductJobTest extends TestCase
         $this->assertSame($entry->date()->format('Y-m-d'), '2064-05-13');
     }
 
+    #[Test]
+    public function updates_changed_handle()
+    {
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->sites(['en', 'fr'])->dated(true)->save();
+        Facades\Taxonomy::make()->handle('collections')->save();
+        Facades\Taxonomy::make()->handle('tags')->save();
+        Facades\Taxonomy::make()->handle('type')->save();
+        Facades\Taxonomy::make()->handle('vendor')->save();
+
+        $this->mock(Graphql::class, function (MockInterface $mock) {
+            $productJson = $this->getProductJson();
+            $productJsonUpdated = str_replace('"handle": "product"', '"handle": "product-new"', $productJson);
+
+            $mock
+                ->shouldReceive('query')
+                ->andReturn(
+                    new HttpResponse(
+                        status: 200,
+                        body: $productJson
+                    ),
+                    new HttpResponse(
+                        status: 200,
+                        body: $productJsonUpdated
+                    )
+                );
+        });
+
+        Jobs\ImportSingleProductJob::dispatch(1072481042);
+
+        $entry = Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->first();
+
+        $this->assertNotNull($entry);
+        $this->assertSame($entry->slug(), 'product');
+
+        Jobs\ImportSingleProductJob::dispatch(1072481042);
+
+        $this->assertSame($entry->slug(), 'product-new');
+    }
+
     private function getProductJson(): string
     {
         return '{
@@ -230,7 +269,7 @@ class ImportSingleProductJobTest extends TestCase
                             },
                             "feedback": null,
                             "giftCardTemplateSuffix": null,
-                            "handle": "draft",
+                            "handle": "product",
                             "hasOnlyDefaultVariant": false,
                             "hasOutOfStockVariants": false,
                             "id": "gid://shopify/Product/108828309",
