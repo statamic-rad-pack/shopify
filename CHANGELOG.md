@@ -1,5 +1,13 @@
 # Changelog
 
+## v6.4.2 - 2025-08-04
+
+### What's Changed
+
+* Update slug when product handle updates by @daun in https://github.com/statamic-rad-pack/shopify/pull/314
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v6.4.1...v6.4.2
+
 ## v6.4.1 - 2025-07-31
 
 ### What's Fixed
@@ -569,6 +577,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
