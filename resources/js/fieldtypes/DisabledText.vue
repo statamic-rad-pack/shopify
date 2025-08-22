@@ -1,10 +1,15 @@
 <template>
     <div>
-        <input type="text" :value="value" class="input-text" disabled />
+        <ui-input
+            :value="value"
+            disabled
+        />
     </div>
 </template>
 
 <script>
+import { FieldtypeMixin as Fieldtype } from '@statamic/cms';
+
 export default {
     mixins: [Fieldtype],
 };

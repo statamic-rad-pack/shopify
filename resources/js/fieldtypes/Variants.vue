@@ -1,53 +1,53 @@
 <template>
     <div class="flex">
-        <section class="flex-grow border rounded">
-            <table class="data-table" v-if="variants">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>SKU</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(variant, index) in variants" :key="index" class="cursor-pointer" @click="openEditVariantStack(variant)">
-                        <td class="text-base">
-                            {{ variant.title }}
-                        </td>
-                        <td class="text-sm">
-                            {{ variant.sku }}
-                        </td>
-                        <td class="text-sm">
-                            {{ currencyFormat(variant.price) }}
-                        </td>
-                        <td class="text-sm">
-                            {{ variant.inventory_quantity }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <p v-else class="p-1 text-sm">To get started, add some variants to products in Shopify.</p>
-        </section>
+        <ui-table class="w-full" v-if="variants">
+            <ui-table-columns>
+                <ui-table-column>{{ __('Title') }}</ui-table-column>
+                <ui-table-column>{{ __('SKU') }}</ui-table-column>
+                <ui-table-column>{{ __('Price') }}</ui-table-column>
+                <ui-table-column>{{ __('Stock') }}</ui-table-column>
+                <ui-table-column></ui-table-column>
+            </ui-table-columns>
+            <ui-table-row v-for="(variant, index) in variants" :key="index">
+                <ui-table-cell>
+                    {{ variant.title }}
+                </ui-table-cell>
+                <ui-table-cell>
+                    {{ variant.sku }}
+                </ui-table-cell>
+                <ui-table-cell>
+                    {{ currencyFormat(variant.price) }}
+                </ui-table-cell>
+                <ui-table-cell>
+                    {{ variant.inventory_quantity }}
+                </ui-table-cell>
+                <ui-table-cell>
+                    <ui-button @click="openEditVariantStack(variant)" size="sm">Edit</ui-button>
+                </ui-table-cell>
+            </ui-table-row>
+        </ui-table>
+
+        <ui-description v-else>To get started, add some variants to products in Shopify.</ui-description>
 
         <variant-form
-          name="variant stack"
-          v-if="showVariantStack"
-          :action="stackAction"
-          title="Edit Variant"
-          :blueprint="variantBlueprint"
-          :meta="variantMeta"
-          :method="stackMethod"
-          :values="stackValues"
-          @closed="showVariantStack = false"
-          @saved="closeVariantStack"
+            name="variant stack"
+            v-if="showVariantStack"
+            :action="stackAction"
+            title="Edit Variant"
+            :blueprint="variantBlueprint"
+            :meta="variantMeta"
+            :method="stackMethod"
+            :values="stackValues"
+            @closed="showVariantStack = false"
+            @saved="closeVariantStack"
         />
     </div>
 </template>
 
 <script>
 import axios from 'axios'
-import VariantForm from '../components/VariantForm'
+import { FieldtypeMixin as Fieldtype } from '@statamic/cms';
+import VariantForm from '../components/VariantForm.vue'
 
 export default {
     mixins: [Fieldtype],
