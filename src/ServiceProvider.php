@@ -48,6 +48,14 @@ class ServiceProvider extends AddonServiceProvider
         Tags\Shopify::class,
     ];
 
+    protected $vite = [
+        'publicDirectory' => 'dist',
+        'hotFile' => 'vendor/shopify/hot',
+        'input' => [
+            'resources/js/cp.js',
+        ],
+    ];
+
     public function boot()
     {
         parent::boot();

@@ -1,7 +1,7 @@
 <template>
     <div class="flex items-center">
-        <button type="button" class="btn-primary" @click="fetch()">Import All</button>
-        <p class="ml-2 text-sm" :class="messageColor" v-if="message">{{ message }}</p>
+        <ui-button type="button" @click="fetch()" :disabled="processing">{{ processing ? 'Please wait' : 'Run import' }}</ui-button>
+        <ui-error-message class="ml-2" v-if="message">{{ message }}</ui-error-message>
     </div>
 </template>
 
@@ -16,29 +16,27 @@ export default {
     data() {
         return {
             message: null,
-            messageColor: 'text-black'
+            processing: false,
         }
     },
 
     methods: {
         fetch() {
-            this.message = 'working....'
-            this.messageColor = 'text-black'
+            this.message = '';
+            this.processing = true;
 
             axios.get(this.url)
                 .then(res => {
-                    console.log(res)
                     this.message = res.data.message
-                    this.messageColor = 'text-green'
 
                     setTimeout(() => this.message = null, 3000)
                 })
                 .catch(err => {
                     this.message = 'Something went wrong. Please try again.'
-                    this.messageColor = 'text-red'
 
                     setTimeout(() => this.message = null, 5000)
                 })
+                .finally(() => this.processing = false)
         }
     }
 }
