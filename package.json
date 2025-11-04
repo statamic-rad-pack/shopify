@@ -4,7 +4,7 @@
         "build": "vite build"
     },
     "dependencies": {
-        "@statamic/cms": "file:./vendor/statamic/cms/resources/js/package",
+        "@statamic/cms": "file:./vendor/statamic/cms/resources/dist-package",
         "@shopify/storefront-api-client": "^1.0.2",
         "axios": "^1.11.0"
     },
