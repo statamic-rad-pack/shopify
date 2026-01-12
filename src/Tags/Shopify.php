@@ -66,7 +66,7 @@ class Shopify extends Tags
             default => 'display_price',
         };
 
-        return __('shopify::messages.' . $langKey, ['currency' => $payload->currency, 'price' => $payload->price]);
+        return __('shopify::messages.'.$langKey, ['currency' => $payload->currency, 'price' => $payload->price]);
     }
 
     /**
