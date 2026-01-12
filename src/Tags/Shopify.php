@@ -567,6 +567,9 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
                   cancelReason
                   createdAt
                   discountCodes
+                  displayFulfillmentStatus
+                  statusPageUrl
+                  name
                 }
                 pageInfo {
                   hasNextPage
