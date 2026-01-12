@@ -488,7 +488,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
         }
 
         $status = '';
-        if (! in_array($this->context->get('status'), ['not_closed', 'open', 'closed', 'cancelled'])) {
+        if ($this->context->get('status') && ! in_array($this->context->get('status'), ['not_closed', 'open', 'closed', 'cancelled'])) {
             $status = ' AND status = '.$this->context->get('status');
         }
 
