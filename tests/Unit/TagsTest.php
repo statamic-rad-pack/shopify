@@ -283,7 +283,6 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04' };
         $this->assertEquals('abc', $this->tag('{{ shopify:variants variant_id:is="abc" }}{{ variant_id }}{{ /shopify:variants }}', ['slug' => 'obi-wan']));
     }
 
-
     #[Test]
     public function runs_hooks_on_variant_price()
     {

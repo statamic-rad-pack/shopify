@@ -66,7 +66,7 @@ class Shopify extends Tags
             default => 'display_price',
         };
 
-        return __('shopify::messages.' . $langKey, ['currency' => $payload->currency, 'price' => $payload->price]);
+        return __('shopify::messages.'.$langKey, ['currency' => $payload->currency, 'price' => $payload->price]);
     }
 
     /**
@@ -567,6 +567,9 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
                   cancelReason
                   createdAt
                   discountCodes
+                  displayFulfillmentStatus
+                  statusPageUrl
+                  name
                 }
                 pageInfo {
                   hasNextPage
