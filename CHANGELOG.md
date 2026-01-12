@@ -1,5 +1,13 @@
 # Changelog
 
+## v6.5.0 - 2026-01-12
+
+### What's Changed
+
+* Add name, status and status url back to query nodes by @GarethFrost in https://github.com/statamic-rad-pack/shopify/pull/318
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v6.4.3...v6.5.0
+
 ## v6.4.3 - 2026-01-12
 
 ### What's Changed
@@ -589,6 +597,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
