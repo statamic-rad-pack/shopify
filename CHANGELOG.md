@@ -1,5 +1,17 @@
 # Changelog
 
+## v6.4.3 - 2026-01-12
+
+### What's Changed
+
+* Add check for if status context exists on custormerOrders function by @GarethFrost in https://github.com/statamic-rad-pack/shopify/pull/317
+
+### New Contributors
+
+* @GarethFrost made their first contribution in https://github.com/statamic-rad-pack/shopify/pull/317
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v6.4.2...v6.4.3
+
 ## v6.4.2 - 2025-08-04
 
 ### What's Changed
@@ -577,6 +589,7 @@ If you want to display options/handle them on the site you need to update your `
     type: array
     icon: array
     listable: hidden
+
 
 
 
