@@ -1,9 +1,6 @@
  <template>
-    <stack name="variant-form-stack" :narrow="narrow" @closed="close">
-        <div class="h-full overflow-auto p-6 bg-white">
-            <header class="-mt-2 mb-3 flex justify-end">
-                <button type="button" class="btn-close" @click="close">×</button>
-            </header>
+    <ui-stack :open="true" :size="narrow ? 'narrow' : null" @update:open="close">
+        <div class="h-full overflow-auto p-6">
             <ui-publish-form
                 name="variant-publish-form"
                 :title="title"
@@ -13,11 +10,10 @@
                 :initial-meta="meta"
                 :initial-values="values"
                 @saved="saved"
-                class="max-w-3xl mx-auto"
             >
             </ui-publish-form>
         </div>
-    </stack>
+    </ui-stack>
 </template>
 
 <script>
