@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Compile assets
-        run: npm run production
+        run: npm run build
       - name: Create zip
         run: tar -czvf dist.tar.gz dist
       - name: Upload zip to release
