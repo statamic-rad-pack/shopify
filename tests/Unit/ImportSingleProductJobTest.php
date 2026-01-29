@@ -49,10 +49,10 @@ class ImportSingleProductJobTest extends TestCase
     #[Test]
     public function imports_translations_for_product()
     {
-        Facades\Site::setConfig(['sites' => [
+        Facades\Site::setSites([
             'en' => ['url' => '/', 'locale' => 'en_US'],
             'fr' => ['url' => '/fr/', 'locale' => 'fr_FR'],
-        ]]);
+        ]);
 
         Facades\Collection::make(config('shopify.collection_handle', 'products'))->sites(['en', 'fr'])->save();
         Facades\Taxonomy::make()->handle('collections')->save();
