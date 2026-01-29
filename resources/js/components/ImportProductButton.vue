@@ -1,17 +1,21 @@
-<template>
+ <template>
     <form @submit.prevent="fetchProduct()" >
-        <p class="mb-1 max-w-sm"><v-select
-              placeholder="Select a product"
-              :options="products"
-              :get-option-key="(option) => option.product_id"
-              :get-option-label="(option) => option.title"
-              :searchable="true"
-              @input="input"
-        /></p>
+        <div class="mb-1 max-w-sm">
+            <ui-combobox
+                class="w-full"
+                clearable="true"
+                :label="__('Select a product')"
+                v-model="selectedProduct"
+                optionLabel="title"
+                :options="products"
+                optionValue="product_id"
+                searchable="true"
+            />
+        </div>
 
         <div class="flex items-center">
-            <button type="submit" class="btn-primary" >Import Product</button>
-            <p class="ml-2 text-sm" :class="messageColor" v-if="message">{{ message }}</p>
+            <ui-button type="button" @click="fetch()" :disabled="processing">{{ processing ? 'Please wait' : 'Import product' }}</ui-button>
+            <ui-error-message class="ml-2" v-if="message">{{ message }}</ui-error-message>
         </div>
     </form>
 </template>
@@ -28,10 +32,10 @@ export default {
 
     data() {
         return {
-            products: [],
             message: null,
-            messageColor: 'text-black',
-            selectedProduct: null
+            selectedProduct: null,
+            processing: false,
+            products: [],
         }
     },
 
@@ -47,25 +51,20 @@ export default {
                 })
         },
 
-        input(value) {
-            this.selectedProduct = value
-        },
-
         fetchProduct() {
-            this.message = 'working....'
-            this.messageColor = 'text-black'
+            this.message = '';
+            this.processing = true;
 
             axios.get(`${this.url}?product=${this.selectedProduct.product_id}`)
                 .then(res => {
                     this.message = res.data.message
-                    this.messageColor = 'text-green'
 
                     setTimeout(() => this.message = null, 3000)
                 }).catch(err => {
                     this.message = 'Something went wrong. Please try again.'
-                    this.messageColor = 'text-red'
                     setTimeout(() => this.message = null, 5000)
                 })
+                .finally(() => this.processing = false)
         }
     }
 }

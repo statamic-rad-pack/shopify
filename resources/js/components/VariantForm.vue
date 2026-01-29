@@ -1,23 +1,16 @@
-<template>
-    <stack name="Form Stack" :narrow="narrow" @closed="close">
-        <div class="h-full overflow-auto p-6 bg-gray-300">
-            <header class="-mt-2 mb-3 flex justify-end">
-                <button type="button" class="btn-close" @click="close">×</button>
-            </header>
-            <publish-form
-                name="Form Stack publish form"
-                :title="title"
-                :action="action"
-                :method="method"
-                :blueprint="blueprint"
-                :meta="meta"
-                :values="values"
-                @saved="saved"
-                class="max-w-3xl mx-auto"
-            >
-            </publish-form>
-        </div>
-    </stack>
+ <template>
+    <ui-stack :open="true" :size="narrow ? 'narrow' : null" @update:open="close">
+        <ui-publish-form
+            name="variant-publish-form"
+            :title="title"
+            :submit-url="action"
+            :submit-method="method"
+            :blueprint="blueprint"
+            :initial-meta="meta"
+            :initial-values="values"
+            @saved="saved"
+        ></ui-publish-form>
+    </ui-stack>
 </template>
 
 <script>
