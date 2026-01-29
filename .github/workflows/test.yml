@@ -11,8 +11,8 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         php: [8.3, 8.4]
-        laravel: [11.*, 12.*]
-        statamic: [^5.0, ^6.0]
+        laravel: [12.*]
+        statamic: [^6.0]
     name: P${{ matrix.php }} - S${{ matrix.statamic }} - L${{ matrix.laravel }} - ubuntu-latest
     steps:
       - name: Checkout code
