@@ -9,6 +9,7 @@ use Statamic\Console\RunsInPlease;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\multisearch;
 use function Laravel\Prompts\password;
+use function Laravel\Prompts\spin;
 use function Laravel\Prompts\text;
 
 class ShopifyInstall extends Command
@@ -129,15 +130,16 @@ class ShopifyInstall extends Command
         $redirectUrl = config('app.url') . '/admin/shopify/callback';
         $state = uniqid();
 
-        info('Requesting authorization...');
-
-        $authResponse = Http::post($shopifyUrl . '/admin/oauth/authorize', [
-            'client_id' => $clientId,
-            'scope' => $scope,
-            'redirect_uri' => $redirectUrl,
-            'state' => $state,
-            'grant_options' => 'offline',
-        ]);
+        $authResponse = spin(
+            fn () => Http::post($shopifyUrl . '/admin/oauth/authorize', [
+                'client_id' => $clientId,
+                'scope' => $scope,
+                'redirect_uri' => $redirectUrl,
+                'state' => $state,
+                'grant_options' => 'offline',
+            ]),
+            'Requesting authorization from Shopify...'
+        );
 
         if (!$authResponse->successful()) {
             $this->error('Authorization request failed: ' . $authResponse->body());
@@ -152,13 +154,14 @@ class ShopifyInstall extends Command
         }
 
         // Exchange code for access token
-        info('Exchanging authorization code for access token...');
-
-        $tokenResponse = Http::post($shopifyUrl . '/admin/oauth/access_token', [
-            'client_id' => $clientId,
-            'client_secret' => $clientSecret,
-            'code' => $code,
-        ]);
+        $tokenResponse = spin(
+            fn () => Http::post($shopifyUrl . '/admin/oauth/access_token', [
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+                'code' => $code,
+            ]),
+            'Exchanging authorization code for access token...'
+        );
 
         if (!$tokenResponse->successful()) {
             $this->error('Failed to obtain access token: ' . $tokenResponse->body());
