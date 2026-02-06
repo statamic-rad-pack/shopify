@@ -40,19 +40,17 @@ SHOPIFY_SALES_CHANNEL="{Sales channel name}"
 ```
 
 
-### Step 2: Create a private app for Admin API integration
-Set up a private app on Shopify for this add-on using the following steps:
+### Step 2: Create an app on the Shopify Dev Dashboard and get an access token
+Set up an app at https://dev.shopify.com/dashboard/ with the following details:
 
-1. Visit the "Apps" section in your Shopify admin by clicking on the sidebar menu link, then in the modal that appears "App and sales channel settings".
-2. Click "Develop Apps" in the top right.
-3. Click "Create an app" in the top right to make a new one.
-4. Set a nice name to remember (eg "Statamic Admin") as well as your email.
-5. Click the "Configuration" Tab.
-    1. Click "Configure" next to Admin API Integration.
-    2. Enable `read_inventory`, `read_metaobjects`, `read_orders`, `read_products`, `read_product_listings`, `read_publications`, `read_translations` and `write_customers`
-    5. Click "Save" in the top right.
-6. Click the "API Credentials" tab. Add the `Admin API access token` to your `.env` as `SHOPIFY_ADMIN_TOKEN`.
-7. If you've configured the app properly you should see a button that says "Install App". Click this.
+1. App name: "Statamic" or whatever other name you want to use.
+2. Redirect URL: https://www.yourwebsite.com (we don't need OAuth redirects)
+3. Scopes: At a minimum we need: `write_customers, read_inventory, read_metaobjects, read_orders, read_product_listings, read_products, read_publications, read_translations`, however your site may need others.
+4. App URL: your website's URL
+
+Once the app is created, make a note of both the `Client ID` and the `Client Secret`. Then click "Install" and add it to your Shopify store.
+
+Once the app is installed on your store, you can then run `php please shopify:install`. Enter the `Client ID` and `Client Secret` and select the scopes you want to enable. The command will negotiate an offline access token with no expiry for you to use with the Admin API, and will write it to your `.env` file under the `admin_token` key.
 
 ### Step 3. Shopfront redirection
 If you are not intending to use the Shopify storefront you should perform redirection from any Shopify URLs to your website. 
