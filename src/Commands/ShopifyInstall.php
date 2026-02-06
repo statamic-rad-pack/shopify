@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Http;
 use Statamic\Console\RunsInPlease;
 
 use function Laravel\Prompts\info;
-use function Laravel\Prompts\multisearch;
+use function Laravel\Prompts\multiselect;
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\text;
@@ -187,7 +187,7 @@ class ShopifyInstall extends Command
 
     protected function selectScopes()
     {
-        $selected = multisearch(
+        $selected = multiselect(
             label: 'Select the API scopes you need',
             placeholder: 'Search for scopes...',
             options: fn (string $value) => strlen($value) > 0
