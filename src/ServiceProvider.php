@@ -40,10 +40,6 @@ class ServiceProvider extends AddonServiceProvider
         Scopes\VariantIsOnSale::class,
     ];
 
-    protected $scripts = [
-        __DIR__.'/../dist/js/statamic-shopify-cp.js',
-    ];
-
     protected $tags = [
         Tags\Shopify::class,
     ];
@@ -80,10 +76,6 @@ class ServiceProvider extends AddonServiceProvider
             $this->publishes([
                 __DIR__.'/../config/shopify.php' => config_path('shopify.php'),
             ], 'shopify-config');
-
-            $this->publishes([
-                __DIR__.'/../dist/js' => public_path('vendor/shopify/js'),
-            ], 'shopify-resources');
 
             $this->publishes([
                 __DIR__.'/../resources/views' => resource_path('views/vendor/shopify'),
