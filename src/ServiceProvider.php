@@ -13,8 +13,6 @@ use Statamic\Statamic;
 
 class ServiceProvider extends AddonServiceProvider
 {
-    protected $publishAfterInstall = false;
-
     protected $commands = [
         Commands\ShopifyImportProducts::class,
         Commands\ShopifyImportSingleProduct::class,
