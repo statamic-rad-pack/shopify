@@ -188,11 +188,14 @@ class ServiceProvider extends AddonServiceProvider
         );
 
         $this->app->bind(Graphql::class, function ($app) {
-            $cacheKey = 'shopify::admin-token';
+            // maintain support for legacy apps through admin_token config
+            if (! $token = config('shopify.admin_token')) {
+                $cacheKey = 'shopify::admin_token';
 
-            if (! $token = Cache::get($cacheKey)) {
-                if ($token = $this->exchangeClientCredentialsForSecret()) {
-                    Cache::put($cacheKey, $token, 1400);
+                if (!$token = Cache::get($cacheKey)) {
+                    if ($token = $this->exchangeClientCredentialsForSecret()) {
+                        Cache::put($cacheKey, $token, 1400);
+                    }
                 }
             }
 
