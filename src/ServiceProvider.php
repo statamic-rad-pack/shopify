@@ -84,10 +84,6 @@ class ServiceProvider extends AddonServiceProvider
             ], 'shopify-config');
 
             $this->publishes([
-                __DIR__.'/../dist/js' => public_path('vendor/shopify/js'),
-            ], 'shopify-resources');
-
-            $this->publishes([
                 __DIR__.'/../resources/views' => resource_path('views/vendor/shopify'),
             ], 'shopify-theme');
 

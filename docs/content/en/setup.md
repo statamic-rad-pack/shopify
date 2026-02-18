@@ -97,18 +97,6 @@ php artisan vendor:publish --provider="StatamicRadPack\Shopify\ServiceProvider"
 
 You can install each asset individually.
 
-#### Blueprints
-
-```bash
-php artisan vendor:publish --tag="shopify-blueprints"
-```
-
-#### Content
-
-```bash
-php artisan vendor:publish --tag="shopify-content"
-```
-
 #### Config
 
 ```bash
