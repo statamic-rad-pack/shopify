@@ -6,22 +6,20 @@ position: 3
 
 ## Required For Admin
 
-| Value             | Description                                                                                                                 |
-| -------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| `SHOPIFY_APP_URL`  | The url to your store (no https://)                                                                                         |
-| `SHOPIFY_ADMIN_TOKEN`  | The Admin API access token you received when generating your app                                                            |
-| `SHOPIFY_AUTH_KEY`  | The Admin API key found when creating your private app. This is optional and only required if you want to use the REST API. |
-| `SHOPIFY_AUTH_PASSWORD` | The Admin API password found when creating your private app. This is optional and only required if you want to use the REST API.                                                               |
+| Value                   | Description                                                                                                                      |
+|-------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+| `SHOPIFY_APP_URL`       | The url to your store (no https://)                                                                                              |
+| `SHOPIFY_CLIENT_ID`     | The Client ID you received when generating your app                                                                              |
+| `SHOPIFY_CLIENT_SECRET` | The Client Secret you received when generating your app.                                                                         |
 
 ## Required For Frontend
 
-If you are using the JavaScript publishable in the addon you'll need to set the following.
+If you are using the JavaScript publishable in the addon you'll also need to set the following.
 
-| Value             | Description                                                                                                       |
-| -------------------|-------------------------------------------------------------------------------------------------------------------|
-| `SHOPIFY_APP_URL`  | The url to your myshopify.com store (no https://)                                                                 |
-| `SHOPIFY_STOREFRONT_URL`  | The custom url to your store if you have one (no https://)                                                        |
-| `SHOPIFY_STOREFRONT_TOKEN`  | Found in the configuration section of your Headless Sales Channel |
+| Value             | Description                                                           |
+| -------------------|-----------------------------------------------------------------------|
+| `SHOPIFY_STOREFRONT_URL`  | The custom url to your store if you have one (no https://) [optional] |
+| `SHOPIFY_STOREFRONT_TOKEN`  | Found in the configuration section of your Headless Sales Channel     |
 
 ## Required For Webhooks
 

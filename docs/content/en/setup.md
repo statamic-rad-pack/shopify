@@ -40,17 +40,17 @@ SHOPIFY_SALES_CHANNEL="{Sales channel name}"
 ```
 
 
-### Step 2: Create an app on the Shopify Dev Dashboard and get an access token
+### Step 2: Create an app to access the Admin API on the Shopify Dev Dashboard and get an access token
 Set up an app at https://dev.shopify.com/dashboard/ with the following details:
 
 1. App name: "Statamic" or whatever other name you want to use.
-2. Redirect URL: https://www.yourwebsite.com (we don't need OAuth redirects)
+2. Redirect URL: https://www.yourwebsite.com (we don't use OAuth redirects, so only add a considered value for if you need it for another reason)
 3. Scopes: At a minimum we need: `write_customers, read_inventory, read_metaobjects, read_orders, read_product_listings, read_products, read_publications, read_translations`, however your site may need others.
 4. App URL: your website's URL
 
-Once the app is created, make a note of both the `Client ID` and the `Client Secret`. Then click "Install" and add it to your Shopify store.
+Once the app is created, add the `Client ID` to your .env as `SHOPIFY_CLIENT_ID` and the `Client Secret` as `SHOPIFY_CLIENT_SECRET`. Then click "Install" and add it to your Shopify store.
 
-Once the app is installed on your store, you can then run `php please shopify:install`. Enter the `Client ID` and `Client Secret` and select the scopes you want to enable. The command will negotiate an offline access token with no expiry for you to use with the Admin API, and will write it to your `.env` file under the `admin_token` key.
+This add-on will automatically negotiate a new Admin API token for you when you make GraphQL calls and handle expirations.
 
 ### Step 3. Shopfront redirection
 If you are not intending to use the Shopify storefront you should perform redirection from any Shopify URLs to your website. 
@@ -64,7 +64,8 @@ After completing steps 1 and 2 your .env should look as follows:
 SHOPIFY_APP_URL="your-store.myshopify.com"
 SHOPIFY_STOREFRONT_TOKEN="{Public access token}"
 SHOPIFY_SALES_CHANNEL="{Sales channel name}"
-SHOPIFY_ADMIN_TOKEN="{Admin API access token}"
+SHOPIFY_CLIENT_ID="{App Client ID}"
+SHOPIFY_CLIENT_SECRET="{App Client Secret}"
 ```
 
 You may also wish to add some of the option values defined in the ["Env Values"](/env) section.

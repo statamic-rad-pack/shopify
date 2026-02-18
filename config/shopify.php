@@ -13,19 +13,19 @@ return [
     'storefront_url' => env('SHOPIFY_STOREFRONT_URL'),
 
     /**
+     * Client ID
+     */
+    'client_id' => env('SHOPIFY_CLIENT_ID'),
+
+    /**
+     * Client Secret
+     */
+    'client_secret' => env('SHOPIFY_CLIENT_SECRET'),
+
+    /**
      * Front-end storefront token
      */
     'storefront_token' => env('SHOPIFY_STOREFRONT_TOKEN'),
-
-    /**
-     * Admin Access Token
-     */
-    'admin_token' => env('SHOPIFY_ADMIN_TOKEN'),
-
-    /**
-     * If using WebHooks make sure you have added the secret that they are signed with here
-     */
-    'webhook_secret' => env('SHOPIFY_WEBHOOK_SECRET'),
 
     /**
      * Whether the importer should overwrite the content stored.

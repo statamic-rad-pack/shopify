@@ -3,6 +3,8 @@
 namespace StatamicRadPack\Shopify;
 
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Shopify\Auth\FileSessionStorage;
 use Shopify\Clients\Graphql;
 use Shopify\Context;
@@ -186,8 +188,31 @@ class ServiceProvider extends AddonServiceProvider
         );
 
         $this->app->bind(Graphql::class, function ($app) {
-            return new Graphql(config('shopify.url'), config('shopify.admin_token'));
+            $cacheKey = 'shopify::admin-token';
+
+            if (! $token = Cache::get($cacheKey)) {
+                if ($token = $this->exchangeClientCredentialsForSecret()) {
+                    Cache::put($cacheKey, $token, 1400);
+                }
+            }
+
+            return new Graphql(config('shopify.url'), $token ?? 'none');
         });
+    }
+
+    private function exchangeClientCredentialsForSecret()
+    {
+        if (! config('shopify.client_id')) {
+            return '';
+        }
+
+        $response = Http::asForm()->post('https://'.config('shopify.url').'/admin/oauth/access_token', [
+            'grant_type' => 'client_credentials',
+            'client_id' => config('shopify.client_id'),
+            'client_secret' => config('shopify.client_secret'),
+        ]);
+
+        return $response->json('access_token');
     }
 
     private function publishAssets(): void
