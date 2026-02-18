@@ -72,7 +72,7 @@ SHOPIFY_CLIENT_SECRET="{App Client Secret}"
 SHOPIFY_WEBHOOK_SECRET="{Webhook Secret}"
 ```
 
-You may also wish to add some of the option values defined in the ["Env Values"](/env) section.
+You may also wish to add some of the optional values defined in the ["Env Values"](/env) section.
 
 ## Publishable Assets
 
