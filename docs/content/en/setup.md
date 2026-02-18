@@ -44,7 +44,7 @@ SHOPIFY_SALES_CHANNEL="{Sales channel name}"
 Set up an app at https://dev.shopify.com/dashboard/ with the following details:
 
 1. App name: "Statamic" or whatever other name you want to use.
-2. Redirect URL: https://www.yourwebsite.com (we don't use OAuth redirects, so only add a considered value for if you need it for another reason)
+2. Redirect URL: https://www.yourwebsite.com/!/shopify/oauth-redirect (as we don't use OAuth redirects this simply redirects to the Statamic admin)
 3. Scopes: At a minimum we need: `write_customers, read_inventory, read_metaobjects, read_orders, read_product_listings, read_products, read_publications, read_translations`, however your site may need others.
 4. App URL: your website's URL
 
