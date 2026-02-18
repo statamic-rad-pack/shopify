@@ -40,36 +40,39 @@ SHOPIFY_SALES_CHANNEL="{Sales channel name}"
 ```
 
 
-### Step 2: Create a private app for Admin API integration
-Set up a private app on Shopify for this add-on using the following steps:
+### Step 2: Create an app to access the Admin API on the Shopify Dev Dashboard and get an access token
+Set up an app at https://dev.shopify.com/dashboard/ with the following details:
 
-1. Visit the "Apps" section in your Shopify admin by clicking on the sidebar menu link, then in the modal that appears "App and sales channel settings".
-2. Click "Develop Apps" in the top right.
-3. Click "Create an app" in the top right to make a new one.
-4. Set a nice name to remember (eg "Statamic Admin") as well as your email.
-5. Click the "Configuration" Tab.
-    1. Click "Configure" next to Admin API Integration.
-    2. Enable `read_inventory`, `read_metaobjects`, `read_orders`, `read_products`, `read_product_listings`, `read_publications`, `read_translations` and `write_customers`
-    5. Click "Save" in the top right.
-6. Click the "API Credentials" tab. Add the `Admin API access token` to your `.env` as `SHOPIFY_ADMIN_TOKEN`.
-7. If you've configured the app properly you should see a button that says "Install App". Click this.
+1. App name: "Statamic" or whatever other name you want to use.
+2. Redirect URL: https://www.yourwebsite.com/!/shopify/oauth-redirect (as we don't use OAuth redirects this simply redirects to the Statamic admin)
+3. Scopes: At a minimum we need: `write_customers, read_inventory, read_metaobjects, read_orders, read_product_listings, read_products, read_publications, read_translations`, however your site may need others.
+4. App URL: your website's URL
+
+Once the app is created, add the `Client ID` to your .env as `SHOPIFY_CLIENT_ID` and the `Client Secret` as `SHOPIFY_CLIENT_SECRET`. Then click "Install" and add it to your Shopify store.
+
+This add-on will automatically negotiate a new Admin API token for you when you make GraphQL calls and handle expirations.
 
 ### Step 3. Shopfront redirection
 If you are not intending to use the Shopify storefront you should perform redirection from any Shopify URLs to your website. 
 
 We recommend installing Shopify's [Hydrogen Redirect Theme](https://github.com/Shopify/hydrogen-redirect-theme), and following their setup instructions. 
 
-### Step 4. Finalise your .env
-After completing steps 1 and 2 your .env should look as follows:
+### Step 4. Set up webhooks
+In order for the addon to receive updates from Shopify about your products and customers you need to set up webhooks. Full details can be found in  ["Webhooks"](/cms/webhooks) section.
+
+### Step 5. Finalise your .env
+After completing steps 1-4 your .env should look as follows:
 
 ```bash
 SHOPIFY_APP_URL="your-store.myshopify.com"
 SHOPIFY_STOREFRONT_TOKEN="{Public access token}"
 SHOPIFY_SALES_CHANNEL="{Sales channel name}"
-SHOPIFY_ADMIN_TOKEN="{Admin API access token}"
+SHOPIFY_CLIENT_ID="{App Client ID}"
+SHOPIFY_CLIENT_SECRET="{App Client Secret}"
+SHOPIFY_WEBHOOK_SECRET="{Webhook Secret}"
 ```
 
-You may also wish to add some of the option values defined in the ["Env Values"](/env) section.
+You may also wish to add some of the optional values defined in the ["Env Values"](/env) section.
 
 ## Publishable Assets
 
@@ -93,18 +96,6 @@ php artisan vendor:publish --provider="StatamicRadPack\Shopify\ServiceProvider"
 ### Granular Setup
 
 You can install each asset individually.
-
-#### Blueprints
-
-```bash
-php artisan vendor:publish --tag="shopify-blueprints"
-```
-
-#### Content
-
-```bash
-php artisan vendor:publish --tag="shopify-content"
-```
 
 #### Config
 
