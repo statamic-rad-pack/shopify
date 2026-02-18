@@ -28,6 +28,11 @@ return [
     'storefront_token' => env('SHOPIFY_STOREFRONT_TOKEN'),
 
     /**
+     * If using WebHooks make sure you have added the secret that they are signed with here
+     */
+    'webhook_secret' => env('SHOPIFY_WEBHOOK_SECRET'),
+
+    /**
      * Whether the importer should overwrite the content stored.
      */
     'overwrite' => [

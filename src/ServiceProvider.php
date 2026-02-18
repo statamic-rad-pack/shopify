@@ -192,7 +192,7 @@ class ServiceProvider extends AddonServiceProvider
             if (! $token = config('shopify.admin_token')) {
                 $cacheKey = 'shopify::admin_token';
 
-                if (!$token = Cache::get($cacheKey)) {
+                if (! $token = Cache::get($cacheKey)) {
                     if ($token = $this->exchangeClientCredentialsForSecret()) {
                         Cache::put($cacheKey, $token, 1400);
                     }

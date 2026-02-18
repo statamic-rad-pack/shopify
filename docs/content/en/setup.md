@@ -57,8 +57,11 @@ If you are not intending to use the Shopify storefront you should perform redire
 
 We recommend installing Shopify's [Hydrogen Redirect Theme](https://github.com/Shopify/hydrogen-redirect-theme), and following their setup instructions. 
 
-### Step 4. Finalise your .env
-After completing steps 1 and 2 your .env should look as follows:
+### Step 4. Set up webhooks
+In order for the addon to receive updates from Shopify about your products and customers you need to set up webhooks. Full details can be found in  ["Webhooks"](/cms/webhooks) section.
+
+### Step 5. Finalise your .env
+After completing steps 1-4 your .env should look as follows:
 
 ```bash
 SHOPIFY_APP_URL="your-store.myshopify.com"
@@ -66,6 +69,7 @@ SHOPIFY_STOREFRONT_TOKEN="{Public access token}"
 SHOPIFY_SALES_CHANNEL="{Sales channel name}"
 SHOPIFY_CLIENT_ID="{App Client ID}"
 SHOPIFY_CLIENT_SECRET="{App Client Secret}"
+SHOPIFY_WEBHOOK_SECRET="{Webhook Secret}"
 ```
 
 You may also wish to add some of the option values defined in the ["Env Values"](/env) section.
