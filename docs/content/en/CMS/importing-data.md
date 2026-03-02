@@ -40,12 +40,26 @@ Fetches all products and runs them through the updater.
 php artisan shopify:import:all
 ```
 
+In [multi-store mode](/CMS/multi-store) you can target a specific store with the `--store` option, or omit it to iterate all configured stores:
+
+```bash
+php artisan shopify:import:all --store=uk
+php artisan shopify:import:all --store=us
+php artisan shopify:import:all   # imports from all stores
+```
+
 #### Single Product
 
 Fetch a single product by their ID. You can find the ID from the `product_id` value stored on the content.
 
 ```bash
-php artisan shopify:import:single ID_HERE
+php artisan shopify:import:product ID_HERE
+```
+
+In multi-store mode you can specify the store the product belongs to:
+
+```bash
+php artisan shopify:import:product ID_HERE --store=uk
 ```
 
 ## Published state
