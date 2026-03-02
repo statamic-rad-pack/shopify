@@ -190,13 +190,15 @@ Pass the `store` param (using the country code) to any tag to use market-specifi
 {{ /shopify:variants }}
 ```
 
-The `tokens` tag in markets mode outputs the single store's URL and storefront token, with the market's `currency` value from config:
+The `tokens` tag in markets mode outputs the single store's URL and storefront token, with the market's `currency` value and a `market` key set to the country code:
 
 ```html
 <script>
-  window.shopifyConfig = { url: 'your-store.myshopify.com', token: '...', apiVersion: '2025-04', currency: '£' }
+  window.shopifyConfig = { url: 'your-store.myshopify.com', token: '...', apiVersion: '2025-04', currency: '£', market: 'GB' }
 </script>
 ```
+
+The bundled Alpine.js integration reads `window.shopifyConfig.market` to apply market-specific pricing and inventory in the `shopifyProduct` component. The active market can also be changed at runtime without a page reload — see [alpine.js markets mode](/frontend/storefront-api#markets-mode).
 
 ## Importing
 

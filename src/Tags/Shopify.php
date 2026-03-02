@@ -93,7 +93,7 @@ class Shopify extends Tags
             $currency = $marketConfig['currency'] ?? config('shopify.currency', '$');
 
             return "<script>
-window.shopifyConfig = { url: '{$url}', token: '{$token}', apiVersion: '{$apiVersion}', currency: '{$currency}' };
+window.shopifyConfig = { url: '{$url}', token: '{$token}', apiVersion: '{$apiVersion}', currency: '{$currency}', market: '{$store}' };
 </script>";
         }
 

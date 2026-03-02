@@ -5,6 +5,7 @@ const createStore = (Alpine) => {
         cartId: null,
         checkoutUrl: '',
         lineItems: [],
+        market: window.shopifyConfig?.market,
         note: '',
         subtotal: null,
 
@@ -14,6 +15,10 @@ const createStore = (Alpine) => {
             if (this.cartId) {
                 this.updateFromResponse(await getOrCreateCart(this.cartId));
             }
+
+            window.addEventListener('shopify.updateMarket', (event) => {
+                this.market = event.detail.market;
+            });
         },
 
         formatCurrency(amount) {
@@ -158,8 +163,19 @@ const createData = (Alpine) => {
             this.selected[index] = value;
         },
 
+        getMarketData(variant) {
+            if (! this.market || !variant.market_data) return null;
+            return variant.market_data[this.market] ?? null;
+        },
+
+        getVariantPrice(variant) {
+            return this.getMarketData(variant)?.price ?? variant.price;
+        },
+
         outOfStock(variant) {
-            return variant.inventory_policy && (variant.inventory_policy.toLowerCase() == 'deny') && (variant.inventory_quantity <= 0);
+            const marketData = this.getMarketData(variant);
+            const qty = marketData ? marketData.inventory_quantity : variant.inventory_quantity;
+            return variant.inventory_policy && (variant.inventory_policy.toLowerCase() == 'deny') && (qty <= 0);
         },
 
         variantExistsAndIsInStock() {

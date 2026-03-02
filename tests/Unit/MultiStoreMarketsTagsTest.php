@@ -49,7 +49,7 @@ class MultiStoreMarketsTagsTest extends TestCase
     }
 
     #[Test]
-    public function tokens_returns_currency_for_market()
+    public function tokens_returns_currency_and_market_for_market()
     {
         config()->set('shopify.multi_store', $this->marketsConfig());
         config()->set('shopify.url', 'single-store.myshopify.com');
@@ -58,6 +58,7 @@ class MultiStoreMarketsTagsTest extends TestCase
         $output = str_replace(["\r", "\n"], '', $this->tag('{{ shopify:tokens store="GB" }}'));
 
         $this->assertStringContainsString("currency: '£'", $output);
+        $this->assertStringContainsString("market: 'GB'", $output);
         $this->assertStringContainsString("url: 'single-store.myshopify.com'", $output);
         $this->assertStringContainsString("token: 'single-token'", $output);
     }
