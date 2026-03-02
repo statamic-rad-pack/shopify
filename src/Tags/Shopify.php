@@ -85,6 +85,18 @@ class Shopify extends Tags
     {
         $store = $this->params->get('store');
 
+        if ($store && StoreConfig::isMarketsMode()) {
+            $marketConfig = StoreConfig::getMarket($store) ?? [];
+            $url = config('shopify.storefront_url') ?? config('shopify.url');
+            $token = config('shopify.storefront_token');
+            $apiVersion = config('shopify.api_version');
+            $currency = $marketConfig['currency'] ?? config('shopify.currency', '$');
+
+            return "<script>
+window.shopifyConfig = { url: '{$url}', token: '{$token}', apiVersion: '{$apiVersion}', currency: '{$currency}' };
+</script>";
+        }
+
         if ($store && StoreConfig::isMultiStore()) {
             $storeConfig = StoreConfig::findByHandle($store) ?? [];
             $url = $storeConfig['storefront_url'] ?? $storeConfig['url'] ?? config('shopify.url');
@@ -294,11 +306,24 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     }
 
     /**
-     * Override variant pricing/stock fields with store-specific data from multi_store_data.
-     * Only applies in unified multi-store mode.
+     * Override variant pricing/stock fields with store-specific data.
+     * In markets mode, reads from market_data.{store}.
+     * In unified multi-store mode, reads from multi_store_data.{store}.
      */
     protected function applyStoreData($variants, string $store)
     {
+        if (StoreConfig::isMarketsMode()) {
+            return $variants->map(function ($variant) use ($store) {
+                $marketData = Arr::get($variant, 'market_data.'.$store, null);
+
+                if ($marketData) {
+                    $variant = array_merge($variant, array_filter($marketData, fn ($v) => ! is_null($v)));
+                }
+
+                return $variant;
+            });
+        }
+
         if (! StoreConfig::isMultiStore() || StoreConfig::getMode() !== 'unified') {
             return $variants;
         }

@@ -7,16 +7,24 @@ use Statamic\Console\RunsInPlease;
 use Statamic\Facades\Collection;
 use Statamic\Support\Arr;
 
-class ShopifyUnifiedMultiStoreEnable extends Command
+class ShopifyMultistoreEnable extends Command
 {
     use RunsInPlease;
 
-    protected $signature = 'shopify:unified-multi-store:enable';
+    protected $signature = 'shopify:multistore:enable {--mode= : The multi-store mode to enable (unified or markets). Defaults to the value in config.}';
 
-    protected $description = 'Adds the multi_store_data field to the variants blueprint for unified multi-store mode';
+    protected $description = 'Adds the appropriate multi-store field to the variants blueprint';
 
     public function handle()
     {
+        $mode = $this->option('mode') ?? config('shopify.multi_store.mode', 'unified');
+
+        if (! in_array($mode, ['unified', 'markets'])) {
+            $this->error("Unknown mode \"{$mode}\". Valid values are: unified, markets.");
+
+            return;
+        }
+
         if (! $variantCollection = Collection::find('variants')) {
             $this->error('Variants collection not found.');
 
@@ -29,21 +37,25 @@ class ShopifyUnifiedMultiStoreEnable extends Command
             return;
         }
 
+        [$fieldHandle, $displayName] = $mode === 'markets'
+            ? ['market_data', 'Market Pricing']
+            : ['multi_store_data', 'Multi-Store Pricing'];
+
         $currentContents = $blueprint->contents();
         $currentFields = Arr::get($currentContents, 'tabs.main.sections.0.fields', []);
 
-        $exists = collect($currentFields)->contains(fn ($field) => ($field['handle'] ?? null) === 'multi_store_data');
+        $exists = collect($currentFields)->contains(fn ($field) => ($field['handle'] ?? null) === $fieldHandle);
 
         if ($exists) {
-            $this->info('multi_store_data field already exists in the variants blueprint.');
+            $this->info("{$fieldHandle} field already exists in the variants blueprint.");
 
             return;
         }
 
         $currentFields[] = [
-            'handle' => 'multi_store_data',
+            'handle' => $fieldHandle,
             'field' => [
-                'display' => 'Multi-Store Pricing',
+                'display' => $displayName,
                 'type' => 'array',
                 'icon' => 'array',
                 'listable' => 'hidden',
@@ -56,6 +68,6 @@ class ShopifyUnifiedMultiStoreEnable extends Command
         $blueprint->setContents($currentContents);
         $blueprint->save();
 
-        $this->info('multi_store_data field has been added to the variants blueprint.');
+        $this->info("{$fieldHandle} field has been added to the variants blueprint.");
     }
 }

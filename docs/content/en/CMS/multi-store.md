@@ -4,12 +4,13 @@ category: CMS
 position: 9
 ---
 
-The addon supports running **multiple Shopify stores** from a single Statamic installation. A common use case is running separate stores per region or currency (e.g. a UK store in GBP and a US store in USD).
+The addon supports running **multiple Shopify stores** from a single Statamic installation, or leveraging **Shopify Markets** to serve territory-specific pricing from a single store.
 
-There are two modes:
+There are three modes:
 
 - **Unified** – all stores share one set of product and variant entries. Store-specific pricing and stock is stored in a `multi_store_data` field on each variant; the primary store's values are also kept at the top level so existing templates continue to work.
 - **Localized** – each store maps to a Statamic site. Products and variants are fully independent per site, without Shopify's built-in translation system.
+- **Markets** – a single Shopify store serves multiple territories via [Shopify Markets](https://help.shopify.com/en/manual/markets). Territory-specific pricing (via the `contextualPricing` GraphQL API) and inventory is stored in a `market_data` field on each variant, keyed by country code.
 
 ## Enabling Multi-Store
 
@@ -17,7 +18,7 @@ Add the following to your `.env`:
 
 ```bash
 SHOPIFY_MULTI_STORE_ENABLED=true
-SHOPIFY_MULTI_STORE_MODE=unified   # or 'localized'
+SHOPIFY_MULTI_STORE_MODE=unified   # or 'localized' or 'markets'
 SHOPIFY_MULTI_STORE_PRIMARY=uk     # handle of the store whose data populates top-level fields (unified mode only)
 ```
 
@@ -87,13 +88,19 @@ The primary store's values are always written to the top-level fields (`price`, 
 After switching on unified multi-store mode, run the following command to add the `multi_store_data` field to the variants blueprint:
 
 ```bash
-php artisan shopify:unified-multi-store:enable
+php artisan shopify:multistore:enable
+```
+
+The command reads `multi_store.mode` from your config automatically. You can also be explicit:
+
+```bash
+php artisan shopify:multistore:enable --mode=unified
 ```
 
 To remove the field:
 
 ```bash
-php artisan shopify:unified-multi-store:disable
+php artisan shopify:multistore:disable
 ```
 
 ## Localized Mode
@@ -101,6 +108,95 @@ php artisan shopify:unified-multi-store:disable
 In localized mode each store maps to a Statamic site. The `site` key in each store's config specifies which Statamic site handle to use. Products and variants are imported into that site's entries independently; no `multi_store_data` field is used.
 
 This mode is an alternative to using Shopify's translation system (see [Multisite](/CMS/multisite)). When importing via a store handle, the built-in Shopify translation-fetching loop is skipped because each store is itself the authoritative source for its locale.
+
+## Markets Mode
+
+Markets mode is for a **single Shopify store** that uses [Shopify Markets](https://help.shopify.com/en/manual/markets) to serve different pricing and availability by territory. No separate store credentials are needed — the existing single-store API connection is used.
+
+### Configuration
+
+Set `mode` to `markets` and list each market country code under `multi_store.markets` in `config/shopify.php`:
+
+```php
+'multi_store' => [
+    'enabled' => true,
+    'mode' => 'markets',
+    'markets' => [
+        'GB' => ['currency' => '£'],
+        'IE' => ['currency' => '€'],
+        'US' => ['currency' => '$'],
+    ],
+],
+```
+
+The country codes must match [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) codes as expected by the Shopify `contextualPricing` GraphQL API.
+
+### Enabling the variant blueprint field
+
+Run the following command to add the `market_data` field to the variants blueprint:
+
+```bash
+php artisan shopify:multistore:enable
+```
+
+The command reads `multi_store.mode` from your config automatically. You can also be explicit:
+
+```bash
+php artisan shopify:multistore:enable --mode=markets
+```
+
+To remove the field:
+
+```bash
+php artisan shopify:multistore:disable
+```
+
+### How data is stored
+
+After importing, each variant entry will have a `market_data` field keyed by country code:
+
+```yaml
+# variant entry data
+price: '23.00'          # standard Shopify variant price (unchanged)
+inventory_quantity: 15  # standard Shopify inventory (unchanged)
+market_data:
+  GB:
+    price: '9.99'
+    compare_at_price: null
+    inventory_quantity: 10
+  IE:
+    price: '12.99'
+    compare_at_price: null
+    inventory_quantity: 5
+  US:
+    price: '11.99'
+    compare_at_price: null
+    inventory_quantity: 8
+```
+
+The top-level `price` and `inventory_quantity` fields are always written from the standard Shopify variant data and are not affected by markets mode. `market_data` inventory quantities are aggregated across all warehouse locations in that country.
+
+### Frontend tags
+
+Pass the `store` param (using the country code) to any tag to use market-specific data:
+
+```twig
+{{ shopify:product_price store="GB" }}
+{{ shopify:in_stock store="IE" }}
+{{ shopify:tokens store="US" }}
+
+{{ shopify:variants store="GB" }}
+    {{ price }} {{# resolves to market_data.GB.price #}}
+{{ /shopify:variants }}
+```
+
+The `tokens` tag in markets mode outputs the single store's URL and storefront token, with the market's `currency` value from config:
+
+```html
+<script>
+  window.shopifyConfig = { url: 'your-store.myshopify.com', token: '...', apiVersion: '2025-04', currency: '£' }
+</script>
+```
 
 ## Importing
 
@@ -185,14 +281,20 @@ This outputs a `window.shopifyConfig` object including a `currency` key sourced 
 {{ shopify:in_stock store="us" }}
 ```
 
-In unified mode these read pricing and stock from `multi_store_data.{store}` on each variant. Without a `store` param the top-level fields (set from the primary store) are used, so existing templates are unaffected.
+In unified mode these read pricing and stock from `multi_store_data.{store}` on each variant. In markets mode they read from `market_data.{countryCode}`. Without a `store` param the top-level fields are used, so existing templates are unaffected in both modes.
 
 ### Variants
 
 ```twig
+{{# Unified mode #}}
 {{ shopify:variants store="uk" }}
     {{ price }} {{# resolves to multi_store_data.uk.price #}}
 {{ /shopify:variants }}
+
+{{# Markets mode #}}
+{{ shopify:variants store="GB" }}
+    {{ price }} {{# resolves to market_data.GB.price #}}
+{{ /shopify:variants }}
 ```
 
-The `price`, `compare_at_price`, `inventory_quantity`, and `inventory_policy` values are automatically overridden from `multi_store_data.{store}` when a store param is given. You can also access raw store data directly as `{{ variant.multi_store_data.uk.price }}`.
+The `price`, `compare_at_price`, and `inventory_quantity` values are automatically overridden from the appropriate store or market data when a `store` param is given.
