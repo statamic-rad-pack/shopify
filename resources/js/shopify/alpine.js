@@ -17,7 +17,8 @@ const createStore = (Alpine) => {
         },
 
         formatCurrency(amount) {
-            return '$' + parseFloat(amount).toFixed(2);
+            const currency = (window.shopifyConfig && window.shopifyConfig.currency) || '$';
+            return currency + parseFloat(amount).toFixed(2);
         },
 
         getItems() {

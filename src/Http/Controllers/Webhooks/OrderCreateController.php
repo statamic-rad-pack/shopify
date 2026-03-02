@@ -14,13 +14,16 @@ class OrderCreateController extends WebhooksController
         // Decode data
         $data = json_decode($request->getContent());
 
+        $storeHandle = $request->attributes->get('shopify_store_handle');
+
         foreach ($data->line_items as $item) {
             ImportSingleProductJob::dispatch(
                 $item->product_id,
                 [
                     'quantity' => [$item->sku => $item->quantity ?? 1],
                     'date' => Carbon::parse($data->created_at),
-                ]
+                ],
+                $storeHandle
             );
         }
 

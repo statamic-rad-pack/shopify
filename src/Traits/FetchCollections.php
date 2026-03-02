@@ -10,18 +10,20 @@ trait FetchCollections
 {
     private int $loopCollectionsPaginationCount = 100;
 
-    public function getManualCollections()
+    public function getManualCollections(?Graphql $client = null)
     {
-        return $this->loopCollections('custom');
+        return $this->loopCollections('custom', $client);
     }
 
-    public function getSmartCollections()
+    public function getSmartCollections(?Graphql $client = null)
     {
-        return $this->loopCollections('smart');
+        return $this->loopCollections('smart', $client);
     }
 
-    private function loopCollections($resource)
+    private function loopCollections($resource, ?Graphql $client = null)
     {
+        $client = $client ?? app(Graphql::class);
+
         $items = [];
 
         $query = <<<QUERY
@@ -41,7 +43,7 @@ trait FetchCollections
         $data = [];
 
         do {
-            $response = app(Graphql::class)->query([
+            $response = $client->query([
                 'query' => $query,
                 'variables' => [
                     'numItems' => $this->loopCollectionsPaginationCount,

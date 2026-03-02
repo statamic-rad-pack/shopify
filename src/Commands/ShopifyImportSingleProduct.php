@@ -10,7 +10,7 @@ class ShopifyImportSingleProduct extends Command
 {
     use RunsInPlease;
 
-    protected $signature = 'shopify:import:product {productId}';
+    protected $signature = 'shopify:import:product {productId} {--store= : The handle of the store to import from}';
 
     protected $description = 'Imports a single products data from Shopify to Statamic';
 
@@ -21,7 +21,7 @@ class ShopifyImportSingleProduct extends Command
         $this->info('================================================================');
 
         // Pass to import Job.
-        ImportSingleProductJob::dispatch($this->argument('productId'));
+        ImportSingleProductJob::dispatch($this->argument('productId'), [], $this->option('store'));
 
         $this->info('Product has been dispatched for import');
     }

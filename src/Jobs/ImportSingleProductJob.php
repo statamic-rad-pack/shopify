@@ -14,6 +14,7 @@ use Statamic\Facades\Site;
 use Statamic\Facades\Term;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use StatamicRadPack\Shopify\Support\StoreConfig;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
 
 class ImportSingleProductJob implements ShouldQueue
@@ -25,8 +26,11 @@ class ImportSingleProductJob implements ShouldQueue
 
     public $data = [];
 
-    public function __construct(public int $productId, public ?array $orderData = [])
-    {
+    public function __construct(
+        public int $productId,
+        public ?array $orderData = [],
+        public ?string $storeHandle = null,
+    ) {
         if ($queue = config('shopify.queue')) {
             $this->onQueue($queue);
         }
@@ -34,6 +38,8 @@ class ImportSingleProductJob implements ShouldQueue
 
     public function handle()
     {
+        $graphql = $this->resolveGraphqlClient();
+
         $query = <<<QUERY
         {
           product(id: "gid://shopify/Product/{$this->productId}") {
@@ -149,7 +155,7 @@ class ImportSingleProductJob implements ShouldQueue
         }
         QUERY;
 
-        $response = app(Graphql::class)->query(['query' => $query]);
+        $response = $graphql->query(['query' => $query]);
 
         if (! $this->data = Arr::get($response->getDecodedBody(), 'data.product', [])) {
             return;
@@ -157,9 +163,11 @@ class ImportSingleProductJob implements ShouldQueue
 
         $this->data['id'] = Str::afterLast($this->data['id'], '/');
 
+        $productSite = $this->resolveSite();
+
         $entry = Entry::query()
             ->where('collection', config('shopify.collection_handle', 'products'))
-            ->where('site', Site::default()->handle())
+            ->where('site', $productSite)
             ->where('product_id', $this->data['id'])
             ->first();
 
@@ -198,14 +206,14 @@ class ImportSingleProductJob implements ShouldQueue
         if (! $entry) {
             $entry = Entry::make()
                 ->collection(config('shopify.collection_handle', 'products'))
-                ->locale(Site::default()->handle());
+                ->locale($productSite);
         }
 
         // Update slug in case it has changed
         $entry->slug($this->data['handle']);
 
         // Import Variant
-        $this->importVariants($this->data['variants'], $this->data['handle']);
+        $this->importVariants($this->data['variants'], $this->data['handle'], $graphql);
 
         // Import Images
         foreach (Arr::get($this->data, 'media.edges', []) as $index => $edge) {
@@ -323,11 +331,17 @@ class ImportSingleProductJob implements ShouldQueue
         $entry->published($published);
         $entry->save();
 
+        // Skip multi-site translation loop when handling a multi-store job
+        // (localized mode uses one store per site; unified mode keeps a single shared entry)
+        if ($this->storeHandle) {
+            return;
+        }
+
         // if we are multisite, get translations
         if (Site::hasMultiple()) {
             $collectionSites = $entry->collection()->sites();
 
-            Site::all()->each(function ($site) use ($collectionSites, $entry) {
+            Site::all()->each(function ($site) use ($collectionSites, $entry, $graphql) {
                 if (Site::default()->handle() == $site->handle()) {
                     return;
                 }
@@ -348,7 +362,7 @@ class ImportSingleProductJob implements ShouldQueue
                   }
                 QUERY;
 
-                $response = app(Graphql::class)->query(['query' => $query]);
+                $response = $graphql->query(['query' => $query]);
 
                 $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
 
@@ -368,6 +382,38 @@ class ImportSingleProductJob implements ShouldQueue
                 }
             });
         }
+    }
+
+    /**
+     * Resolve the Graphql client for this job.
+     * In multi-store mode, uses the store-specific client.
+     */
+    private function resolveGraphqlClient(): Graphql
+    {
+        if ($this->storeHandle && StoreConfig::isMultiStore()) {
+            $storeConfig = StoreConfig::findByHandle($this->storeHandle);
+
+            if ($storeConfig) {
+                return StoreConfig::makeGraphqlClient($storeConfig);
+            }
+        }
+
+        return app(Graphql::class);
+    }
+
+    /**
+     * Determine the Statamic site handle to use for this import.
+     * In localized multi-store mode, maps the store handle to a site.
+     */
+    private function resolveSite(): string
+    {
+        if ($this->storeHandle && StoreConfig::isMultiStore() && StoreConfig::getMode() === 'localized') {
+            $storeConfig = StoreConfig::findByHandle($this->storeHandle);
+
+            return $storeConfig['site'] ?? Site::default()->handle();
+        }
+
+        return Site::default()->handle();
     }
 
     private function importTaxonomy(array $tags, string $taxonomyHandle)
@@ -402,7 +448,7 @@ class ImportSingleProductJob implements ShouldQueue
         return $tags->keys()->toArray();
     }
 
-    private function importVariants(array $returnedVariants, string $product_slug)
+    private function importVariants(array $returnedVariants, string $product_slug, Graphql $graphql)
     {
         $variants = [];
         foreach ($returnedVariants['edges'] as $variant) {
@@ -414,17 +460,19 @@ class ImportSingleProductJob implements ShouldQueue
 
         $this->removeOldVariants($variants, $product_slug);
 
+        $variantSite = $this->resolveSite();
+
         foreach ($variants as $variant) {
             $entry = Entry::query()
                 ->where('collection', 'variants')
                 ->where('slug', $variant['id'])
-                ->where('site', Site::default()->handle())
+                ->where('site', $variantSite)
                 ->first();
 
             if (! $entry) {
                 $entry = Entry::make()
                     ->collection('variants')
-                    ->locale(Site::default()->handle())
+                    ->locale($variantSite)
                     ->slug($variant['id']);
             }
 
@@ -442,6 +490,25 @@ class ImportSingleProductJob implements ShouldQueue
                 'weight' => Arr::get($variant, 'inventoryItem.measurement.weight', null), // blueprint update: was grams, this has unit and value now
                 'requires_shipping' => Arr::get($variant, 'inventoryItem.requiresShipping', null),
             ], collect($variant['selectedOptions'] ?? [])->mapWithKeys(fn ($opt, $index) => ['option'.($index + 1) => $opt['value']])->all());  // blueprint update: what if there are more than 3?
+
+            // Unified multi-store mode: write store-specific pricing to multi_store_data
+            if ($this->storeHandle && StoreConfig::isMultiStore() && StoreConfig::getMode() === 'unified') {
+                $storeData = [
+                    'price' => $variant['price'],
+                    'compare_at_price' => $variant['compareAtPrice'],
+                    'inventory_quantity' => $variant['inventoryQuantity'] ?? null,
+                    'inventory_policy' => $variant['inventoryPolicy'] ?? null,
+                ];
+
+                $existingMultiStoreData = $entry->get('multi_store_data', []);
+                $existingMultiStoreData[$this->storeHandle] = $storeData;
+                $data['multi_store_data'] = $existingMultiStoreData;
+
+                // For non-primary stores, do not overwrite the top-level pricing fields
+                if (! StoreConfig::isPrimaryStore($this->storeHandle)) {
+                    unset($data['price'], $data['compare_at_price'], $data['inventory_quantity'], $data['inventory_policy']);
+                }
+            }
 
             foreach (Arr::get($variant, 'media.edges', []) as $index => $edge) {
                 if (! $image = Arr::get($edge, 'node.image', [])) {
@@ -479,11 +546,16 @@ class ImportSingleProductJob implements ShouldQueue
 
             $entry->save();
 
+            // Skip multi-site translation loop when handling a multi-store job
+            if ($this->storeHandle) {
+                continue;
+            }
+
             // if we are multisite, get translations
             if (Site::hasMultiple()) {
                 $collectionSites = $entry->collection()->sites();
 
-                Site::all()->each(function ($site) use ($collectionSites, $entry, $variant) {
+                Site::all()->each(function ($site) use ($collectionSites, $entry, $variant, $graphql) {
                     if (Site::default()->handle() == $site->handle()) {
                         return;
                     }
@@ -504,7 +576,7 @@ class ImportSingleProductJob implements ShouldQueue
                       }
                     QUERY;
 
-                    $response = app(Graphql::class)->query(['query' => $query]);
+                    $response = $graphql->query(['query' => $query]);
 
                     $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
 

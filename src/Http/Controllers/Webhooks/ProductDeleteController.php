@@ -5,6 +5,7 @@ namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 use Illuminate\Http\Request;
 use Statamic\Facades\Entry;
 use StatamicRadPack\Shopify\Events;
+use StatamicRadPack\Shopify\Support\StoreConfig;
 
 class ProductDeleteController extends WebhooksController
 {
@@ -19,10 +20,24 @@ class ProductDeleteController extends WebhooksController
 
         Events\ProductDelete::dispatch($data);
 
-        $productEntry = Entry::query()
-            ->where('collection', config('shopify.collection_handle', 'products'))
-            ->where('product_id', $data->id)
-            ->first();
+        $storeHandle = $request->attributes->get('shopify_store_handle');
+
+        // In localized multi-store mode, scope deletion to the mapped site
+        if ($storeHandle && StoreConfig::isMultiStore() && StoreConfig::getMode() === 'localized') {
+            $storeConfig = StoreConfig::findByHandle($storeHandle);
+            $site = $storeConfig['site'] ?? null;
+
+            $productEntry = Entry::query()
+                ->where('collection', config('shopify.collection_handle', 'products'))
+                ->where('product_id', $data->id)
+                ->where('site', $site)
+                ->first();
+        } else {
+            $productEntry = Entry::query()
+                ->where('collection', config('shopify.collection_handle', 'products'))
+                ->where('product_id', $data->id)
+                ->first();
+        }
 
         if ($productEntry && $productEntry->slug()) {
             $entry = Entry::query()

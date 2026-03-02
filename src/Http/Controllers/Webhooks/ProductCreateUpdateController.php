@@ -23,8 +23,8 @@ class ProductCreateUpdateController extends WebhooksController
     {
         $data = json_decode($request->getContent());
 
-        // Dispatch job
-        ImportSingleProductJob::dispatch($data->id);
+        // Dispatch job, passing the resolved store handle (null in single-store mode)
+        ImportSingleProductJob::dispatch($data->id, [], $request->attributes->get('shopify_store_handle'));
 
         $eventCallback($data);
 
