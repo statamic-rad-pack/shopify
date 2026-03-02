@@ -11,6 +11,7 @@ use Statamic\Facades\Site;
 use Statamic\Facades\Term;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use StatamicRadPack\Shopify\Support\StoreConfig;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
 
 class ImportCollectionJob implements ShouldQueue
@@ -22,7 +23,7 @@ class ImportCollectionJob implements ShouldQueue
 
     private array $collection = [];
 
-    public function __construct(public int $collectionId)
+    public function __construct(public int $collectionId, public ?string $storeHandle = null)
     {
         if ($queue = config('shopify.queue')) {
             $this->onQueue($queue);
@@ -31,6 +32,8 @@ class ImportCollectionJob implements ShouldQueue
 
     public function handle()
     {
+        $graphql = $this->resolveGraphqlClient();
+
         $query = <<<QUERY
             {
               collection(id: "gid://shopify/Collection/{$this->collectionId}") {
@@ -55,7 +58,7 @@ class ImportCollectionJob implements ShouldQueue
             }
             QUERY;
 
-        $response = app(Graphql::class)->query(['query' => $query]);
+        $response = $graphql->query(['query' => $query]);
 
         if (! $this->collection = Arr::get($response->getDecodedBody(), 'data.collection', [])) {
             return;
@@ -95,8 +98,8 @@ class ImportCollectionJob implements ShouldQueue
             }
         }
 
-        // if we are multisite, get translations
-        if (Site::hasMultiple()) {
+        // Skip multi-site translation loop when handling a multi-store job
+        if (! $this->storeHandle && Site::hasMultiple()) {
             $taxonomySites = $term->taxonomy()->sites();
 
             Site::all()->each(function ($site) use ($taxonomySites, $term) {
@@ -133,5 +136,22 @@ class ImportCollectionJob implements ShouldQueue
         }
 
         $term->merge($data)->save();
+    }
+
+    /**
+     * Resolve the Graphql client for this job.
+     * In multi-store mode, uses the store-specific client.
+     */
+    private function resolveGraphqlClient(): Graphql
+    {
+        if ($this->storeHandle && StoreConfig::isMultiStore()) {
+            $storeConfig = StoreConfig::findByHandle($this->storeHandle);
+
+            if ($storeConfig) {
+                return StoreConfig::makeGraphqlClient($storeConfig);
+            }
+        }
+
+        return app(Graphql::class);
     }
 }
