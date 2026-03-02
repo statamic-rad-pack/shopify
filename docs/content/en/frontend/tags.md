@@ -27,7 +27,7 @@ Allows you to output your Site URL and Storefront Token to the front end and bin
 
 #### Multi-Store
 
-In [multi-store mode](/CMS/multi-store) pass the `store` param to output that store's credentials. A `currency` key is also included, sourced from the store's config:
+In [unified or localized multi-store mode](/CMS/multi-store) pass the `store` param to output that store's credentials. A `currency` key is also included, sourced from the store's config:
 
 ```twig
 {{ shopify:tokens store="uk" }}
@@ -36,6 +36,20 @@ In [multi-store mode](/CMS/multi-store) pass the `store` param to output that st
 ```html
 <script>
   window.shopifyConfig = { url: 'uk-store.myshopify.com', token: 'uk-storefront-token', apiVersion: '2025-04', currency: '£' }
+</script>
+```
+
+#### Markets Mode
+
+In [markets mode](/CMS/multi-store#markets-mode) pass a country code as the `store` param. The single store's URL and storefront token are used, but the `currency` is sourced from the matching market's config:
+
+```twig
+{{ shopify:tokens store="GB" }}
+```
+
+```html
+<script>
+  window.shopifyConfig = { url: 'your-store.myshopify.com', token: 'storefront-token', apiVersion: '2025-04', currency: '£' }
 </script>
 ```
 

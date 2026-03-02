@@ -146,10 +146,18 @@ return [
      * mode: 'unified'   – all stores share one set of product/variant entries;
      *                     store-specific pricing/stock is stored under multi_store_data.
      * mode: 'localized' – each store maps to a Statamic site handle; variants are per-site.
+     * mode: 'markets'   – single store with territory-specific pricing via Shopify Markets
+     *                     (contextualPricing); market data stored under market_data keyed by country code.
      */
     'multi_store' => [
         'enabled' => env('SHOPIFY_MULTI_STORE_ENABLED', false),
-        'mode' => env('SHOPIFY_MULTI_STORE_MODE', 'unified'), // 'unified' or 'localized'
+        'mode' => env('SHOPIFY_MULTI_STORE_MODE', 'unified'), // 'unified' | 'localized' | 'markets'
+        'markets' => [
+            // Country-code keys used in 'markets' mode.
+            // 'GB' => ['currency' => '£'],
+            // 'IE' => ['currency' => '€'],
+            // 'US' => ['currency' => '$'],
+        ],
         'primary_store' => env('SHOPIFY_MULTI_STORE_PRIMARY'), // handle of the primary store
         'stores' => [
             // Each key is the store handle used throughout the system.
