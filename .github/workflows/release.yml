@@ -1,67 +1,54 @@
-name: Release
+name: Bundle Release Assets
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  release:
+    types:
+      - released
+      - prereleased
 
 jobs:
-  get_draft_release:
-    runs-on: ubuntu-latest
-    outputs:
-      release_body: ${{ steps.latest_draft_release.outputs.body }}
-      release_id: ${{ steps.latest_draft_release.outputs.id }}
-      release_tag: ${{ steps.latest_draft_release.outputs.tag_name }}
-      release_upload_url: ${{ steps.latest_draft_release.outputs.upload_url }}
-    steps:
-      - name: Get Draft Release
-        uses: cardinalby/git-get-release-action@v1
-        id: latest_draft_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          draft: true
-          latest: true
-
-  upload_assets:
-    needs: get_draft_release
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Install dependencies
-        run: npm install
-      - name: Compile assets
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          tools: composer:v2
+
+      - name: Use Node.js 23.3.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23.3.0
+
+      - name: Install composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Install node dependencies
+        run: npm ci
+
+      - name: Build release assets
         run: npm run build
+
       - name: Create zip
         run: tar -czvf dist.tar.gz dist
-      - name: Upload zip to release
-        uses: actions/upload-release-asset@v1
+
+      - name: Get release
+        id: get_release
+        uses: cardinalby/git-get-release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload dist zip to release
+        uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ needs.get_draft_release.outputs.release_upload_url }}
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
           asset_path: ./dist.tar.gz
           asset_name: dist.tar.gz
           asset_content_type: application/tar+gz
-
-  release:
-    runs-on: ubuntu-latest
-    needs: get_draft_release
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Update Changelog
-        id: update_changelog
-        uses: stefanzweifel/changelog-updater-action@v1
-        with:
-          latest-version: ${{ needs.get_draft_release.outputs.release_tag }}
-          release-notes: ${{ needs.get_draft_release.outputs.release_body }}
-      - name: Commit updated CHANGELOG
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          branch: main
-          commit_message: Update CHANGELOG
-          file_pattern: CHANGELOG.md
-      - uses: eregon/publish-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          release_id: ${{ needs.get_draft_release.outputs.release_id }}

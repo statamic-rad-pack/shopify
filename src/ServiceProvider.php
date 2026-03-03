@@ -15,8 +15,6 @@ use Statamic\Statamic;
 
 class ServiceProvider extends AddonServiceProvider
 {
-    protected $publishAfterInstall = false;
-
     protected $commands = [
         Commands\ShopifyImportProducts::class,
         Commands\ShopifyImportSingleProduct::class,
@@ -42,10 +40,6 @@ class ServiceProvider extends AddonServiceProvider
     protected $scopes = [
         Scopes\VariantByProduct::class,
         Scopes\VariantIsOnSale::class,
-    ];
-
-    protected $scripts = [
-        __DIR__.'/../dist/js/statamic-shopify-cp.js',
     ];
 
     protected $tags = [
@@ -220,7 +214,6 @@ class ServiceProvider extends AddonServiceProvider
     {
         Statamic::afterInstalled(function () {
             Artisan::call('vendor:publish --tag=shopify-config');
-            Artisan::call('vendor:publish --tag=shopify-resources --force');
 
             static::installCollectionsTaxonomiesAssetsAndBlueprints();
         });
