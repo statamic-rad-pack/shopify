@@ -25,6 +25,8 @@ Route::name('shopify.')
         Route::get('variants/{product}', [VariantsController::class, 'fetch'])
             ->name('variants.fetch');
 
+        Route::get('oauth-redirect', fn () => redirect()->route('statamic.cp.shopify.index'));
+
         Route::prefix('webhook')
             ->withoutMiddleware(['App\Http\Middleware\VerifyCsrfToken', 'Illuminate\Foundation\Http\Middleware\VerifyCsrfToken'])
             ->middleware([VerifyShopifyHeaders::class])
