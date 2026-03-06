@@ -27,7 +27,13 @@ trait SavesImagesAndMetafields
             ->where('path', Str::replaceStart(config('shopify.asset.path').'/', '/', '').$name)
             ->first();
 
+        $altText = $image['altText'] ?? null;
+
         if ($asset) {
+            if ($altText && $asset->get('alt') !== $altText) {
+                $asset->set('alt', $altText)->save();
+            }
+
             return $asset;
         }
 
@@ -38,7 +44,13 @@ trait SavesImagesAndMetafields
             ->container(config('shopify.asset.container'))
             ->path($this->getPath($file));
 
-        $asset->upload($file)->save();
+        $asset = $asset->upload($file);
+
+        if ($altText) {
+            $asset->set('alt', $altText);
+        }
+
+        $asset->save();
 
         $this->cleanupFakeFile($name);
 

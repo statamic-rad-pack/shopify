@@ -8,6 +8,8 @@ use Statamic\Support\Str;
 
 trait FetchCollections
 {
+    use ThrottlesShopifyRequests;
+
     private int $loopCollectionsPaginationCount = 100;
 
     public function getManualCollections(?Graphql $client = null)
@@ -43,7 +45,7 @@ trait FetchCollections
         $data = [];
 
         do {
-            $response = $client->query([
+            $response = $this->queryWithThrottle($client, [
                 'query' => $query,
                 'variables' => [
                     'numItems' => $this->loopCollectionsPaginationCount,

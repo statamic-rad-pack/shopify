@@ -23,6 +23,7 @@ class ServiceProvider extends AddonServiceProvider
         Commands\ShopifyImportCollections::class,
         Commands\ShopifyMultistoreEnable::class,
         Commands\ShopifyMultistoreDisable::class,
+        Commands\ShopifyWebhooksRegister::class,
     ];
 
     protected $fieldtypes = [

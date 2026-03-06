@@ -16,6 +16,7 @@ use Statamic\Support\Arr;
 use Statamic\Support\Str;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
+use StatamicRadPack\Shopify\Traits\ThrottlesShopifyRequests;
 
 class ImportSingleProductJob implements ShouldQueue
 {
@@ -23,6 +24,7 @@ class ImportSingleProductJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SavesImagesAndMetafields;
+    use ThrottlesShopifyRequests;
 
     public $data = [];
 
@@ -111,7 +113,7 @@ class ImportSingleProductJob implements ShouldQueue
         }
         QUERY;
 
-        $response = $graphql->query(['query' => $query]);
+        $response = $this->queryWithThrottle($graphql, ['query' => $query]);
 
         if (! $this->data = Arr::get($response->getDecodedBody(), 'data.product', [])) {
             return;
@@ -318,7 +320,7 @@ class ImportSingleProductJob implements ShouldQueue
                   }
                 QUERY;
 
-                $response = $graphql->query(['query' => $query]);
+                $response = $this->queryWithThrottle($graphql, ['query' => $query]);
 
                 $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
 
@@ -660,7 +662,7 @@ class ImportSingleProductJob implements ShouldQueue
                       }
                     QUERY;
 
-                    $response = $graphql->query(['query' => $query]);
+                    $response = $this->queryWithThrottle($graphql, ['query' => $query]);
 
                     $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
 

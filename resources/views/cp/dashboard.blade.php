@@ -28,6 +28,12 @@
             <ui-description>Fetch the collections data from Shopify - these will be imported as taxonomies and assigned to the products.</ui-description>
             <shopify-import-button url="{{ cp_route('shopify.collections.fetchAll') }}"></shopify-import-button>
         </ui-card>
+
+        <ui-card class="mt-4">
+            <ui-heading type="lg">Webhook Status</ui-heading>
+            <ui-description>Webhooks registered in Shopify for this store. Run <code>php artisan shopify:webhooks:register</code> to register any missing ones.</ui-description>
+            <shopify-webhook-status url="{{ cp_route('shopify.webhooks.status') }}"></shopify-webhook-status>
+        </ui-card>
     @else
 
         <ui-heading size="lg">Looks like you haven't set everything up yet.</ui-heading>

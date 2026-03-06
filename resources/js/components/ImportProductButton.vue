@@ -3,13 +3,13 @@
         <div class="mb-1 max-w-sm">
             <ui-combobox
                 class="w-full"
-                clearable="true"
+                :clearable="true"
                 :label="__('Select a product')"
                 v-model="selectedProduct"
                 optionLabel="title"
                 :options="products"
                 optionValue="product_id"
-                searchable="true"
+                :searchable="true"
             />
         </div>
 

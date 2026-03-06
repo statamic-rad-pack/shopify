@@ -5,6 +5,7 @@ use StatamicRadPack\Shopify\Http\Controllers\CP\ImportCollectionsController;
 use StatamicRadPack\Shopify\Http\Controllers\CP\ImportProductsController;
 use StatamicRadPack\Shopify\Http\Controllers\CP\ProductsController;
 use StatamicRadPack\Shopify\Http\Controllers\CP\VariantsController;
+use StatamicRadPack\Shopify\Http\Controllers\CP\WebhooksStatusController;
 
 Route::get('/shopify', [DashboardController::class, 'index'])
     ->name('shopify.index');
@@ -31,3 +32,6 @@ Route::post('/shopify/variants', [VariantsController::class, 'store'])
 
 Route::patch('/shopify/variants/{id}', [VariantsController::class, 'update'])
     ->name('shopify.variants.edit');
+
+Route::get('/shopify/webhooks/status', [WebhooksStatusController::class, 'index'])
+    ->name('shopify.webhooks.status');

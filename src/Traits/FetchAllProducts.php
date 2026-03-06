@@ -9,6 +9,8 @@ use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 
 trait FetchAllProducts
 {
+    use ThrottlesShopifyRequests;
+
     private int $loopProductsPaginationCount = 100;
 
     public function fetchProducts(?Graphql $client = null)
@@ -34,7 +36,7 @@ trait FetchAllProducts
         $data = [];
 
         do {
-            $response = $client->query([
+            $response = $this->queryWithThrottle($client, [
                 'query' => $query,
                 'variables' => [
                     'numItems' => $this->loopProductsPaginationCount,
