@@ -62,6 +62,16 @@ In multi-store mode you can specify the store the product belongs to:
 php artisan shopify:import:product ID_HERE --store=uk
 ```
 
+## API Rate Limiting
+
+The importer automatically handles Shopify's GraphQL API throttling. After each query, it inspects the `extensions.cost.throttleStatus` returned by Shopify. If the available query budget drops below 500 points, the importer pauses briefly (calculated from Shopify's restore rate) before continuing.
+
+This means large imports will slow down gracefully rather than hitting hard API errors. No configuration is required.
+
+## Image Alt Text
+
+Alt text is imported from Shopify alongside each product and variant image. When an image is first downloaded, its alt text is saved to the Statamic asset's `alt` field. On subsequent imports, if the alt text has changed in Shopify it will be updated on the existing asset.
+
 ## Published state
 
 By default the `published` state and `published_at` of the product is determined by the values of `Online Store` sales channel. If you want to use a different sales channel to determine availability you can specify the name of the channel in the `SHOPIFY_SALES_CHANNEL` env variable, e.g. `SHOPIFY_SALES_CHANNEL="My other channel"`.

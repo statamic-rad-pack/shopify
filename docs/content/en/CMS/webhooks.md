@@ -6,7 +6,35 @@ position: 7
 
 There is a built method to listen for webhooks sent by Shopify back to your application. These are validated based on a secret you received when setting them up.
 
-## Setting Up Webhooks
+## Registering Webhooks
+
+### Via the Command Line (recommended)
+
+The easiest way to register all webhooks is to run the built-in Artisan command. It will query your Shopify store, skip any that are already registered, and create any that are missing.
+
+```bash
+php artisan shopify:webhooks:register
+```
+
+In [multi-store mode](/CMS/multi-store) you can target a specific store:
+
+```bash
+php artisan shopify:webhooks:register --store=uk
+```
+
+If `--store` is omitted in multi-store mode, the command iterates all configured stores.
+
+The command outputs a table showing the topic, callback URL, and whether each webhook was already registered, newly registered, or failed.
+
+<alert type="info">
+
+The command requires your Shopify credentials to be configured and your application's `APP_URL` to be set correctly, so that the callback URLs it generates are publicly accessible.
+
+</alert>
+
+### Via the Shopify Admin
+
+You can also register webhooks manually:
 
 1. Head to your Shopify admin
 2. Click **Settings > Notifications**
@@ -21,67 +49,40 @@ If you are trying to test any webhooks locally you'll need to use a service like
 
 </alert>
 
-## Collection Create
+## Webhook Status
 
-You should add a webhook on **Collection Creation** that sends the data to Statamic and queues the import of that one collection.
+The Shopify Control Panel dashboard includes a **Webhook Status** card that queries your Shopify store and shows which webhooks are registered, whether their callback URLs match what the addon expects, and which topics are missing.
 
-Your URL should point to the following endpoint:
+For any missing topics, run `php artisan shopify:webhooks:register` to create them automatically.
 
-```bash
-https://YOURSITE/!/shopify/webhook/collection/create
+## Webhook Endpoints
+
+The following endpoints are registered by the addon. All webhook URLs follow the pattern:
+
+```
+https://YOURSITE/!/shopify/webhook/{resource}/{action}
 ```
 
-## Collection Update
+| Topic | URL |
+|---|---|
+| Collection Create | `/!/shopify/webhook/collection/create` |
+| Collection Update | `/!/shopify/webhook/collection/update` |
+| Collection Delete | `/!/shopify/webhook/collection/delete` |
+| Product Create | `/!/shopify/webhook/product/create` |
+| Product Update | `/!/shopify/webhook/product/update` |
+| Product Delete | `/!/shopify/webhook/product/delete` |
+| Customer Create | `/!/shopify/webhook/customer/create` |
+| Customer Update | `/!/shopify/webhook/customer/update` |
+| Customer Delete | `/!/shopify/webhook/customer/delete` |
+| Order Created | `/!/shopify/webhook/order` |
 
-Similarly, rather than running the full import to catch any changes to collections, you can add a webhook on **Collection Update** that sends any updated data to Statamic and queues a refresh of that collection.
+<alert type="info">
 
-Your URL should point to the following endpoint:
+Shopify will send the product update webhook on creation too, so a separate product/create webhook is optional for most setups.
 
-```bash
-https://YOURSITE/!/shopify/webhook/collection/update
-```
+</alert>
 
-## Collection Delete
-
-If you want collections to be removed from Statamic whenever you delete them from Shopify, you can add a webhook in Shopify which tells the system to delete the collection.
-
-Your URL should point to the following endpoint:
-
-```bash
-https://YOURSITE/!/shopify/webhook/collection/delete
-```
-
-## Product Update
-
-Similarly, rather than running the full import to catch any changes to products, you can add a webhook on **Product Update** that sends any updated data to Statamic and queues a refresh of that product.
-
-Note that Shopify will send the update hook on product creation as well, so no separate webhook is required for that.
-
-Your URL should point to the following endpoint:
-
-```bash
-https://YOURSITE/!/shopify/webhook/product/update
-```
-
-## Product Delete
-
-If you want products to be removed from Statamic whenever you delete them from Shopify, you can add a webhook in Shopify which tells the system to delete the products.
-
-Your URL should point to the following endpoint:
-
-```bash
-https://YOURSITE/!/shopify/webhook/product/delete
-```
-
-## Order Created
-
-This will scan for all `line_items` and refetch the product data.
-
-Your URL should point to the following endpoint:
-
-```bash
-https://YOURSITE/!/shopify/webhook/order
-```
+The **Order Created** webhook scans all `line_items` and re-fetches the product data for each.
 
 ## Multi-Store
 
