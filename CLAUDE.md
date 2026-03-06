@@ -77,10 +77,19 @@ Routes in `routes/actions.php` under `/!/shopify/webhook/...` handle real-time S
 
 Vue components in `resources/js/` build the Control Panel UI:
 - `ImportButton.vue` / `ImportProductButton.vue` — trigger bulk/single imports from the CP dashboard
+- `WebhookStatus.vue` — fetches and displays registered Shopify webhooks with status badges (uses Statamic UI library: `ui-table`, `ui-badge`, `ui-error-message`)
 - `VariantForm.vue` — inline variant editor in the CP
 - `Fieldtypes/Variants.vue` / `DisabledText.vue` — custom CP fieldtypes
 
+The CP dashboard (`resources/views/cp/dashboard.blade.php`) has a **Webhook Status** card that renders `WebhookStatus.vue`, backed by `Http\Controllers\CP\WebhooksStatusController` at `GET /cp/shopify/webhooks/status`.
+
 CP assets are compiled to `dist/` (Vite-built). The `resources/js/shopify/` directory (cart.js, client.js, alpine.js) is publishable to the host app for frontend Storefront API integration.
+
+### Traits
+
+- `FetchAllProducts` / `FetchCollections` — paginate through Shopify product/collection IDs and dispatch import jobs. Both use `ThrottlesShopifyRequests`.
+- `SavesImagesAndMetafields` — downloads images to Statamic assets (with alt text), parses metafields via the configured parser.
+- `ThrottlesShopifyRequests` — wraps `Graphql::query()` calls; inspects `extensions.cost.throttleStatus` and calls `throttleSleep()` if available budget < 500 points. The sleep is extracted into a protected method so tests can override it without actually sleeping.
 
 ### Extensibility Points
 
