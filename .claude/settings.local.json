@@ -3,7 +3,8 @@
     "allow": [
       "Bash(vendor/bin/phpunit:*)",
       "Bash(vendor/bin/pint:*)",
-      "Bash(/usr/bin/git diff:*)"
+      "Bash(/usr/bin/git diff:*)",
+      "WebFetch(domain:ui.statamic.dev)"
     ]
   }
 }

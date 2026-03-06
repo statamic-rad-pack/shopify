@@ -27,6 +27,8 @@ vendor/bin/pint
 php artisan shopify:import:all           # Import all products via queue
 php artisan shopify:import:single        # Import a single product
 php artisan shopify:import:collections   # Import all collections
+php artisan shopify:webhooks:register    # Register all webhook subscriptions in Shopify
+php artisan shopify:webhooks:register --store=uk  # Register for a specific store (multi-store)
 ```
 
 ## Architecture
@@ -34,6 +36,10 @@ php artisan shopify:import:collections   # Import all collections
 ### Entry Point
 
 `src/ServiceProvider.php` registers all addon components: Artisan commands, fieldtypes, event listeners, routes, query scopes, CP scripts, and Antlers tags. It also initializes the Shopify API client via `Shopify\Context` and binds `Shopify\Clients\Graphql` into the container (with support for both legacy `admin_token` and OAuth `client_credentials` flow).
+
+### Enums
+
+`src/Enums/WebhookTopic.php` — backed enum listing all 10 supported Shopify webhook topics. Each case exposes `->routeName()` and `->callbackUrl()` so the topic→route mapping is defined in one place and shared by the register command and the CP status controller.
 
 ### Data Model
 
@@ -48,8 +54,9 @@ Shopify data maps to Statamic content:
 1. `Commands/ShopifyImportProducts.php` (via `FetchAllProducts` trait) paginates through all Shopify product IDs via GraphQL
 2. Each ID is dispatched as `Jobs/ImportSingleProductJob` onto the configured queue
 3. `ImportSingleProductJob` fetches full product data (title, content, tags, variants, images, metafields, collections, publication status) and saves/updates Statamic entries
-4. The `SavesImagesAndMetafields` trait handles image downloading and metafield parsing (delegated to the class in `config('shopify.metafields_parser')`)
+4. The `SavesImagesAndMetafields` trait handles image downloading and metafield parsing (delegated to the class in `config('shopify.metafields_parser')`). Alt text from Shopify is saved/updated on the Statamic asset's `alt` field.
 5. In multisite setups, the job also fetches Shopify translations for each locale
+6. All GraphQL calls in the import pipeline go through `ThrottlesShopifyRequests::queryWithThrottle()`, which inspects `extensions.cost.throttleStatus` and sleeps if the available query budget drops below 500 points.
 
 ### Webhooks
 
@@ -70,10 +77,19 @@ Routes in `routes/actions.php` under `/!/shopify/webhook/...` handle real-time S
 
 Vue components in `resources/js/` build the Control Panel UI:
 - `ImportButton.vue` / `ImportProductButton.vue` — trigger bulk/single imports from the CP dashboard
+- `WebhookStatus.vue` — fetches and displays registered Shopify webhooks with status badges (uses Statamic UI library: `ui-table`, `ui-badge`, `ui-error-message`)
 - `VariantForm.vue` — inline variant editor in the CP
 - `Fieldtypes/Variants.vue` / `DisabledText.vue` — custom CP fieldtypes
 
+The CP dashboard (`resources/views/cp/dashboard.blade.php`) has a **Webhook Status** card that renders `WebhookStatus.vue`, backed by `Http\Controllers\CP\WebhooksStatusController` at `GET /cp/shopify/webhooks/status`.
+
 CP assets are compiled to `dist/` (Vite-built). The `resources/js/shopify/` directory (cart.js, client.js, alpine.js) is publishable to the host app for frontend Storefront API integration.
+
+### Traits
+
+- `FetchAllProducts` / `FetchCollections` — paginate through Shopify product/collection IDs and dispatch import jobs. Both use `ThrottlesShopifyRequests`.
+- `SavesImagesAndMetafields` — downloads images to Statamic assets (with alt text), parses metafields via the configured parser.
+- `ThrottlesShopifyRequests` — wraps `Graphql::query()` calls; inspects `extensions.cost.throttleStatus` and calls `throttleSleep()` if available budget < 500 points. The sleep is extracted into a protected method so tests can override it without actually sleeping.
 
 ### Extensibility Points
 
