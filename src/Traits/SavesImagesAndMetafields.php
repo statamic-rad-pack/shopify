@@ -45,24 +45,6 @@ trait SavesImagesAndMetafields
         return $asset;
     }
 
-    private function cleanArrayData($data)
-    {
-        if (! $data) {
-            return null;
-        }
-
-        $formattedItems = [];
-        $items = explode(', ', $data);
-
-        if ($items) {
-            foreach ($items as $item) {
-                $formattedItems[] = Str::slug($item);
-            }
-        }
-
-        return $formattedItems;
-    }
-
     /**
      * Clean up any query params ont he end of the URL.
      */

@@ -352,7 +352,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
         foreach ($variants as $variant) {
             $stock += $variant['inventory_quantity'];
 
-            if (isset($variant['inventory_policy'])) {
+            if (! $deny && isset($variant['inventory_policy'])) {
                 $deny = strtolower($variant['inventory_policy']) === 'deny';
             }
         }
@@ -394,8 +394,8 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
 
         if (! $this->parser) {
             return array_merge([
-                'attrs' => $this->formAttrs($action, $method, $knownParams),
-                'params' => $this->formMetaPrefix($this->formParams($method, $params)),
+                'attrs' => $this->formAttrs($endpoint, 'post', $knownParams),
+                'params' => $this->formMetaPrefix($this->formParams('post', $params)),
             ], $data);
         }
 
@@ -574,7 +574,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
         }
 
         $status = '';
-        if ($this->context->get('status') && ! in_array($this->context->get('status'), ['not_closed', 'open', 'closed', 'cancelled'])) {
+        if ($this->context->get('status') && in_array($this->context->get('status'), ['not_closed', 'open', 'closed', 'cancelled'])) {
             $status = ' AND status = '.$this->context->get('status');
         }
 
