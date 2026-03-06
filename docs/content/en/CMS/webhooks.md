@@ -120,3 +120,5 @@ StatamicRadPack\Shopify\Events\OrderCreate
 ```
 
 Each event has one property `$data` with the payload data decoded to a `stdClass`.
+
+For import job failures, see `ProductImportFailed` documented in [Importing Data](/CMS/importing-data#import-failures).
