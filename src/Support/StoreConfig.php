@@ -23,6 +23,21 @@ class StoreConfig
         return config('shopify.multi_store.primary_store') === $handle;
     }
 
+    public static function isMarketsMode(): bool
+    {
+        return static::isMultiStore() && static::getMode() === 'markets';
+    }
+
+    public static function getMarkets(): array
+    {
+        return config('shopify.multi_store.markets', []);
+    }
+
+    public static function getMarket(string $handle): ?array
+    {
+        return config('shopify.multi_store.markets.'.$handle);
+    }
+
     public static function findByHandle(string $handle): ?array
     {
         $stores = config('shopify.multi_store.stores', []);

@@ -40,6 +40,8 @@ class ImportSingleProductJob implements ShouldQueue
     {
         $graphql = $this->resolveGraphqlClient();
 
+        $variantFields = $this->buildVariantFields();
+
         $query = <<<QUERY
         {
           product(id: "gid://shopify/Product/{$this->productId}") {
@@ -100,53 +102,7 @@ class ImportSingleProductJob implements ShouldQueue
             variants(first: 100) {
               edges {
                 node {
-                  compareAtPrice
-                  id
-                  inventoryItem {
-                    measurement {
-                      weight {
-                        unit
-                        value
-                      }
-                    }
-                    requiresShipping
-                  }
-                  inventoryPolicy
-                  inventoryQuantity
-                  media(first: 20) {
-                    edges {
-                      node {
-                        id
-                        ... on MediaImage {
-                          id
-                          image {
-                            altText
-                            url
-                          }
-                        }
-                      }
-                    }
-                  }
-                  metafields(first: 100) {
-                    edges {
-                      node {
-                        id
-                        jsonValue
-                        key
-                        value
-                      }
-                    }
-                  }
-                  price
-                  selectedOptions {
-                    name
-                    optionValue {
-                      id
-                    }
-                    value
-                  }
-                  sku
-                  title
+                  {$variantFields}
                 }
               }
             }
@@ -385,6 +341,129 @@ class ImportSingleProductJob implements ShouldQueue
     }
 
     /**
+     * Build the GraphQL fields for the variant node.
+     * In markets mode, appends contextualPricing aliases and inventoryLevels.
+     */
+    private function buildVariantFields(): string
+    {
+        $inventoryItemFields = StoreConfig::isMarketsMode()
+            ? 'inventoryItem {
+                    measurement {
+                      weight {
+                        unit
+                        value
+                      }
+                    }
+                    requiresShipping
+                    inventoryLevels(first: 50) {
+                      nodes {
+                        location {
+                          address {
+                            countryCode
+                          }
+                        }
+                        quantities(names: ["available"]) {
+                          name
+                          quantity
+                        }
+                      }
+                    }
+                  }'
+            : 'inventoryItem {
+                    measurement {
+                      weight {
+                        unit
+                        value
+                      }
+                    }
+                    requiresShipping
+                  }';
+
+        $contextualPricingFields = '';
+        if (StoreConfig::isMarketsMode()) {
+            foreach (array_keys(StoreConfig::getMarkets()) as $countryCode) {
+                $alias = 'contextualPricing'.strtoupper($countryCode);
+                $contextualPricingFields .= <<<GQL
+
+                  {$alias}: contextualPricing(context: { country: {$countryCode} }) {
+                    price { amount currencyCode }
+                    compareAtPrice { amount currencyCode }
+                  }
+                GQL;
+            }
+        }
+
+        return <<<GQL
+        compareAtPrice
+                  id
+                  {$inventoryItemFields}
+                  inventoryPolicy
+                  inventoryQuantity
+                  media(first: 20) {
+                    edges {
+                      node {
+                        id
+                        ... on MediaImage {
+                          id
+                          image {
+                            altText
+                            url
+                          }
+                        }
+                      }
+                    }
+                  }
+                  metafields(first: 100) {
+                    edges {
+                      node {
+                        id
+                        jsonValue
+                        key
+                        value
+                      }
+                    }
+                  }
+                  price
+                  selectedOptions {
+                    name
+                    optionValue {
+                      id
+                    }
+                    value
+                  }
+                  sku
+                  title{$contextualPricingFields}
+        GQL;
+    }
+
+    /**
+     * Build the market_data array from contextual pricing and inventory levels.
+     */
+    private function buildMarketData(array $variant): array
+    {
+        $marketData = [];
+
+        foreach (array_keys(StoreConfig::getMarkets()) as $countryCode) {
+            $alias = 'contextualPricing'.strtoupper($countryCode);
+            $price = Arr::get($variant, $alias.'.price.amount');
+            $compareAtPrice = Arr::get($variant, $alias.'.compareAtPrice.amount');
+
+            $inventoryNodes = Arr::get($variant, 'inventoryItem.inventoryLevels.nodes', []);
+            $inventoryQuantity = collect($inventoryNodes)
+                ->filter(fn ($node) => Arr::get($node, 'location.address.countryCode') === $countryCode)
+                ->sum(fn ($node) => (int) Arr::get($node, 'quantities.0.quantity', 0));
+
+            $marketData[$countryCode] = [
+                'price' => $price,
+                'compare_at_price' => $compareAtPrice,
+                'inventory_quantity' => $inventoryQuantity,
+            ];
+        }
+
+        return $marketData;
+    }
+
+    /**
      * Resolve the Graphql client for this job.
      * In multi-store mode, uses the store-specific client.
      */
@@ -490,6 +569,11 @@ class ImportSingleProductJob implements ShouldQueue
                 'weight' => Arr::get($variant, 'inventoryItem.measurement.weight', null), // blueprint update: was grams, this has unit and value now
                 'requires_shipping' => Arr::get($variant, 'inventoryItem.requiresShipping', null),
             ], collect($variant['selectedOptions'] ?? [])->mapWithKeys(fn ($opt, $index) => ['option'.($index + 1) => $opt['value']])->all());  // blueprint update: what if there are more than 3?
+
+            // Markets mode: write territory-specific pricing to market_data
+            if (StoreConfig::isMarketsMode()) {
+                $data['market_data'] = $this->buildMarketData($variant);
+            }
 
             // Unified multi-store mode: write store-specific pricing to multi_store_data
             if ($this->storeHandle && StoreConfig::isMultiStore() && StoreConfig::getMode() === 'unified') {

@@ -188,6 +188,28 @@ To use it:
 
 The `handleSubmit` method makes use of the `cart.js` methods to update the cart with the line items to be added.
 
+#### Markets mode
+
+When using [markets mode](/CMS/multi-store#markets-mode), `shopifyProduct` reads the active market from `window.shopifyConfig.market` (set by `{{ shopify:tokens store="GB" }}`). Two additional methods are available:
+
+- `getVariantPrice(variant)` — returns the market-specific price from `variant.market_data`, falling back to the standard `variant.price`
+- `outOfStock(variant)` — automatically checks market-specific inventory when a market is active
+
+```antlers
+{{ $variants = {shopify:variants} }}
+<div x-data='shopifyProduct({{ options | to_json }}, {{ variants | to_json }})'>
+    <span x-text="getVariantPrice(selectedVariant)"></span>
+</div>
+```
+
+The active market can be changed at runtime by dispatching a `shopify.updateMarket` event, which is useful for letting users switch territory without a page reload:
+
+```js
+window.dispatchEvent(new CustomEvent('shopify.updateMarket', { detail: { market: 'IE' } }));
+```
+
+The store's `market` property will update reactively, so any Alpine expressions that call `getVariantPrice()` or `outOfStock()` will re-evaluate immediately.
+
 
 ### Alpine.store('statamic.shopify.cart')
 This store provides client side cart functionality and methods that are needed to allow users to update their cart on the site.
