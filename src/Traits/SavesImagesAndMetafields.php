@@ -3,6 +3,8 @@
 namespace StatamicRadPack\Shopify\Traits;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Statamic\Facades\Asset;
 use Statamic\Facades\Path;
@@ -37,7 +39,13 @@ trait SavesImagesAndMetafields
             return $asset;
         }
 
-        $file = $this->uploadFakeFileFromUrl($name, $url);
+        try {
+            $file = $this->uploadFakeFileFromUrl($name, $url);
+        } catch (\Throwable $e) {
+            Log::warning('Shopify: could not download image from '.$url.': '.$e->getMessage());
+
+            return null;
+        }
 
         // If it doesn't exists, let's make it exist.
         $asset = Asset::make()
@@ -78,7 +86,7 @@ trait SavesImagesAndMetafields
      */
     public function uploadFakeFileFromUrl(string $name, string $url): UploadedFile
     {
-        Storage::disk('local')->put($name, file_get_contents($url));
+        Storage::disk('local')->put($name, Http::timeout(30)->get($url)->throw()->body());
 
         return new UploadedFile(Storage::disk('local')->path($name), $name);
     }
