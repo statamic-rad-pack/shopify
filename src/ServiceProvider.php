@@ -18,11 +18,11 @@ class ServiceProvider extends AddonServiceProvider
     protected $publishAfterInstall = false;
 
     protected $commands = [
+        Commands\ShopifyImportCollections::class,
         Commands\ShopifyImportProducts::class,
         Commands\ShopifyImportSingleProduct::class,
-        Commands\ShopifyImportCollections::class,
-        Commands\ShopifyMultistoreEnable::class,
         Commands\ShopifyMultistoreDisable::class,
+        Commands\ShopifyMultistoreEnable::class,
         Commands\ShopifyWebhooksRegister::class,
     ];
 

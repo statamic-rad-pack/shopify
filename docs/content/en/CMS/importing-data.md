@@ -62,6 +62,29 @@ In multi-store mode you can specify the store the product belongs to:
 php artisan shopify:import:product ID_HERE --store=uk
 ```
 
+## Import Failures
+
+When an import job fails after all retries are exhausted, two things happen automatically:
+
+1. The error is written to your Laravel log with the product ID and, in multi-store mode, the store handle.
+2. A `ProductImportFailed` event is fired, which you can listen for to add your own handling (notifications, alerts, etc.).
+
+```php
+use StatamicRadPack\Shopify\Events\ProductImportFailed;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function boot(): void
+    {
+        Event::listen(ProductImportFailed::class, function (ProductImportFailed $event) {
+            // $event->productId   — the Shopify product ID
+            // $event->storeHandle — the store handle (null in single-store mode)
+            // $event->exception   — the Throwable that caused the failure
+        });
+    }
+}
+```
+
 ## API Rate Limiting
 
 The importer automatically handles Shopify's GraphQL API throttling. After each query, it inspects the `extensions.cost.throttleStatus` returned by Shopify. If the available query budget drops below 500 points, the importer pauses briefly (calculated from Shopify's restore rate) before continuing.
