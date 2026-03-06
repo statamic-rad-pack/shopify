@@ -6,36 +6,65 @@
 
 <p>
 
-[![Latest Stable Version](https://poser.pugx.org/jackabox/statamic-shopify/v)](//packagist.org/packages/jackabox/statamic-shopify)
-[![Total Downloads](https://poser.pugx.org/jackabox/statamic-shopify/downloads)](//packagist.org/packages/jackabox/statamic-shopify)
-[![License](https://poser.pugx.org/jackabox/statamic-shopify/license)](//packagist.org/packages/jackabox/statamic-shopify)
+[![Latest Stable Version](https://poser.pugx.org/statamic-rad-pack/shopify/v)](//packagist.org/packages/statamic-rad-pack/shopify)
+[![Total Downloads](https://poser.pugx.org/statamic-rad-pack/shopify/downloads)](//packagist.org/packages/statamic-rad-pack/shopify)
+[![License](https://poser.pugx.org/statamic-rad-pack/shopify/license)](//packagist.org/packages/statamic-rad-pack/shopify)
 
 </p>
 </div>
 
-A Statamic addon that allows you to integrate Shopify. World-class ecommerce mixed with the brilliance of Statamic.
+A Statamic addon that integrates Shopify with Statamic CMS. Use Shopify for world-class ecommerce while building your storefront with Antlers.
 
-[Live Demo](https://statamic-shopify-demostore.vercel.app) -
-[Docs](https://statamic-shopify-docs.vercel.app)
+[Live Demo](https://statamic-shopify-demostore.vercel.app) —
+[Documentation](https://statamic-shopify-docs.vercel.app) —
+[Issues](https://github.com/statamic-rad-pack/shopify/issues) —
+[Discussions](https://github.com/statamic-rad-pack/shopify/discussions)
 <!-- /statamic:hide -->
 
+## Requirements
 
-### Purpose
-Shopify is world-class for ecommerce and it provides one of the best systems for handling orders, products, and users. However, the templating engine isn't as nice to use as Antlers. This plugin aims to marry the wonderful CMS of Statamic with the ecommerce tools of Shopify.
+- PHP 8.3 or 8.4
+- Laravel 12
+- Statamic 6
 
-It utilises the Admin API to fetch products and listen to webhooks, and then allows for customisation on the front using either the Storefront API or the Buy Buttons.
+## Features
 
-### Features
+- Import products, variants, images, and collections from Shopify into Statamic
+- Real-time sync via Shopify webhooks (products, orders, collections, customers)
+- Antlers tags for frontend product display, cart, and customer account pages
+- Control Panel UI for triggering imports and managing variants
+- User sync between Statamic and Shopify
+- Metafields support with a swappable parser
+- Multisite / localisation support
+- Multi-store support (unified, localized, and markets modes)
+- Works with flat-file or database-backed Statamic
 
-- No more liquid
-- Import Products, Variants, and Images into Statamic
-- Can be used either flat-file (yay!) or with a database.
-- Keeps stock up to date by enabling the Order Webhook.
-- Keeps products in sync by enabling the Product Delete webhook.
-- ES6 JavaScript written integration to the Storefront API saving you hours.
+## Installation
 
-### Issues
+Install via Composer:
 
-Please open an issue on [GitHub](https://github.com/statamic-rad-pack/shopify/issues) if you encounter a problem. 
+```bash
+composer require statamic-rad-pack/shopify
+```
 
-If you'd like to propose a new feature then you can also start a [discussion](https://github.com/statamic-rad-pack/shopify/discussions).
+Publish the config file:
+
+```bash
+php artisan vendor:publish --tag=shopify-config
+```
+
+Publish the frontend JS assets (optional, for Storefront API cart integration):
+
+```bash
+php artisan vendor:publish --tag=shopify-scripts
+```
+
+## Documentation
+
+Full documentation on configuration, webhooks, Antlers tags, multi-store setup, and more is available at [statamic-shopify-docs.vercel.app](https://statamic-shopify-docs.vercel.app).
+
+## Issues & Feedback
+
+Please open an issue on [GitHub](https://github.com/statamic-rad-pack/shopify/issues) if you encounter a problem.
+
+To propose a new feature, start a [discussion](https://github.com/statamic-rad-pack/shopify/discussions).
