@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Statamic\Facades\User;
 use StatamicRadPack\Shopify\Events;
+use StatamicRadPack\Shopify\Support\StoreConfig;
 
 class CustomerCreateUpdateController extends WebhooksController
 {
@@ -24,9 +25,21 @@ class CustomerCreateUpdateController extends WebhooksController
         // Decode data
         $data = json_decode($request->getContent());
 
-        $customerEntry = User::query()
-            ->where('shopify_id', $data->id)
-            ->first();
+        $storeHandle = $request->attributes->get('shopify_store_handle');
+        $isMultiStore = $storeHandle && StoreConfig::isMultiStore();
+
+        // Look up user by store-specific Shopify ID or global Shopify ID
+        if ($isMultiStore) {
+            $customerEntry = User::all()->first(function ($user) use ($data, $storeHandle) {
+                $shopifyIds = $user->get('shopify_ids', []);
+
+                return ($shopifyIds[$storeHandle] ?? null) == $data->id;
+            });
+        } else {
+            $customerEntry = User::query()
+                ->where('shopify_id', $data->id)
+                ->first();
+        }
 
         if (! $customerEntry) {
 
@@ -65,7 +78,13 @@ class CustomerCreateUpdateController extends WebhooksController
             }
 
             if ($customerEntry) {
-                $customerEntry->set('shopify_id', $data->id)->save();
+                if ($isMultiStore) {
+                    $shopifyIds = $customerEntry->get('shopify_ids', []);
+                    $shopifyIds[$storeHandle] = $data->id;
+                    $customerEntry->set('shopify_ids', $shopifyIds)->save();
+                } else {
+                    $customerEntry->set('shopify_id', $data->id)->save();
+                }
             }
         }
 

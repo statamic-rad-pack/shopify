@@ -21,9 +21,25 @@ Allows you to output your Site URL and Storefront Token to the front end and bin
 
 ```html
 <script>
-  window.shopifyConfig = { url: 'your-site.myshopify.com', token: 'storefront-token' }
+  window.shopifyConfig = { url: 'your-site.myshopify.com', token: 'storefront-token', apiVersion: '2025-04' }
 </script>
 ```
+
+#### Multi-Store
+
+In [multi-store mode](/CMS/multi-store) pass the `store` param to output that store's credentials. A `currency` key is also included, sourced from the store's config:
+
+```twig
+{{ shopify:tokens store="uk" }}
+```
+
+```html
+<script>
+  window.shopifyConfig = { url: 'uk-store.myshopify.com', token: 'uk-storefront-token', apiVersion: '2025-04', currency: '£' }
+</script>
+```
+
+The bundled Alpine.js integration reads `window.shopifyConfig.currency` automatically for currency formatting.
 
 ## Product Price
 

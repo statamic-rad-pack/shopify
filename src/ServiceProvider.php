@@ -19,6 +19,8 @@ class ServiceProvider extends AddonServiceProvider
         Commands\ShopifyImportProducts::class,
         Commands\ShopifyImportSingleProduct::class,
         Commands\ShopifyImportCollections::class,
+        Commands\ShopifyUnifiedMultiStoreEnable::class,
+        Commands\ShopifyUnifiedMultiStoreDisable::class,
     ];
 
     protected $fieldtypes = [

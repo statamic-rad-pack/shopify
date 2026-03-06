@@ -83,6 +83,22 @@ Your URL should point to the following endpoint:
 https://YOURSITE/!/shopify/webhook/order
 ```
 
+## Multi-Store
+
+In [multi-store mode](/CMS/multi-store), the same webhook URLs are used for all stores. Configure a separate set of webhooks in **each** Shopify admin pointing to the same Statamic endpoints.
+
+Shopify always sends an `X-Shopify-Shop-Domain` header with every webhook request. The addon uses this header to:
+
+1. Identify which store the webhook came from (matched against each store's `url` in config).
+2. Verify the HMAC signature using **that store's** `webhook_secret`.
+3. Pass the resolved store handle to any import jobs dispatched.
+
+<alert type="warning">
+Webhook requests from domains not listed in `multi_store.stores` are rejected with a `403` response.
+</alert>
+
+Each store's webhook secret must be set individually. See [Env Values](/env) for the per-store env var pattern (`SHOPIFY_STORE_{HANDLE}_WEBHOOK_SECRET`).
+
 ## Events
 
 Each webhook listener also fires an event you can use to hook into with your own logic based on the payload received.

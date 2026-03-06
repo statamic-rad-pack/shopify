@@ -10,6 +10,7 @@ features:
   - Keeps stock up to date by enabling the Order Webhook.
   - Keeps products in sync by enabling the Product Delete webhook.
   - ES6 JavaScript written integration to the Storefront API saving you hours.
+  - Multi-store support — run multiple Shopify stores from one Statamic installation.
 ---
 
 

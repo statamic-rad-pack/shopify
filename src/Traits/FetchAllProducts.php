@@ -11,8 +11,10 @@ trait FetchAllProducts
 {
     private int $loopProductsPaginationCount = 100;
 
-    public function fetchProducts()
+    public function fetchProducts(?Graphql $client = null)
     {
+        $client = $client ?? app(Graphql::class);
+
         $items = [];
 
         $query = <<<'QUERY'
@@ -32,7 +34,7 @@ trait FetchAllProducts
         $data = [];
 
         do {
-            $response = app(Graphql::class)->query([
+            $response = $client->query([
                 'query' => $query,
                 'variables' => [
                     'numItems' => $this->loopProductsPaginationCount,
@@ -51,8 +53,8 @@ trait FetchAllProducts
         return $items;
     }
 
-    private function callJob(int $productId)
+    private function callJob(int $productId, ?string $storeHandle = null)
     {
-        ImportSingleProductJob::dispatch($productId);
+        ImportSingleProductJob::dispatch($productId, [], $storeHandle);
     }
 }

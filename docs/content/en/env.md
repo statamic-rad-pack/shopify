@@ -45,3 +45,23 @@ These allow you to tweak how the system works. Please check out the `config/shop
 | `SHOPIFY_TAXONOMY_TAGS`     | The taxonomy handle to use for 'tags' of product (defaults to 'tags').                          |
 | `SHOPIFY_TAXONOMY_TYPE`     | The taxonomy handle to use for 'types' of product (defaults to 'type').                         |
 | `SHOPIFY_TAXONOMY_VENDOR`     | The taxonomy handle to use for 'vendors' of product (defaults to 'vendor').                     |
+
+## Multi-Store
+
+Used when running multiple Shopify stores from one Statamic installation. See [Multi-Store](/CMS/multi-store) for full setup details.
+
+| Value | Description |
+|---|---|
+| `SHOPIFY_MULTI_STORE_ENABLED` | Set to `true` to enable multi-store mode (defaults to `false`). |
+| `SHOPIFY_MULTI_STORE_MODE` | Either `unified` (shared entries with per-store pricing) or `localized` (one entry set per Statamic site). Defaults to `unified`. |
+| `SHOPIFY_MULTI_STORE_PRIMARY` | The handle of the store whose data populates top-level fields in unified mode. |
+
+Per-store credentials follow the pattern `SHOPIFY_STORE_{HANDLE}_{KEY}`, e.g.:
+
+| Value | Description |
+|---|---|
+| `SHOPIFY_STORE_UK_URL` | The `.myshopify.com` URL for the store (no https://). |
+| `SHOPIFY_STORE_UK_ADMIN_TOKEN` | Admin API token (or use `CLIENT_ID` / `CLIENT_SECRET` for OAuth). |
+| `SHOPIFY_STORE_UK_STOREFRONT_TOKEN` | Storefront API token. |
+| `SHOPIFY_STORE_UK_WEBHOOK_SECRET` | Webhook signing secret for this store. |
+| `SHOPIFY_STORE_UK_API_VERSION` | API version override for this store (defaults to `2025-04`). |

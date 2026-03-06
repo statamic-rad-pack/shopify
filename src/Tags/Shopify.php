@@ -15,6 +15,7 @@ use Statamic\Tags\Concerns\QueriesConditions;
 use Statamic\Tags\Concerns\QueriesOrderBys;
 use Statamic\Tags\Concerns\RendersForms;
 use Statamic\Tags\Tags;
+use StatamicRadPack\Shopify\Support\StoreConfig;
 
 class Shopify extends Tags
 {
@@ -35,6 +36,10 @@ class Shopify extends Tags
             return null;
         }
 
+        if ($store = $this->params->get('store')) {
+            $variants = $this->applyStoreData($variants, $store);
+        }
+
         return $this->isInStock($variants);
     }
 
@@ -51,6 +56,10 @@ class Shopify extends Tags
 
         if (! $variants) {
             return null;
+        }
+
+        if ($store = $this->params->get('store')) {
+            $variants = $this->applyStoreData($variants, $store);
         }
 
         // Lowest Price
@@ -74,6 +83,20 @@ class Shopify extends Tags
      */
     public function tokens()
     {
+        $store = $this->params->get('store');
+
+        if ($store && StoreConfig::isMultiStore()) {
+            $storeConfig = StoreConfig::findByHandle($store) ?? [];
+            $url = $storeConfig['storefront_url'] ?? $storeConfig['url'] ?? config('shopify.url');
+            $token = $storeConfig['storefront_token'] ?? config('shopify.storefront_token');
+            $apiVersion = $storeConfig['api_version'] ?? config('shopify.api_version');
+            $currency = $storeConfig['currency'] ?? config('shopify.currency', '$');
+
+            return "<script>
+window.shopifyConfig = { url: '{$url}', token: '{$token}', apiVersion: '{$apiVersion}', currency: '{$currency}' };
+</script>";
+        }
+
         return "<script>
 window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('shopify.url'))."', token: '".config('shopify.storefront_token')."', apiVersion: '".config('shopify.api_version')."' };
 </script>";
@@ -113,6 +136,10 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
 
         if (! $variants) {
             return;
+        }
+
+        if ($store = $this->params->get('store')) {
+            $variants = $this->applyStoreData($variants, $store);
         }
 
         return view('shopify::fields.variant_form', [
@@ -161,7 +188,17 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
      */
     public function variants()
     {
-        return $this->fetchProductVariants($this->context->get('slug'));
+        $variants = $this->fetchProductVariants($this->context->get('slug'));
+
+        if (! $variants) {
+            return null;
+        }
+
+        if ($store = $this->params->get('store')) {
+            $variants = $this->applyStoreData($variants, $store);
+        }
+
+        return $variants;
     }
 
     /*
@@ -257,6 +294,27 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     }
 
     /**
+     * Override variant pricing/stock fields with store-specific data from multi_store_data.
+     * Only applies in unified multi-store mode.
+     */
+    protected function applyStoreData($variants, string $store)
+    {
+        if (! StoreConfig::isMultiStore() || StoreConfig::getMode() !== 'unified') {
+            return $variants;
+        }
+
+        return $variants->map(function ($variant) use ($store) {
+            $storeData = Arr::get($variant, 'multi_store_data.'.$store, null);
+
+            if ($storeData) {
+                $variant = array_merge($variant, array_filter($storeData, fn ($v) => ! is_null($v)));
+            }
+
+            return $variant;
+        });
+    }
+
+    /**
      * Check if all variants are in stock
      *
      * @param  array  $variants
@@ -342,6 +400,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
      */
     public function customer()
     {
+        $storeParam = $this->params->get('store');
         $id = $this->params->get('customer_id');
         $user = false;
 
@@ -363,7 +422,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             }
         }
 
-        $customerId = $user->get('shopify_id') ?? 'none';
+        [$customerId, $graphql] = $this->resolveCustomerGraphql($user, $storeParam);
 
         $query = <<<QUERY
             {
@@ -378,7 +437,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             }
             QUERY;
 
-        $response = app(Graphql::class)->query(['query' => $query]);
+        $response = $graphql->query(['query' => $query]);
 
         if ($data = Arr::get($response->getDecodedBody() ?? [], 'data.customer', [])) {
             $data = [
@@ -399,6 +458,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
      */
     public function customerAddresses()
     {
+        $storeParam = $this->params->get('store');
         $id = $this->params->get('customer_id');
         $user = false;
 
@@ -420,7 +480,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             }
         }
 
-        $customerId = $user->get('shopify_id') ?? 'none';
+        [$customerId, $graphql] = $this->resolveCustomerGraphql($user, $storeParam);
 
         $query = <<<QUERY
             {
@@ -443,7 +503,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             }
             QUERY;
 
-        $response = app(Graphql::class)->query(['query' => $query]);
+        $response = $graphql->query(['query' => $query]);
 
         if ($data = Arr::get($response->getDecodedBody() ?? [], 'data.customer.addresses', [])) {
             $data = collect($data)
@@ -466,6 +526,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
      */
     public function customerOrders()
     {
+        $storeParam = $this->params->get('store');
         $id = $this->params->get('customer_id');
         $user = false;
 
@@ -492,7 +553,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             $status = ' AND status = '.$this->context->get('status');
         }
 
-        $userId = ($user->get('shopify_id') ?? 'none');
+        [$userId, $graphql] = $this->resolveCustomerGraphql($user, $storeParam);
 
         $query = <<<QUERY
             query (\$numItems: Int!, \$cursor: String) {
@@ -583,7 +644,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
         $items = [];
 
         do {
-            $response = app(Graphql::class)->query([
+            $response = $graphql->query([
                 'query' => $query,
                 'variables' => [
                     'numItems' => 100,
@@ -629,6 +690,24 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
         }
 
         return array_merge($this->output($data), ['orders_count' => count($data ?? [])]);
+    }
+
+    /**
+     * Resolve the customer's Shopify ID and Graphql client for the given store param.
+     * Returns [$customerId, $graphqlClient].
+     */
+    protected function resolveCustomerGraphql($user, ?string $storeParam): array
+    {
+        if ($storeParam && StoreConfig::isMultiStore()) {
+            $customerId = Arr::get($user->get('shopify_ids', []), $storeParam, 'none');
+            $storeConfig = StoreConfig::findByHandle($storeParam);
+            $graphql = $storeConfig ? StoreConfig::makeGraphqlClient($storeConfig) : app(Graphql::class);
+        } else {
+            $customerId = $user->get('shopify_id') ?? 'none';
+            $graphql = app(Graphql::class);
+        }
+
+        return [$customerId, $graphql];
     }
 
     protected function paginatedOutput($paginator)

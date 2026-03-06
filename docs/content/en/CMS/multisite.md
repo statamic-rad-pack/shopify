@@ -19,3 +19,9 @@ On the Products collection ensure that `Propagate` is toggled on, and that the `
 ## How it works
 
 Now when your product or collection is updated we will check Shopify for any translations matching the `locale` of your Statamic site. Where they are found, the locale entry in Statamic is updated with those translations.
+
+## Multisite vs. Multi-Store
+
+This page describes the **translation-based multisite** approach: one Shopify store, multiple Statamic sites, with Shopify's built-in translation system providing locale-specific content.
+
+If you are running **separate Shopify stores** per region (e.g. a UK store in GBP and a US store in USD), see [Multi-Store](/CMS/multi-store) instead. Multi-store's **localized mode** is an alternative to the translation-based approach — each store maps to a Statamic site and is itself the authoritative source for its locale, so the translation-fetching loop described above is skipped.

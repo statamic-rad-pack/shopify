@@ -139,4 +139,32 @@ return [
      * Note: this is not required unless you are doing custom integrations using the RestApi
      */
     'auth_password' => env('SHOPIFY_AUTH_PASSWORD', 'api-password'),
+
+    /**
+     * Multi-store configuration.
+     * When enabled, the package supports multiple Shopify stores.
+     * mode: 'unified'   – all stores share one set of product/variant entries;
+     *                     store-specific pricing/stock is stored under multi_store_data.
+     * mode: 'localized' – each store maps to a Statamic site handle; variants are per-site.
+     */
+    'multi_store' => [
+        'enabled' => env('SHOPIFY_MULTI_STORE_ENABLED', false),
+        'mode' => env('SHOPIFY_MULTI_STORE_MODE', 'unified'), // 'unified' or 'localized'
+        'primary_store' => env('SHOPIFY_MULTI_STORE_PRIMARY'), // handle of the primary store
+        'stores' => [
+            // Each key is the store handle used throughout the system.
+            // 'uk' => [
+            //     'url' => env('SHOPIFY_STORE_UK_URL'),
+            //     'storefront_token' => env('SHOPIFY_STORE_UK_STOREFRONT_TOKEN'),
+            //     'webhook_secret' => env('SHOPIFY_STORE_UK_WEBHOOK_SECRET'),
+            //     'client_id' => env('SHOPIFY_STORE_UK_CLIENT_ID'),
+            //     'client_secret' => env('SHOPIFY_STORE_UK_CLIENT_SECRET'),
+            //     'admin_token' => env('SHOPIFY_STORE_UK_ADMIN_TOKEN'),
+            //     'api_version' => env('SHOPIFY_STORE_UK_API_VERSION', '2025-04'),
+            //     'sales_channel' => 'Online Store',
+            //     'currency' => '£',
+            //     'site' => 'en', // only used in 'localized' mode
+            // ],
+        ],
+    ],
 ];

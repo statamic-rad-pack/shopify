@@ -24,8 +24,8 @@ class CollectionCreateUpdateController extends WebhooksController
         // Decode data
         $data = json_decode($request->getContent());
 
-        // Dispatch job
-        Jobs\ImportCollectionJob::dispatch($data->id);
+        // Dispatch job, passing the resolved store handle (null in single-store mode)
+        Jobs\ImportCollectionJob::dispatch($data->id, $request->attributes->get('shopify_store_handle'));
 
         $eventCallback($data);
 
