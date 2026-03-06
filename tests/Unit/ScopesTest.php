@@ -10,7 +10,7 @@ class ScopesTest extends TestCase
 {
     private function tag($tag, $variables = [])
     {
-        return (string) Facades\Parse::template($tag, $variables);
+        return (string) Facades\Parse::template($tag, $variables, trusted: true);
     }
 
     #[Test]
