@@ -3,6 +3,7 @@
 namespace StatamicRadPack\Shopify\Jobs;
 
 use Carbon\Carbon;
+use Throwable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -14,6 +15,7 @@ use Statamic\Facades\Site;
 use Statamic\Facades\Term;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use StatamicRadPack\Shopify\Events\ProductImportFailed;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
 use StatamicRadPack\Shopify\Traits\ThrottlesShopifyRequests;
@@ -698,6 +700,21 @@ class ImportSingleProductJob implements ShouldQueue
                     $variant->delete();
                 }
             });
+    }
+
+    /**
+     * Handle a job failure — log the error and fire an event.
+     */
+    public function failed(Throwable $exception): void
+    {
+        $context = array_filter([
+            'product_id' => $this->productId,
+            'store' => $this->storeHandle,
+        ]);
+
+        Log::error('Shopify: ImportSingleProductJob failed for product '.$this->productId.': '.$exception->getMessage(), $context);
+
+        ProductImportFailed::dispatch($this->productId, $this->storeHandle, $exception);
     }
 
     /**
