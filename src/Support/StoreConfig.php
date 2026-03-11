@@ -5,6 +5,7 @@ namespace StatamicRadPack\Shopify\Support;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Shopify\Clients\Graphql;
+use Shopify\Context;
 
 class StoreConfig
 {
@@ -80,7 +81,8 @@ class StoreConfig
 
             if ($token = ($storeConfig['admin_token'] ?? null)) {
                 $capturedToken = $token;
-                app()->bind($abstract, fn () => new Graphql($url, $capturedToken, $apiVersion));
+                Context::$API_VERSION = $apiVersion;
+                app()->bind($abstract, fn () => new Graphql($url, $capturedToken));
             } else {
                 // OAuth client_credentials flow
                 $cacheKey = 'shopify::admin_token::'.$handle;
@@ -93,7 +95,8 @@ class StoreConfig
                 }
 
                 $capturedToken = $token ?? 'none';
-                app()->bind($abstract, fn () => new Graphql($url, $capturedToken, $apiVersion));
+                Context::$API_VERSION = $apiVersion;
+                app()->bind($abstract, fn () => new Graphql($url, $capturedToken));
             }
         }
 
