@@ -45,10 +45,6 @@ class ServiceProvider extends AddonServiceProvider
         Scopes\VariantIsOnSale::class,
     ];
 
-    protected $scripts = [
-        __DIR__.'/../dist/js/statamic-shopify-cp.js',
-    ];
-
     protected $tags = [
         Tags\Shopify::class,
     ];
