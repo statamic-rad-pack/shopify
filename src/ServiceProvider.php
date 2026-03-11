@@ -167,7 +167,7 @@ class ServiceProvider extends AddonServiceProvider
 
     private function setShopifyApiConfig(): void
     {
-        if (! $key = config('shopify.admin_token')) {
+        if (! (config('shopify.admin_token') || config('shopify.client_id'))) {
             return;
         }
 
