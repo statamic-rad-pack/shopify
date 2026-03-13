@@ -10,6 +10,7 @@
                     <ui-table-column>Topic</ui-table-column>
                     <ui-table-column>Callback URL</ui-table-column>
                     <ui-table-column>Status</ui-table-column>
+                    <ui-table-column>Last received</ui-table-column>
                 </ui-table-columns>
                 <ui-table-rows>
                     <ui-table-row v-for="webhook in webhooks" :key="webhook.id">
@@ -19,13 +20,15 @@
                             <ui-badge v-if="webhook.expected" color="green" icon="check" text="Registered" />
                             <ui-badge v-else color="amber" icon="warning" text="Unknown URL" />
                         </ui-table-cell>
+                        <ui-table-cell class="text-xs">{{ formatLastReceived(webhook.last_received_at) }}</ui-table-cell>
                     </ui-table-row>
                     <ui-table-row v-for="topic in missingTopics" :key="topic">
                         <ui-table-cell class="font-mono text-xs">{{ topic }}</ui-table-cell>
-                        <ui-table-cell class="font-mono text-xs text-gray-400">{{ expected[topic] }}</ui-table-cell>
+                        <ui-table-cell class="font-mono text-xs">{{ expected[topic] }}</ui-table-cell>
                         <ui-table-cell>
                             <ui-badge color="red" icon="warning-diamond" text="Not registered" />
                         </ui-table-cell>
+                        <ui-table-cell class="text-xs">—</ui-table-cell>
                     </ui-table-row>
                 </ui-table-rows>
             </ui-table>
@@ -64,6 +67,13 @@ export default {
                 .map(w => w.topic);
 
             return Object.keys(this.expected).filter(t => !registeredTopics.includes(t));
+        },
+    },
+
+    methods: {
+        formatLastReceived(timestamp) {
+            if (!timestamp) return 'Never';
+            return new Date(timestamp).toLocaleString();
         },
     },
 
