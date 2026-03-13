@@ -80,7 +80,7 @@ php artisan shopify:webhooks:register
 
 This will register all required webhooks in your Shopify store automatically. You can also check webhook status at any time from the **Shopify** section of the Control Panel.
 
-Note: if you have not requested access to protected customer fields, the order create, user create and user update webhooks will fail to register.
+Note: if you have not requested access to protected customer fields, the order create, customer create and customer update webhooks will fail to register.
 
 Full details can be found in the ["Webhooks"](/cms/webhooks) section.
 
