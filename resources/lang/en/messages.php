@@ -8,4 +8,5 @@ return [
     'option_title_price_nostock' => ':title - :price (Out of Stock)',
     'option_title_nostock' => ':title (Out of Stock)',
     'out_of_stock' => 'Out of Stock',
+    'reimport_product' => 'Reimport from Shopify',
 ];

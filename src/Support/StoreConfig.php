@@ -50,6 +50,19 @@ class StoreConfig
         return array_merge(['handle' => $handle], $stores[$handle]);
     }
 
+    public static function findBySite(string $siteHandle): ?array
+    {
+        $stores = config('shopify.multi_store.stores', []);
+
+        foreach ($stores as $handle => $store) {
+            if (($store['site'] ?? null) === $siteHandle) {
+                return array_merge(['handle' => $handle], $store);
+            }
+        }
+
+        return null;
+    }
+
     public static function findByDomain(string $domain): ?array
     {
         $stores = config('shopify.multi_store.stores', []);

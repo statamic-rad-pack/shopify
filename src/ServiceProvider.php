@@ -26,6 +26,10 @@ class ServiceProvider extends AddonServiceProvider
         Commands\ShopifyWebhooksRegister::class,
     ];
 
+    protected $actions = [
+        Actions\ReimportProduct::class,
+    ];
+
     protected $fieldtypes = [
         Fieldtypes\Variants::class,
         Fieldtypes\DisabledText::class,
