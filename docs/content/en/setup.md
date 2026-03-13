@@ -48,6 +48,17 @@ Set up an app at https://dev.shopify.com/dashboard/ with the following details:
 3. Scopes: At a minimum we need: `write_customers, read_inventory, read_metaobjects, read_orders, read_product_listings, read_products, read_publications, read_translations`, however your site may need others.
 4. App URL: your website's URL
 
+If you plan to use customer order history or addresses on your site, you need to request access to protected user fields:
+
+To request access:
+
+1. From the Partner Dashboard, go to Apps, and then select your app.
+2. In the sidebar, click API access requests.
+3. Find Protected customer data access and click Request access.
+4. Select Protected customer data, provide your reasons for using it (we suggest 'App functionality'), and click Save.
+5. If your app needs access to protected customer fields, then select the relevant fields, provide your reasons for using them, and click Save.
+6. Complete your Data protection details, making sure that your app meets the protected customer data requirements.
+
 Once the app is created, add the `Client ID` to your .env as `SHOPIFY_CLIENT_ID` and the `Client Secret` as `SHOPIFY_CLIENT_SECRET`. Then click "Install" and add it to your Shopify store.
 
 This add-on will automatically negotiate a new Admin API token for you when you make GraphQL calls and handle expirations.
@@ -62,11 +73,14 @@ In order for the addon to receive updates from Shopify about your products and c
 
 The quickest way is to run the registration command once your credentials are configured:
 
+
 ```bash
 php artisan shopify:webhooks:register
 ```
 
 This will register all required webhooks in your Shopify store automatically. You can also check webhook status at any time from the **Shopify** section of the Control Panel.
+
+Note: if you have not requested access to protected customer fields, the order create, user create and user update webhooks will fail to register.
 
 Full details can be found in the ["Webhooks"](/cms/webhooks) section.
 
