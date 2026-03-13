@@ -3,6 +3,7 @@
 namespace StatamicRadPack\Shopify\Http\Controllers\CP;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Shopify\Clients\Graphql;
 use Statamic\Http\Controllers\CP\CpController;
 use Statamic\Support\Arr;
@@ -39,12 +40,22 @@ class WebhooksStatusController extends CpController
         $webhooks = collect($registered)->map(fn ($webhook) => array_merge($webhook, [
             'expected' => isset($expected[$webhook['topic']])
                 && $webhook['callbackUrl'] === $expected[$webhook['topic']],
+            'last_received_at' => $this->getLastReceivedAt($webhook['topic'], $storeHandle),
         ]))->all();
 
         return response()->json([
             'webhooks' => $webhooks,
             'expected' => $expected,
         ]);
+    }
+
+    private function getLastReceivedAt(string $topic, ?string $storeHandle): ?string
+    {
+        $cacheKey = $storeHandle
+            ? "shopify::webhook_last_received::{$storeHandle}::{$topic}"
+            : "shopify::webhook_last_received::{$topic}";
+
+        return Cache::get($cacheKey);
     }
 
     private function fetchWebhooks(Graphql $graphql): array

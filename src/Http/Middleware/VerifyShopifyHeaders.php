@@ -4,6 +4,7 @@ namespace StatamicRadPack\Shopify\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 
 class VerifyShopifyHeaders
@@ -34,7 +35,27 @@ class VerifyShopifyHeaders
             return response()->json(['error' => true], 403);
         }
 
+        $this->recordLastReceived($request);
+
         return $next($request);
+    }
+
+    protected function recordLastReceived(Request $request): void
+    {
+        $rawTopic = $request->header('X-Shopify-Topic');
+
+        if (! $rawTopic) {
+            return;
+        }
+
+        $topic = str_replace('/', '_', strtoupper($rawTopic));
+        $storeHandle = $request->attributes->get('shopify_store_handle');
+
+        $cacheKey = $storeHandle
+            ? "shopify::webhook_last_received::{$storeHandle}::{$topic}"
+            : "shopify::webhook_last_received::{$topic}";
+
+        Cache::forever($cacheKey, now()->toIso8601String());
     }
 
     /**
