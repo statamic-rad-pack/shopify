@@ -241,6 +241,117 @@ class ImportSingleProductJobTest extends TestCase
         $this->assertSame($entry->slug(), 'product-new');
     }
 
+    #[Test]
+    public function clears_product_metafields_removed_in_shopify()
+    {
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
+        Facades\Taxonomy::make()->handle('collections')->save();
+        Facades\Taxonomy::make()->handle('tags')->save();
+        Facades\Taxonomy::make()->handle('type')->save();
+        Facades\Taxonomy::make()->handle('vendor')->save();
+
+        $jsonWithMetafield = $this->getProductJson();
+        $jsonWithoutMetafield = str_replace(
+            '"edges": [
+                                {
+                                  "node": {
+                                    "id" : 1,
+                                    "key": "some_metafield",
+                                    "value": "this is a value"
+                                  }
+                                }
+                              ]',
+            '"edges": []',
+            $jsonWithMetafield
+        );
+
+        $this->mock(Graphql::class, function (MockInterface $mock) use ($jsonWithMetafield, $jsonWithoutMetafield) {
+            $mock
+                ->shouldReceive('query')
+                ->andReturn(
+                    new HttpResponse(status: 200, body: $jsonWithMetafield),
+                    new HttpResponse(status: 200, body: $jsonWithoutMetafield)
+                );
+        });
+
+        Jobs\ImportSingleProductJob::dispatch(1072481042);
+
+        $entry = Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->first();
+        $this->assertSame($entry->get('some_metafield'), 'this is a value');
+
+        Jobs\ImportSingleProductJob::dispatch(1072481042);
+
+        $entry = Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->first();
+        $this->assertNull($entry->get('some_metafield'));
+        $this->assertSame([], $entry->get('shopify_metafield_keys'));
+    }
+
+    #[Test]
+    public function clears_variant_metafields_removed_in_shopify()
+    {
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
+        Facades\Taxonomy::make()->handle('collections')->save();
+        Facades\Taxonomy::make()->handle('tags')->save();
+        Facades\Taxonomy::make()->handle('type')->save();
+        Facades\Taxonomy::make()->handle('vendor')->save();
+
+        $jsonWithVariantMetafield = str_replace(
+            '"metafields": {
+                                        "edges": []
+                                      }',
+            '"metafields": {
+                                        "edges": [
+                                          {
+                                            "node": {
+                                              "id": 2,
+                                              "key": "variant_metafield",
+                                              "value": "variant value"
+                                            }
+                                          }
+                                        ]
+                                      }',
+            $this->getProductJson()
+        );
+
+        $jsonWithoutVariantMetafield = str_replace(
+            '"metafields": {
+                                        "edges": [
+                                          {
+                                            "node": {
+                                              "id": 2,
+                                              "key": "variant_metafield",
+                                              "value": "variant value"
+                                            }
+                                          }
+                                        ]
+                                      }',
+            '"metafields": {
+                                        "edges": []
+                                      }',
+            $jsonWithVariantMetafield
+        );
+
+        $this->mock(Graphql::class, function (MockInterface $mock) use ($jsonWithVariantMetafield, $jsonWithoutVariantMetafield) {
+            $mock
+                ->shouldReceive('query')
+                ->andReturn(
+                    new HttpResponse(status: 200, body: $jsonWithVariantMetafield),
+                    new HttpResponse(status: 200, body: $jsonWithoutVariantMetafield)
+                );
+        });
+
+        Jobs\ImportSingleProductJob::dispatch(1072481042);
+
+        $variant = Facades\Entry::whereCollection('variants')->first();
+        $this->assertSame($variant->get('variant_metafield'), 'variant value');
+
+        Jobs\ImportSingleProductJob::dispatch(1072481042);
+
+        $variant = Facades\Entry::whereCollection('variants')->first();
+        $this->assertNull($variant->get('variant_metafield'));
+        $this->assertSame([], $variant->get('shopify_metafield_keys'));
+    }
+
     private function getProductJson(): string
     {
         return '{
