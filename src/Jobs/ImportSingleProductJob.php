@@ -237,15 +237,7 @@ class ImportSingleProductJob implements ShouldQueue
 
             // meta fields
             try {
-                $metafields = collect(Arr::get($this->data, 'metafields.edges', []))->map(fn ($metafield) => $metafield['node'] ?? [])->filter()->all();
-
-                if ($metafields) {
-                    $metafields = $this->parseMetafields($metafields, 'product');
-
-                    if ($metafields) {
-                        $entry->merge($metafields);
-                    }
-                }
+                $this->syncMetafields($entry, Arr::get($this->data, 'metafields.edges', []), 'product');
             } catch (\Throwable $e) {
                 Log::error('Could not retrieve metafields for product '.$this->data['id']);
                 Log::error($e->getMessage());
@@ -619,15 +611,7 @@ class ImportSingleProductJob implements ShouldQueue
             $entry->merge($data);
 
             try {
-                $metafields = collect(Arr::get($variant, 'metafields.edges', []))->map(fn ($metafield) => $metafield['node'] ?? [])->filter()->all();
-
-                if ($metafields) {
-                    $metafields = $this->parseMetafields($metafields, 'product-variant');
-
-                    if ($metafields) {
-                        $entry->merge($metafields);
-                    }
-                }
+                $this->syncMetafields($entry, Arr::get($variant, 'metafields.edges', []), 'product-variant');
             } catch (\Throwable $e) {
                 Log::error('Could not retrieve metafields for variant '.$this->data['id']);
             }
@@ -715,6 +699,27 @@ class ImportSingleProductJob implements ShouldQueue
         Log::error('Shopify: ImportSingleProductJob failed for product '.$this->productId.': '.$exception->getMessage(), $context);
 
         ProductImportFailed::dispatch($this->productId, $this->storeHandle, $exception);
+    }
+
+    /**
+     * Sync metafields onto an entry, clearing any keys that were previously set
+     * but are no longer returned by Shopify (i.e. the metafield was deleted).
+     */
+    private function syncMetafields(\Statamic\Contracts\Entries\Entry $entry, array $edges, string $context): void
+    {
+        $raw = collect($edges)->map(fn ($m) => $m['node'] ?? [])->filter()->all();
+        $parsed = $this->parseMetafields($raw, $context);
+
+        $previousKeys = $entry->get('shopify_metafield_keys', []);
+        foreach (array_diff($previousKeys, array_keys($parsed)) as $staleKey) {
+            $entry->set($staleKey, null);
+        }
+
+        if ($parsed) {
+            $entry->merge($parsed);
+        }
+
+        $entry->set('shopify_metafield_keys', array_keys($parsed));
     }
 
     /**
