@@ -129,6 +129,13 @@ return [
     'sales_channel' => env('SHOPIFY_SALES_CHANNEL', 'Online Store'),
 
     /**
+     * When true (default), all products are imported regardless of sales channel membership.
+     * When false, only products assigned to the configured sales_channel are imported.
+     * Products previously imported that are no longer on the sales channel will be deleted.
+     */
+    'import_all_products' => true,
+
+    /**
      * Your App's Admin API Auth Key
      * Note: this is not required unless you are doing custom integrations using the RestApi
      */
