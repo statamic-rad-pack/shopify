@@ -364,6 +364,7 @@ class ImportSingleProductJob implements ShouldQueue
                         }
                       }
                     }
+                    tracked
                   }'
             : 'inventoryItem {
                     measurement {
@@ -373,6 +374,7 @@ class ImportSingleProductJob implements ShouldQueue
                       }
                     }
                     requiresShipping
+                    tracked
                   }';
 
         $contextualPricingFields = '';
@@ -557,7 +559,7 @@ class ImportSingleProductJob implements ShouldQueue
                 'product_slug' => $product_slug,
                 'title' => $variant['title'] === 'Default Title' ? 'Default' : $variant['title'],
                 'inventory_quantity' => $variant['inventoryQuantity'] ?? null,
-                'inventory_policy' => $variant['inventoryPolicy'] ?? null,
+                'inventory_policy' => Arr::get($variant, 'inventoryItem.tracked') ? ($variant['inventoryPolicy'] ?? null) : 'CONTINUE',
                 'inventory_management' => 'shopify', // @deprecated, left in for backwards JS compatibility
                 'price' => $variant['price'],
                 'compare_at_price' => $variant['compareAtPrice'],
@@ -577,7 +579,7 @@ class ImportSingleProductJob implements ShouldQueue
                     'price' => $variant['price'],
                     'compare_at_price' => $variant['compareAtPrice'],
                     'inventory_quantity' => $variant['inventoryQuantity'] ?? null,
-                    'inventory_policy' => $variant['inventoryPolicy'] ?? null,
+                    'inventory_policy' => Arr::get($variant, 'inventoryItem.tracked') ? ($variant['inventoryPolicy'] ?? null) : 'CONTINUE',
                 ];
 
                 $existingMultiStoreData = $entry->get('multi_store_data', []);
