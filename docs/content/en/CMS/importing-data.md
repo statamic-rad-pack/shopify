@@ -99,6 +99,16 @@ Alt text is imported from Shopify alongside each product and variant image. When
 
 By default the `published` state and `published_at` of the product is determined by the values of `Online Store` sales channel. If you want to use a different sales channel to determine availability you can specify the name of the channel in the `SHOPIFY_SALES_CHANNEL` env variable, e.g. `SHOPIFY_SALES_CHANNEL="My other channel"`.
 
+## Sales channel filtering
+
+By default all Shopify products are imported regardless of whether they are assigned to the configured sales channel. To restrict imports to only products on the sales channel, set `import_all_products` to `false` in `config/shopify.php`:
+
+```php
+'import_all_products' => false,
+```
+
+When this is enabled, any product that is not assigned to the configured sales channel will be skipped. If a product was previously imported and is later removed from the sales channel, it and all of its variants will be deleted from Statamic on the next import.
+
 ## Metafields
 
 Any product and variant meta fields will be automatically added to the Statamic entry data, with the same handle as their key in Shopify and using the raw value.
