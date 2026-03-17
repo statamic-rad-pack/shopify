@@ -353,8 +353,10 @@ class ImportSingleProductJobTest extends TestCase
     }
 
     #[Test]
-    public function uses_shopify_inventory_policy_when_variant_is_tracked()
+    public function skips_import_when_not_in_sales_channel()
     {
+        config(['shopify.import_all_products' => false]);
+
         Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
         Facades\Collection::make('variants')->save();
         Facades\Taxonomy::make()->handle('collections')->save();
@@ -363,18 +365,23 @@ class ImportSingleProductJobTest extends TestCase
         Facades\Taxonomy::make()->handle('vendor')->save();
 
         $this->mock(Graphql::class, function (MockInterface $mock) {
-            $mock->shouldReceive('query')->andReturn(new HttpResponse(status: 200, body: $this->getProductJson()));
+            $mock->shouldReceive('query')->andReturn(new HttpResponse(
+                status: 200,
+                body: $this->getProductJson()
+            ));
         });
 
         Jobs\ImportSingleProductJob::dispatch(1);
 
-        $variant = Facades\Entry::whereCollection('variants')->first();
-        $this->assertSame('DENY', $variant->get('inventory_policy'));
+        $this->assertCount(0, Facades\Entry::whereCollection(config('shopify.collection_handle', 'products')));
+        $this->assertCount(0, Facades\Entry::whereCollection('variants'));
     }
 
     #[Test]
-    public function sets_inventory_policy_to_continue_when_variant_is_not_tracked()
+    public function deletes_existing_product_when_removed_from_sales_channel()
     {
+        config(['shopify.import_all_products' => false]);
+
         Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
         Facades\Collection::make('variants')->save();
         Facades\Taxonomy::make()->handle('collections')->save();
@@ -382,16 +389,79 @@ class ImportSingleProductJobTest extends TestCase
         Facades\Taxonomy::make()->handle('type')->save();
         Facades\Taxonomy::make()->handle('vendor')->save();
 
-        $json = str_replace('"tracked": true', '"tracked": false', $this->getProductJson());
+        // First import with the product in the sales channel
+        $jsonWithChannel = str_replace('"resourcePublications": {}', '"resourcePublications": {
+                            "edges": [
+                              {
+                                "node": {
+                                  "isPublished": true,
+                                  "publication": {
+                                    "id": "gid://shopify/Publication/1",
+                                    "name": "Online Store"
+                                  },
+                                  "publishDate": "2024-01-01T00:00:00Z"
+                                }
+                              }
+                            ]
+                          }', $this->getProductJson());
 
-        $this->mock(Graphql::class, function (MockInterface $mock) use ($json) {
-            $mock->shouldReceive('query')->andReturn(new HttpResponse(status: 200, body: $json));
+        $this->mock(Graphql::class, function (MockInterface $mock) use ($jsonWithChannel) {
+            $mock->shouldReceive('query')->andReturn(
+                new HttpResponse(status: 200, body: $jsonWithChannel),
+                new HttpResponse(status: 200, body: $this->getProductJson())
+            );
         });
 
         Jobs\ImportSingleProductJob::dispatch(1);
 
-        $variant = Facades\Entry::whereCollection('variants')->first();
-        $this->assertSame('CONTINUE', $variant->get('inventory_policy'));
+        $this->assertCount(1, Facades\Entry::whereCollection(config('shopify.collection_handle', 'products')));
+        $this->assertCount(1, Facades\Entry::whereCollection('variants'));
+
+        // Second import with the product no longer in the sales channel
+        Jobs\ImportSingleProductJob::dispatch(1);
+
+        $this->assertCount(0, Facades\Entry::whereCollection(config('shopify.collection_handle', 'products')));
+        $this->assertCount(0, Facades\Entry::whereCollection('variants'));
+    }
+
+    #[Test]
+    public function imports_product_when_in_sales_channel_and_filter_enabled()
+    {
+        config(['shopify.import_all_products' => false]);
+
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
+        Facades\Taxonomy::make()->handle('collections')->save();
+        Facades\Taxonomy::make()->handle('tags')->save();
+        Facades\Taxonomy::make()->handle('type')->save();
+        Facades\Taxonomy::make()->handle('vendor')->save();
+
+        $jsonWithChannel = str_replace('"resourcePublications": {}', '"resourcePublications": {
+                            "edges": [
+                              {
+                                "node": {
+                                  "isPublished": true,
+                                  "publication": {
+                                    "id": "gid://shopify/Publication/1",
+                                    "name": "Online Store"
+                                  },
+                                  "publishDate": "2024-01-01T00:00:00Z"
+                                }
+                              }
+                            ]
+                          }', $this->getProductJson());
+
+        $this->mock(Graphql::class, function (MockInterface $mock) use ($jsonWithChannel) {
+            $mock->shouldReceive('query')->andReturn(new HttpResponse(
+                status: 200,
+                body: $jsonWithChannel
+            ));
+        });
+
+        Jobs\ImportSingleProductJob::dispatch(1);
+
+        $entry = Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->first();
+        $this->assertNotNull($entry);
+        $this->assertSame($entry->product_id, '108828309');
     }
 
     private function getProductJson(): string
@@ -532,8 +602,7 @@ class ImportSingleProductJobTest extends TestCase
                                             "value": 0
                                           }
                                         },
-                                        "requiresShipping": true,
-                                        "tracked": true
+                                        "requiresShipping": true
                                       },
                                       "inventoryPolicy": "DENY",
                                       "inventoryQuantity": 0,

@@ -131,6 +131,20 @@ class ImportSingleProductJob implements ShouldQueue
             ->where('product_id', $this->data['id'])
             ->first();
 
+        if (! config('shopify.import_all_products', true)) {
+            $inSalesChannel = collect(Arr::get($this->data, 'resourcePublications.edges', []))
+                ->contains(fn ($pub) => Arr::get($pub, 'node.publication.name') === config('shopify.sales_channel', 'Online Store'));
+
+            if (! $inSalesChannel) {
+                if ($entry) {
+                    $this->removeOldVariants([], $this->data['handle']);
+                    $entry->delete();
+                }
+
+                return;
+            }
+        }
+
         // Clean up data whilst checking if product exists
         $tags = $this->importTaxonomy($this->data['tags'], config('shopify.taxonomies.tags'));
         $vendors = $this->importTaxonomy([$this->data['vendor']], config('shopify.taxonomies.vendor'));
