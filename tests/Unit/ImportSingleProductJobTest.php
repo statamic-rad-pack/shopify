@@ -464,6 +464,48 @@ class ImportSingleProductJobTest extends TestCase
         $this->assertSame($entry->product_id, '108828309');
     }
 
+    #[Test]
+    public function uses_shopify_inventory_policy_when_variant_is_tracked()
+    {
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
+        Facades\Collection::make('variants')->save();
+        Facades\Taxonomy::make()->handle('collections')->save();
+        Facades\Taxonomy::make()->handle('tags')->save();
+        Facades\Taxonomy::make()->handle('type')->save();
+        Facades\Taxonomy::make()->handle('vendor')->save();
+
+        $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock->shouldReceive('query')->andReturn(new HttpResponse(status: 200, body: $this->getProductJson()));
+        });
+
+        Jobs\ImportSingleProductJob::dispatch(1);
+
+        $variant = Facades\Entry::whereCollection('variants')->first();
+        $this->assertSame('DENY', $variant->get('inventory_policy'));
+    }
+
+    #[Test]
+    public function sets_inventory_policy_to_continue_when_variant_is_not_tracked()
+    {
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
+        Facades\Collection::make('variants')->save();
+        Facades\Taxonomy::make()->handle('collections')->save();
+        Facades\Taxonomy::make()->handle('tags')->save();
+        Facades\Taxonomy::make()->handle('type')->save();
+        Facades\Taxonomy::make()->handle('vendor')->save();
+
+        $json = str_replace('"tracked": true', '"tracked": false', $this->getProductJson());
+
+        $this->mock(Graphql::class, function (MockInterface $mock) use ($json) {
+            $mock->shouldReceive('query')->andReturn(new HttpResponse(status: 200, body: $json));
+        });
+
+        Jobs\ImportSingleProductJob::dispatch(1);
+
+        $variant = Facades\Entry::whereCollection('variants')->first();
+        $this->assertSame('CONTINUE', $variant->get('inventory_policy'));
+    }
+
     private function getProductJson(): string
     {
         return '{
@@ -602,7 +644,8 @@ class ImportSingleProductJobTest extends TestCase
                                             "value": 0
                                           }
                                         },
-                                        "requiresShipping": true
+                                        "requiresShipping": true,
+                                        "tracked": true
                                       },
                                       "inventoryPolicy": "DENY",
                                       "inventoryQuantity": 0,
