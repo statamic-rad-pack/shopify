@@ -14,7 +14,7 @@
         </div>
 
         <div class="flex items-center">
-            <ui-button type="button" @click="fetch()" :disabled="processing">{{ processing ? 'Please wait' : 'Import product' }}</ui-button>
+            <ui-button type="submit" :disabled="processing">{{ processing ? 'Please wait' : 'Import product' }}</ui-button>
             <ui-error-message class="ml-2" v-if="message">{{ message }}</ui-error-message>
         </div>
     </form>
