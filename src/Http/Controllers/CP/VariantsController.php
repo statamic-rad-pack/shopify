@@ -4,6 +4,7 @@ namespace StatamicRadPack\Shopify\Http\Controllers\CP;
 
 use Illuminate\Http\Request;
 use Statamic\Facades\Entry;
+use Statamic\Facades\Site;
 use Statamic\Http\Controllers\CP\CpController;
 use StatamicRadPack\Shopify\Blueprints\VariantBlueprint;
 
@@ -11,21 +12,18 @@ class VariantsController extends CpController
 {
     public function fetch($product)
     {
+        $site = Site::selected()->handle();
+
         return Entry::query()
             ->where('collection', 'variants')
             ->where('product_slug', $product)
+            ->where('site', $site)
             ->get()
             ->map(function ($variant) {
-                $values = [];
-                $values['id'] = $variant->id();
-                $values['slug'] = $variant->slug();
-
-                // Map all variant values to data to ensure we are getting everything.
-                foreach ($variant->data() as $key => $value) {
-                    $values[$key] = $value;
-                }
-
-                return $values;
+                return $variant->values()->merge([
+                    'id' => $variant->id(),
+                    'slug' => $variant->slug(),
+                ]);
             });
     }
 
