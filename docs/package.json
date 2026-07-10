@@ -1,16 +1,17 @@
 {
-  "name": "shopify-docs-2",
-  "version": "1.0.0",
+  "name": "shopify-docs",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "nuxt",
-    "build": "nuxt build",
-    "start": "nuxt start",
-    "generate": "nuxt generate"
+    "dev": "nuxi dev",
+    "build": "nuxi build",
+    "generate": "nuxi generate",
+    "preview": "nuxi preview"
   },
   "dependencies": {
-    "@nuxt/content-theme-docs": "0.9.0",
-    "nuxt": "^2.15.2"
+    "better-sqlite3": "^12.0.0",
+    "docus": "^5.12.3",
+    "nuxt": "^4.0.0"
   },
   "devDependencies": {
     "vercel": "^55.0.0"
