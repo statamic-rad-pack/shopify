@@ -22,7 +22,7 @@ jobs:
       - name: Setup node env
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
 
       # Install all dependencies needed to build our documentation
       - name: Install dependencies
