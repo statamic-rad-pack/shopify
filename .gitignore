@@ -7,4 +7,3 @@ mix-manifest.json
 yarn.lock
 .idea/
 .claude/
-docs/.output
