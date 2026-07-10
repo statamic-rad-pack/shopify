@@ -147,3 +147,47 @@ $bard = (new StatamicRadPack\Shopify\Support\RichTextConverter)->convert($metafi
 
 
 ```
+
+## Hooks
+
+`ImportSingleProductJob` provides two [Hooks](https://statamic.dev/extending/hooks) so you can tap into the import pipeline without overriding the job.
+
+#### import-product-query hook
+
+Runs just before the product GraphQL query is sent to Shopify. Use it to add or change fields on the query, e.g. to pull in additional data.
+
+```php
+\StatamicRadPack\Shopify\Jobs\ImportSingleProductJob::hook('import-product-query', function ($payload, $next) {
+    // $payload->query        — the GraphQL query string about to be sent
+    // $payload->productId    — the Shopify product ID being imported
+    // $payload->storeHandle  — the store handle in multi-store mode, otherwise null
+
+    $payload->query = str_replace('descriptionHtml', 'descriptionHtml seo { title }', $payload->query);
+
+    return $next($payload);
+});
+```
+
+#### import-product-data hook
+
+Runs just before the imported data is merged onto the Statamic entry. Use it to modify, add, or remove fields before they're saved.
+
+```php
+\StatamicRadPack\Shopify\Jobs\ImportSingleProductJob::hook('import-product-data', function ($payload, $next) {
+    // $payload->data        — the array of data about to be merged onto the entry
+    // $payload->entry       — the Statamic entry (existing or newly made) being imported into
+    // $payload->product     — the raw product data returned by Shopify
+
+    $data = $payload->data;
+    $data['title'] = strtoupper($data['title']);
+    $payload->data = $data;
+
+    return $next($payload);
+});
+```
+
+<alert type="info">
+
+  Because `$payload->data` is an array exposed through a magic property, you can't modify it in place (e.g. `$payload->data['title'] = '...'`). Assign it to a local variable, change it, then assign it back to `$payload->data` as shown above.
+
+</alert>

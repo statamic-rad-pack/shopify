@@ -3,7 +3,6 @@
 namespace StatamicRadPack\Shopify\Jobs;
 
 use Carbon\Carbon;
-use Throwable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -15,14 +14,17 @@ use Statamic\Facades\Site;
 use Statamic\Facades\Term;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use Statamic\Support\Traits\Hookable;
 use StatamicRadPack\Shopify\Events\ProductImportFailed;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
 use StatamicRadPack\Shopify\Traits\ThrottlesShopifyRequests;
+use Throwable;
 
 class ImportSingleProductJob implements ShouldQueue
 {
     use Dispatchable;
+    use Hookable;
     use InteractsWithQueue;
     use Queueable;
     use SavesImagesAndMetafields;
@@ -114,6 +116,12 @@ class ImportSingleProductJob implements ShouldQueue
           }
         }
         QUERY;
+
+        $query = $this->runHooksWith('import-product-query', [
+            'query' => $query,
+            'productId' => $this->productId,
+            'storeHandle' => $this->storeHandle,
+        ])->query;
 
         $response = $this->queryWithThrottle($graphql, ['query' => $query]);
 
@@ -212,6 +220,12 @@ class ImportSingleProductJob implements ShouldQueue
 
             $data = $this->updatePurchaseHistory($data, $qty);
         }
+
+        $data = $this->runHooksWith('import-product-data', [
+            'data' => $data,
+            'entry' => $entry,
+            'product' => $this->data,
+        ])->data;
 
         $entry->merge($data);
 

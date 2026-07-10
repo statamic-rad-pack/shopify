@@ -57,6 +57,7 @@ Shopify data maps to Statamic content:
 4. The `SavesImagesAndMetafields` trait handles image downloading and metafield parsing (delegated to the class in `config('shopify.metafields_parser')`). Alt text from Shopify is saved/updated on the Statamic asset's `alt` field.
 5. In multisite setups, the job also fetches Shopify translations for each locale
 6. All GraphQL calls in the import pipeline go through `ThrottlesShopifyRequests::queryWithThrottle()`, which inspects `extensions.cost.throttleStatus` and sleeps if the available query budget drops below 500 points.
+7. `ImportSingleProductJob` uses Statamic's `Hookable` trait (same mechanism as the `product-price` tag hook) to expose two hooks: `import-product-query` (modify the GraphQL query before it's sent) and `import-product-data` (modify the data array before it's merged onto the entry). See `docs/content/en/CMS/importing-data.md`.
 
 ### Webhooks
 
