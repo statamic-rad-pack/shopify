@@ -13,6 +13,6 @@
     "nuxt": "^2.15.2"
   },
   "devDependencies": {
-    "vercel": "^32.2.4"
+    "vercel": "^55.0.0"
   }
 }
