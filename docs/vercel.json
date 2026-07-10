@@ -1,0 +1,9 @@
+{
+  "buildCommand": "yarn nuxt generate",
+  "outputDirectory": "dist",
+  "build": {
+    "env": {
+      "NODE_OPTIONS": "--openssl-legacy-provider"
+    }
+  }
+}
