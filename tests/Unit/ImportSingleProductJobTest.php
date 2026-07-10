@@ -506,6 +506,93 @@ class ImportSingleProductJobTest extends TestCase
         $this->assertSame('CONTINUE', $variant->get('inventory_policy'));
     }
 
+    #[Test]
+    public function import_product_query_hook_can_modify_the_query()
+    {
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
+        Facades\Taxonomy::make()->handle('collections')->save();
+        Facades\Taxonomy::make()->handle('tags')->save();
+        Facades\Taxonomy::make()->handle('type')->save();
+        Facades\Taxonomy::make()->handle('vendor')->save();
+
+        $seenProductId = null;
+        $seenStoreHandle = 'not-set';
+
+        Jobs\ImportSingleProductJob::hook('import-product-query', function ($payload, $next) use (&$seenProductId, &$seenStoreHandle) {
+            $seenProductId = $payload->productId;
+            $seenStoreHandle = $payload->storeHandle;
+
+            $payload->query = str_replace('descriptionHtml', 'descriptionHtml # hook-applied', $payload->query);
+
+            return $next($payload);
+        });
+
+        $receivedQuery = null;
+
+        $this->mock(Graphql::class, function (MockInterface $mock) use (&$receivedQuery) {
+            $mock
+                ->shouldReceive('query')
+                ->withArgs(function ($query) use (&$receivedQuery) {
+                    if (str_contains($query['query'], 'product(id')) {
+                        $receivedQuery = $query['query'];
+                    }
+
+                    return true;
+                })
+                ->andReturn(new HttpResponse(
+                    status: 200,
+                    body: $this->getProductJson()
+                ));
+        });
+
+        Jobs\ImportSingleProductJob::dispatch(1);
+
+        $this->assertSame(1, $seenProductId);
+        $this->assertNull($seenStoreHandle);
+        $this->assertStringContainsString('# hook-applied', $receivedQuery);
+    }
+
+    #[Test]
+    public function import_product_data_hook_can_modify_data_before_it_is_merged()
+    {
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
+        Facades\Taxonomy::make()->handle('collections')->save();
+        Facades\Taxonomy::make()->handle('tags')->save();
+        Facades\Taxonomy::make()->handle('type')->save();
+        Facades\Taxonomy::make()->handle('vendor')->save();
+
+        $seenEntry = null;
+        $seenProduct = null;
+
+        Jobs\ImportSingleProductJob::hook('import-product-data', function ($payload, $next) use (&$seenEntry, &$seenProduct) {
+            $seenEntry = $payload->entry;
+            $seenProduct = $payload->product;
+
+            $data = $payload->data;
+            $data['title'] = 'Hooked title';
+            $payload->data = $data;
+
+            return $next($payload);
+        });
+
+        $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock
+                ->shouldReceive('query')
+                ->andReturn(new HttpResponse(
+                    status: 200,
+                    body: $this->getProductJson()
+                ));
+        });
+
+        Jobs\ImportSingleProductJob::dispatch(1);
+
+        $entry = Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->first();
+
+        $this->assertSame('Hooked title', $entry->title);
+        $this->assertInstanceOf(\Statamic\Contracts\Entries\Entry::class, $seenEntry);
+        $this->assertSame('108828309', $seenProduct['id']);
+    }
+
     private function getProductJson(): string
     {
         return '{
