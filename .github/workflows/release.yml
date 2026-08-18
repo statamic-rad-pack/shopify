@@ -2,20 +2,37 @@ name: Bundle Release Assets
 
 on:
   workflow_dispatch:
-  release:
-    types:
-      - created
+    inputs:
+      version:
+        description: 'Release version, without the v prefix (e.g. 7.1.0)'
+        required: true
+        type: string
 
 permissions:
   contents: write
 
 jobs:
   build:
-    if: github.event.release.draft == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
+      - name: Validate version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [[ ! "$INPUT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::Version must look like 7.1.0 (got: $INPUT_VERSION)"
+            exit 1
+          fi
+
+          echo "TAG=v$INPUT_VERSION" >> "$GITHUB_ENV"
+
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Assert tag does not already exist
+        run: |
+          existing="$(git ls-remote --tags origin "$TAG")"
+          [ -z "$existing" ] || { echo "::error::Tag $TAG already exists on remote. Aborting."; exit 1; }
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -40,12 +57,10 @@ jobs:
       - name: Create zip
         run: tar -czvf dist.tar.gz dist
 
-      - name: Upload dist zip to release
+      - name: Create release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.event.release.tag_name }}" dist.tar.gz --clobber
-
-      - name: Publish release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release edit "${{ github.event.release.tag_name }}" --draft=false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$TAG" dist.tar.gz \
+            --title "$TAG" \
+            --generate-notes
