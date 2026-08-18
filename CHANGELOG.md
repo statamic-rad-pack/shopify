@@ -1,5 +1,116 @@
 # Changelog
 
+## v7.8.1 - 2026-08-18
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.8.0...v7.8.1
+
+## v7.8.0 - 2026-08-18
+
+### What's Changed
+* Move docs to docus by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/350
+* Move settings page to inertia by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/352
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.7.0...v7.8.0
+
+## v7.7.0 - 2026-07-10
+
+### What's Changed
+* Add product import hooks by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/349
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.6.1...v7.7.0
+
+## v7.6.1 - 2026-06-21
+
+### What's Fixed
+* Fix single product import by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/345
+* Ensure variants are site specific, and use fallback values by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/346
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.6.0...v7.6.1
+
+## v7.6.0 - 2026-03-18
+
+### What's Changed
+* Supports Laravel 13 by @duncanmcclean in https://github.com/statamic-rad-pack/shopify/pull/342
+
+### New Contributors
+* @duncanmcclean made their first contribution in https://github.com/statamic-rad-pack/shopify/pull/342
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.5.0...v7.6.0
+
+## v7.5.0 - 2026-03-17
+
+### What's Changed
+* Config for sales channel import by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/340
+
+### What's Fixed
+* If inventory not tracked assume we can sell it by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/341
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.4.0...v7.5.0
+
+## v7.4.0 - 2026-03-16
+
+### What's Changed
+* Add re-import action to view page by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/334
+* Track and store last received on webhook table by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/335
+* Ensure any metafield data removed on Shopify is removed in Statamic by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/339
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.3.1...v7.4.0
+
+## v6.5.1 - 2026-03-11
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v6.5.0...v6.5.1
+
+## v7.3.1 - 2026-03-11
+
+### What's Changed
+* Remove old cp js reference by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/328
+* set API version correctly in multi-store context by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/329
+* Ensure we set up even when we dont have admin_token by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/330
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.3.0...v7.3.1
+
+## v7.3.0 - 2026-03-09
+
+### What's Changed
+* Add webhook registration, api request throttling by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/325
+* Add failed() logging and event to ProductImport by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/326
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.2.0...v7.3.0
+
+## v7.2.0 - 2026-03-06
+
+### What's Changed
+* Add Multi-Store Shopify Support by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/323
+* Add Shopify Markets (contextualPricing) support by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/324
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.1.0...v7.2.0
+
+## v7.1.0 - 2026-03-03
+
+### What's Changed
+* Update to new Shopify apps approach by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/319
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.0.4...v7.1.0
+
+## v7.0.4 - 2026-02-14
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.0.3...v7.0.4
+
+## v7.0.3 - 2026-02-14
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.0.2...v7.0.3
+
+## v7.0.2 - 2026-02-14
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.0.1...v7.0.2
+
+## v7.0.1 - 2026-02-14
+
+### What's Changed
+* Remove scripts in service provider by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/321
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.0.0...v7.0.1
+
 ## v7.0.0 - 2026-01-29
 
 ### What's Changed

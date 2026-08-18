@@ -64,3 +64,35 @@ jobs:
           gh release create "$TAG" dist.tar.gz \
             --title "$TAG" \
             --generate-notes
+
+          gh release view "$TAG" --json body --jq .body > /tmp/release-notes.md
+
+      - name: Update CHANGELOG.md
+        run: |
+          python3 - <<'PY'
+          import os, re, datetime
+
+          tag = os.environ["TAG"]
+
+          with open("/tmp/release-notes.md") as f:
+              notes = f.read().replace("\r\n", "\n").strip()
+          notes = re.sub(r"(?m)^## ", "### ", notes)
+
+          date = datetime.date.today().isoformat()
+          entry = f"## {tag} - {date}\n\n{notes}\n"
+
+          with open("CHANGELOG.md") as f:
+              content = f.read()
+          header, _, rest = content.partition("\n\n")
+
+          with open("CHANGELOG.md", "w") as f:
+              f.write(f"{header}\n\n{entry}\n{rest}")
+          PY
+
+      - name: Commit CHANGELOG.md
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "Update changelog for $TAG"
+          git push origin HEAD:"${{ github.ref_name }}"
