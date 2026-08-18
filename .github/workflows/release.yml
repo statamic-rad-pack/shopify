@@ -4,11 +4,14 @@ on:
   workflow_dispatch:
   release:
     types:
-      - released
-      - prereleased
+      - created
+
+permissions:
+  contents: write
 
 jobs:
   build:
+    if: github.event.release.draft == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -37,20 +40,12 @@ jobs:
       - name: Create zip
         run: tar -czvf dist.tar.gz dist
 
-      - name: Get release
-        id: get_release
-        uses: cardinalby/git-get-release-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag: ${{ github.event.release.tag_name }}
-
       - name: Upload dist zip to release
-        uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.get_release.outputs.upload_url }}
-          asset_path: ./dist.tar.gz
-          asset_name: dist.tar.gz
-          asset_content_type: application/tar+gz
+        run: gh release upload "${{ github.event.release.tag_name }}" dist.tar.gz --clobber
+
+      - name: Publish release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "${{ github.event.release.tag_name }}" --draft=false
