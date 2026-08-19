@@ -20,7 +20,7 @@
         </div>
 
         {{ $variants = {shopify:variants} }}
-        <div class="grid-cell" x-data='shopifyProduct({{ options | to_json }}, {{ variants | to_json }})'>
+        <div class="grid-cell" x-data='shopifyProduct({{ options | to_json }}, {{ $variants | to_json }})'>
             <div class="mb-8 prose">{{ content }}</div>
 
             {{ if type }}
