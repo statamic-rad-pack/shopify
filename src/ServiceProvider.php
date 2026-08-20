@@ -221,7 +221,7 @@ class ServiceProvider extends AddonServiceProvider
     {
         Statamic::afterInstalled(function () {
             Artisan::call('vendor:publish --tag=shopify-config');
-            Artisan::call('vendor:publish --tag=shopify-resources --force');
+            Artisan::call('vendor:publish --tag=shopify --force');
 
             static::installCollectionsTaxonomiesAssetsAndBlueprints();
         });
