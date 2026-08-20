@@ -1,5 +1,9 @@
 # Changelog
 
+## v7.8.3 - 2026-08-20
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.8.1...v7.8.3
+
 ## v7.8.1 - 2026-08-18
 
 **Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.8.0...v7.8.1
