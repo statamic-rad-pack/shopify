@@ -1,5 +1,13 @@
 # Changelog
 
+## v7.8.4 - 2026-08-27
+
+### What's Changed
+* Add accept header to image downloads by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/355
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.8.2...v7.8.4
+
 ## v7.8.3 - 2026-08-20
 
 **Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.8.1...v7.8.3
