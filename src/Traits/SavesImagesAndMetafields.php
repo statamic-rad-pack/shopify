@@ -86,9 +86,34 @@ trait SavesImagesAndMetafields
      */
     public function uploadFakeFileFromUrl(string $name, string $url): UploadedFile
     {
-        Storage::disk('local')->put($name, Http::timeout(30)->get($url)->throw()->body());
+        $request = Http::timeout(30);
+
+        // Shopify's CDN does content negotiation, so without an Accept header it
+        // may return a format that doesn't match the extension in the URL (and
+        // therefore not the filename we write to disk). Ask for what the
+        // extension promises.
+        if ($accept = $this->acceptHeaderForExtension($url)) {
+            $request = $request->withHeaders(['Accept' => $accept]);
+        }
+
+        Storage::disk('local')->put($name, $request->get($url)->throw()->body());
 
         return new UploadedFile(Storage::disk('local')->path($name), $name);
+    }
+
+    /**
+     * Map the file extension in a URL to the image mime type to request.
+     */
+    private function acceptHeaderForExtension(string $url): ?string
+    {
+        return match (strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION))) {
+            'webp' => 'image/webp',
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'avif' => 'image/avif',
+            default => null,
+        };
     }
 
     /**
