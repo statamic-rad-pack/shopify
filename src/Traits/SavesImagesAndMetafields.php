@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Statamic\Facades\Asset;
 use Statamic\Facades\Path;
-use Statamic\Support\Str;
 
 trait SavesImagesAndMetafields
 {
@@ -26,7 +25,7 @@ trait SavesImagesAndMetafields
         // Check if it exists first - no point double importing.
         $asset = Asset::query()
             ->where('container', config('shopify.asset.container'))
-            ->where('path', Str::replaceStart(config('shopify.asset.path').'/', '/', '').$name)
+            ->where('path', $this->getAssetPath($name))
             ->first();
 
         $altText = $image['altText'] ?? null;
@@ -131,7 +130,16 @@ trait SavesImagesAndMetafields
      */
     private function getPath(UploadedFile $file): string
     {
-        return Path::assemble(config('shopify.asset.path'), $file->getClientOriginalName());
+        return $this->getAssetPath($file->getClientOriginalName());
+    }
+
+    /**
+     * Build the container-relative asset path for a file name. Used by both the
+     * read (duplicate check) and write (upload) paths so the two cannot drift.
+     */
+    private function getAssetPath(string $name): string
+    {
+        return ltrim(Path::assemble(config('shopify.asset.path'), $name), '/');
     }
 
     /**
