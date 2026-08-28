@@ -1,5 +1,13 @@
 # Changelog
 
+## v7.8.5 - 2026-08-28
+
+### What's Changed
+* Ensure image path is consistent by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/357
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.8.4...v7.8.5
+
 ## v7.8.4 - 2026-08-27
 
 ### What's Changed
