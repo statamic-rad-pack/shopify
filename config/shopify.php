@@ -49,11 +49,6 @@ return [
     'api_version' => env('SHOPIFY_API_VERSION', '2025-04'),
 
     /**
-     * Admin connection is a private app, defaults to false
-     */
-    'api_private_app' => false,
-
-    /**
      * Shop Currency
      */
     'currency' => '£',
@@ -113,11 +108,6 @@ return [
     'update_shopify_user_job' => \StatamicRadPack\Shopify\Jobs\CreateOrUpdateShopifyUser::class,
 
     /**
-     * Where should the Shopify API client store its session data
-     */
-    'session_storage_path' => env('SHOPIFY_SESSION_STORAGE_PATH', '/tmp/php_sessions'),
-
-    /**
      * In which collection should the Shopify products be created
      */
     'collection_handle' => env('SHOPIFY_COLLECTION_HANDLE', 'products'),
@@ -134,18 +124,6 @@ return [
      * Products previously imported that are no longer on the sales channel will be deleted.
      */
     'import_all_products' => true,
-
-    /**
-     * Your App's Admin API Auth Key
-     * Note: this is not required unless you are doing custom integrations using the RestApi
-     */
-    'auth_key' => env('SHOPIFY_AUTH_KEY', 'api-key'),
-
-    /**
-     * Admin API Auth Password
-     * Note: this is not required unless you are doing custom integrations using the RestApi
-     */
-    'auth_password' => env('SHOPIFY_AUTH_PASSWORD', 'api-password'),
 
     /**
      * Multi-store configuration.

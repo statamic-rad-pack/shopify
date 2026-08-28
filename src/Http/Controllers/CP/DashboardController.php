@@ -15,8 +15,7 @@ class DashboardController extends CpController
         }
 
         $shopifyUrl = (config('shopify.url')) ? 'https://'.config('shopify.url').'/admin' : null;
-        $hasAuthKey = (config('shopify.auth_key') && config('shopify.auth_password'));
-        $canRunImport = (config('shopify.url') && ($hasAuthKey || config('shopify.admin_token')));
+        $canRunImport = (bool) (config('shopify.url') && (config('shopify.admin_token') || config('shopify.client_id')));
 
         return Inertia::render('shopify::Dashboard', [
             'shopifyUrl' => $shopifyUrl,
