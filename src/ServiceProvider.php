@@ -4,14 +4,12 @@ namespace StatamicRadPack\Shopify;
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
-use Shopify\Auth\FileSessionStorage;
-use Shopify\Clients\Graphql;
-use Shopify\Context;
+use Shopify\App\ShopifyApp;
 use Statamic\Events;
 use Statamic\Facades;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
+use StatamicRadPack\Shopify\Clients\Graphql;
 
 class ServiceProvider extends AddonServiceProvider
 {
@@ -175,18 +173,14 @@ class ServiceProvider extends AddonServiceProvider
             return;
         }
 
-        Context::initialize(
-            apiKey: config('shopify.auth_key'),
-            apiSecretKey: config('shopify.auth_password'),
-            scopes: ['read_metaobjects', 'read_products'],
-            hostName: config('shopify.url'),
-            sessionStorage: new FileSessionStorage(config('shopify.session_storage_path', '/tmp/php_sessions')),
-            apiVersion: config('shopify.api_version'),
-            isEmbeddedApp: false,
-            isPrivateApp: config('shopify.api_private_app') ?? false,
-        );
+        // clientId/clientSecret are only used for the client_credentials exchange;
+        // legacy admin_token apps never reach that path, so a placeholder is fine.
+        $this->app->singleton(ShopifyApp::class, fn () => new ShopifyApp(
+            clientId: config('shopify.client_id') ?: 'none',
+            clientSecret: config('shopify.client_secret') ?: 'none',
+        ));
 
-        $this->app->bind(Graphql::class, function ($app) {
+        $this->app->bind(Graphql::class, function () {
             // maintain support for legacy apps through admin_token config
             if (! $token = config('shopify.admin_token')) {
                 $cacheKey = 'shopify::admin_token';
@@ -208,13 +202,11 @@ class ServiceProvider extends AddonServiceProvider
             return '';
         }
 
-        $response = Http::asForm()->post('https://'.config('shopify.url').'/admin/oauth/access_token', [
-            'grant_type' => 'client_credentials',
-            'client_id' => config('shopify.client_id'),
-            'client_secret' => config('shopify.client_secret'),
-        ]);
+        $result = app(ShopifyApp::class)->exchangeUsingClientCredentials(
+            shop: Graphql::shop(config('shopify.url')),
+        );
 
-        return $response->json('access_token');
+        return $result->ok ? $result->accessToken->token : null;
     }
 
     private function publishAssets(): void

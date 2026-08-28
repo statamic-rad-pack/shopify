@@ -3,9 +3,8 @@
 namespace StatamicRadPack\Shopify\Support;
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
-use Shopify\Clients\Graphql;
-use Shopify\Context;
+use Shopify\App\ShopifyApp;
+use StatamicRadPack\Shopify\Clients\Graphql;
 
 class StoreConfig
 {
@@ -92,31 +91,19 @@ class StoreConfig
             $url = $storeConfig['url'] ?? config('shopify.url');
             $apiVersion = $storeConfig['api_version'] ?? config('shopify.api_version', '2025-04');
 
-            if ($token = ($storeConfig['admin_token'] ?? null)) {
-                $capturedToken = $token;
-                app()->bind($abstract, function () use ($url, $capturedToken, $apiVersion) {
-                    Context::$API_VERSION = $apiVersion;
-
-                    return new Graphql($url, $capturedToken);
-                });
-            } else {
-                // OAuth client_credentials flow
+            // legacy admin_token, else OAuth client_credentials flow
+            if (! $token = ($storeConfig['admin_token'] ?? null)) {
                 $cacheKey = 'shopify::admin_token::'.$handle;
 
                 if (! $token = Cache::get($cacheKey)) {
-                    $token = static::exchangeClientCredentials($storeConfig);
-                    if ($token) {
+                    if ($token = static::exchangeClientCredentials($storeConfig)) {
                         Cache::put($cacheKey, $token, 1400);
                     }
                 }
-
-                $capturedToken = $token ?? 'none';
-                app()->bind($abstract, function () use ($url, $capturedToken, $apiVersion) {
-                    Context::$API_VERSION = $apiVersion;
-
-                    return new Graphql($url, $capturedToken);
-                });
             }
+
+            $capturedToken = $token ?? 'none';
+            app()->bind($abstract, fn () => new Graphql($url, $capturedToken, $apiVersion));
         }
 
         return app($abstract);
@@ -128,12 +115,13 @@ class StoreConfig
             return null;
         }
 
-        $response = Http::asForm()->post('https://'.$storeConfig['url'].'/admin/oauth/access_token', [
-            'grant_type' => 'client_credentials',
-            'client_id' => $storeConfig['client_id'],
-            'client_secret' => $storeConfig['client_secret'] ?? '',
-        ]);
+        $result = (new ShopifyApp(
+            clientId: $storeConfig['client_id'],
+            clientSecret: $storeConfig['client_secret'] ?? '',
+        ))->exchangeUsingClientCredentials(
+            shop: Graphql::shop($storeConfig['url'] ?? config('shopify.url')),
+        );
 
-        return $response->json('access_token');
+        return $result->ok ? $result->accessToken->token : null;
     }
 }

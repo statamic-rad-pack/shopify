@@ -7,10 +7,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Shopify\Clients\Graphql;
 use Statamic\Contracts\Auth\User;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use StatamicRadPack\Shopify\Clients\Graphql;
 
 class CreateOrUpdateShopifyUser implements ShouldQueue
 {

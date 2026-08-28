@@ -4,9 +4,9 @@ namespace StatamicRadPack\Shopify\Tests\Unit;
 
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use Shopify\Clients\Graphql;
-use Shopify\Clients\HttpResponse;
 use Statamic\Facades\User;
+use StatamicRadPack\Shopify\Clients\Graphql;
+use StatamicRadPack\Shopify\Clients\HttpResponse;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
 class WebhooksStatusControllerTest extends TestCase
