@@ -100,6 +100,7 @@ const createData = (Alpine) => {
 
             if (! options) {
                 options = {};
+                this.options = options;
             }
 
             this.selectedVariant = variants[0];
