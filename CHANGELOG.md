@@ -1,5 +1,16 @@
 # Changelog
 
+## v7.8.6 - 2026-09-02
+
+### What's Changed
+* docs: note JS prerequisites where the scripts are published by @digitalnativgmbh in https://github.com/statamic-rad-pack/shopify/pull/359
+* fix: assign the normalised options object to this.options by @digitalnativgmbh in https://github.com/statamic-rad-pack/shopify/pull/360
+
+### New Contributors
+* @digitalnativgmbh made their first contribution in https://github.com/statamic-rad-pack/shopify/pull/359
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.8.5...v7.8.6
+
 ## v7.8.5 - 2026-08-28
 
 ### What's Changed
