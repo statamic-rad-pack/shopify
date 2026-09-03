@@ -1,5 +1,13 @@
 # Changelog
 
+## v7.9.0 - 2026-09-03
+
+### What's Changed
+* Add slug param to tags to override context by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/361
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.8.6...v7.9.0
+
 ## v7.8.6 - 2026-09-02
 
 ### What's Changed
