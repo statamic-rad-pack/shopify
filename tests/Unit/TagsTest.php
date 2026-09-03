@@ -86,6 +86,45 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04' };
     }
 
     #[Test]
+    public function slug_can_be_passed_as_a_parameter()
+    {
+        $product = Facades\Entry::make()->data([
+            'title' => 'Obi wan',
+            'vendor' => 'Kenobe',
+            'slug' => 'obi-wan',
+            'product_id' => 1,
+        ])
+            ->collection(config('shopify.collection_handle', 'products'));
+
+        $product->save();
+
+        $variant = Facades\Entry::make()->data([
+            'title' => 'T-shirt',
+            'slug' => 'obi-wan-tshirt',
+            'sku' => 'obi-wan-tshirt',
+            'product_slug' => 'obi-wan',
+            'price' => 9.99,
+            'inventory_quantity' => 10,
+            'variant_id' => 'abc',
+            'inventory_policy' => 'deny',
+            'inventory_management' => 'shopify',
+        ])
+            ->collection('variants');
+
+        $variant->save();
+
+        // No slug in context, provided as a parameter instead.
+        $this->assertEquals('£9.99', $this->tag('{{ shopify:product_price slug="obi-wan" }}'));
+        $this->assertEquals('Yes', $this->tag('{{ if {shopify:in_stock slug="obi-wan"} }}Yes{{ /if }}'));
+        $this->assertEquals('<input type="hidden" name="ss-product-variant" value="obi-wan-tshirt">', trim($this->tag('{{ shopify:variants:generate slug="obi-wan" }}')));
+
+        // Parameter takes precedence over the context.
+        $this->assertEquals('£9.99', $this->tag('{{ shopify:product_price slug="obi-wan" }}', ['slug' => 'wrong-slug']));
+        $this->assertEquals('Yes', $this->tag('{{ if {shopify:in_stock slug="obi-wan"} }}Yes{{ /if }}', ['slug' => 'wrong-slug']));
+        $this->assertEquals('<input type="hidden" name="ss-product-variant" value="obi-wan-tshirt">', trim($this->tag('{{ shopify:variants:generate slug="obi-wan" }}', ['slug' => 'wrong-slug'])));
+    }
+
+    #[Test]
     public function runs_hooks_on_product_price()
     {
         $product = Facades\Entry::make()->data([
