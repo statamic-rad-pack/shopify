@@ -117,11 +117,13 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04' };
         $this->assertEquals('£9.99', $this->tag('{{ shopify:product_price slug="obi-wan" }}'));
         $this->assertEquals('Yes', $this->tag('{{ if {shopify:in_stock slug="obi-wan"} }}Yes{{ /if }}'));
         $this->assertEquals('<input type="hidden" name="ss-product-variant" value="obi-wan-tshirt">', trim($this->tag('{{ shopify:variants:generate slug="obi-wan" }}')));
+        $this->assertEquals('abc', $this->tag('{{ shopify:variants slug="obi-wan" }}{{ variant_id }}{{ /shopify:variants }}'));
 
         // Parameter takes precedence over the context.
         $this->assertEquals('£9.99', $this->tag('{{ shopify:product_price slug="obi-wan" }}', ['slug' => 'wrong-slug']));
         $this->assertEquals('Yes', $this->tag('{{ if {shopify:in_stock slug="obi-wan"} }}Yes{{ /if }}', ['slug' => 'wrong-slug']));
         $this->assertEquals('<input type="hidden" name="ss-product-variant" value="obi-wan-tshirt">', trim($this->tag('{{ shopify:variants:generate slug="obi-wan" }}', ['slug' => 'wrong-slug'])));
+        $this->assertEquals('abc', $this->tag('{{ shopify:variants slug="obi-wan" }}{{ variant_id }}{{ /shopify:variants }}', ['slug' => 'wrong-slug']));
     }
 
     #[Test]
