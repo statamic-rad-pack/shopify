@@ -100,4 +100,51 @@ class ScopesTest extends TestCase
         $this->assertEquals('obi-wan-tshirt-2,obi-wan-tshirt,', $this->tag('{{ collection:variants }}{{ sku }},{{ /collection:variants }}'));
         $this->assertEquals('obi-wan-tshirt-2,', $this->tag('{{ collection:variants query_scope="variant_is_on_sale" }}{{ sku }},{{ /collection:variants }}'));
     }
+
+    #[Test]
+    public function limits_products_by_has_stock()
+    {
+        $productsCollection = config('shopify.collection_handle', 'products');
+
+        Facades\Entry::make()->slug('in-stock')->data([
+            'title' => 'In stock',
+            'product_id' => 1,
+        ])->collection($productsCollection)->save();
+
+        Facades\Entry::make()->slug('oversells')->data([
+            'title' => 'Oversells',
+            'product_id' => 2,
+        ])->collection($productsCollection)->save();
+
+        Facades\Entry::make()->slug('out-of-stock')->data([
+            'title' => 'Out of stock',
+            'product_id' => 3,
+        ])->collection($productsCollection)->save();
+
+        Facades\Entry::make()->slug('in-stock-variant')->data([
+            'title' => 'In stock variant',
+            'sku' => 'in-stock-variant',
+            'product_slug' => 'in-stock',
+            'inventory_quantity' => 10,
+            'inventory_policy' => 'DENY',
+        ])->collection('variants')->save();
+
+        Facades\Entry::make()->slug('oversell-variant')->data([
+            'title' => 'Oversell variant',
+            'sku' => 'oversell-variant',
+            'product_slug' => 'oversells',
+            'inventory_quantity' => 0,
+            'inventory_policy' => 'CONTINUE',
+        ])->collection('variants')->save();
+
+        Facades\Entry::make()->slug('out-of-stock-variant')->data([
+            'title' => 'Out of stock variant',
+            'sku' => 'out-of-stock-variant',
+            'product_slug' => 'out-of-stock',
+            'inventory_quantity' => 0,
+            'inventory_policy' => 'DENY',
+        ])->collection('variants')->save();
+
+        $this->assertEquals('in-stock,oversells,', $this->tag('{{ collection:products query_scope="product_has_stock" sort="product_id" }}{{ slug }},{{ /collection:products }}'));
+    }
 }

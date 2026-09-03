@@ -45,6 +45,7 @@ class ServiceProvider extends AddonServiceProvider
     ];
 
     protected $scopes = [
+        Scopes\ProductHasStock::class,
         Scopes\VariantByProduct::class,
         Scopes\VariantIsOnSale::class,
     ];
