@@ -1,5 +1,14 @@
 # Changelog
 
+## v7.9.1 - 2026-09-03
+
+### What's Changed
+* Add param for slug to tags to override context by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/362
+* Add PreventRequestForgery to webhook middleware exclusions by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/364
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.9.0...v7.9.1
+
 ## v7.9.0 - 2026-09-03
 
 ### What's Changed
