@@ -26,11 +26,11 @@ class Shopify extends Tags
      */
     public function inStock()
     {
-        if (! $this->context->get('slug')) {
+        if (! $slug = $this->params->get('slug', $this->context->get('slug'))) {
             return null;
         }
 
-        $variants = $this->fetchProductVariants($this->context->get('slug'));
+        $variants = $this->fetchProductVariants($slug);
 
         if (! $variants) {
             return null;
@@ -48,11 +48,11 @@ class Shopify extends Tags
      */
     public function productPrice()
     {
-        if (! $this->context->get('slug')) {
+        if (! $slug = $this->params->get('slug', $this->context->get('slug'))) {
             return null;
         }
 
-        $variants = $this->fetchProductVariants($this->context->get('slug'));
+        $variants = $this->fetchProductVariants($slug);
 
         if (! $variants) {
             return null;
@@ -144,7 +144,9 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
      */
     private function variantGenerate()
     {
-        $variants = $this->fetchProductVariants($this->context->get('slug'));
+        $slug = $this->params->get('slug', $this->context->get('slug'));
+
+        $variants = $this->fetchProductVariants($slug);
 
         if (! $variants) {
             return;
