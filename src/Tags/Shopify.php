@@ -202,7 +202,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
      */
     public function variants()
     {
-        $variants = $this->fetchProductVariants($this->context->get('slug'));
+        $variants = $this->fetchProductVariants($this->params->get('slug', $this->context->get('slug')));
 
         if (! $variants) {
             return null;
