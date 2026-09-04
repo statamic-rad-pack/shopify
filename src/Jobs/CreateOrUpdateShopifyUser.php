@@ -37,8 +37,8 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
         $email = $this->user->email();
 
         $query = <<<'QUERY'
-            query {
-              customers(first: 1, query: "email:{$email}") {
+            query ($query: String!) {
+              customers(first: 1, query: $query) {
                 edges {
                   node {
                     id
@@ -50,6 +50,9 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
 
         $response = app(Graphql::class)->query([
             'query' => $query,
+            'variables' => [
+                'query' => "email:{$email}",
+            ],
         ]);
 
         $id = Arr::get($response->getDecodedBody(), 'data.customers.edges.0.node.id');
@@ -66,8 +69,8 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
         }
 
         $query = <<<'QUERY'
-            mutation customerCreate(\$input: CustomerInput!) {
-              customerCreate(input: \$input) {
+            mutation customerCreate($input: CustomerInput!) {
+              customerCreate(input: $input) {
                 userErrors {
                   field
                   message
@@ -105,8 +108,8 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
     private function updateUser($id)
     {
         $query = <<<'QUERY'
-            mutation customerUpdate(\$input: CustomerInput!) {
-              customerUpdate(input: \$input) {
+            mutation customerUpdate($input: CustomerInput!) {
+              customerUpdate(input: $input) {
                 userErrors {
                   field
                   message
