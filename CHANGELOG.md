@@ -1,5 +1,14 @@
 # Changelog
 
+## v7.11.0 - 2026-09-04
+
+### What's Changed
+* Fix customer graphql mutations by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/366
+* Various security hardening fixes by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/367
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.10.0...v7.11.0
+
 ## v7.10.0 - 2026-09-04
 
 ### What's Changed
