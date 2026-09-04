@@ -1,5 +1,13 @@
 # Changelog
 
+## v7.10.0 - 2026-09-04
+
+### What's Changed
+* Add ProductHasStock query scope by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/363
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.9.1...v7.10.0
+
 ## v7.9.1 - 2026-09-03
 
 ### What's Changed
