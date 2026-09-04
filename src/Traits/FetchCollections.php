@@ -2,9 +2,9 @@
 
 namespace StatamicRadPack\Shopify\Traits;
 
-use Shopify\Clients\Graphql;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use StatamicRadPack\Shopify\Clients\Graphql;
 
 trait FetchCollections
 {

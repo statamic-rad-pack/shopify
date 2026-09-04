@@ -4,9 +4,9 @@ namespace StatamicRadPack\Shopify\Tests\Unit;
 
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use Shopify\Clients\Graphql;
-use Shopify\Clients\HttpResponse;
 use Statamic\Facades;
+use StatamicRadPack\Shopify\Clients\Graphql;
+use StatamicRadPack\Shopify\Clients\HttpResponse;
 use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
