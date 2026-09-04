@@ -11,8 +11,12 @@ class ImportProductsController extends CpController
 {
     use FetchAllProducts;
 
-    public function fetchAll(): JsonResponse
+    public function fetchAll(Request $request): JsonResponse
     {
+        if ($request->user()->cannot('access shopify')) {
+            abort(403);
+        }
+
         collect($this->fetchProducts())
             ->each(function ($productId) {
                 $this->callJob($productId);
@@ -25,6 +29,10 @@ class ImportProductsController extends CpController
 
     public function fetchSingleProduct(Request $request): JsonResponse
     {
+        if ($request->user()->cannot('access shopify')) {
+            abort(403);
+        }
+
         $this->callJob((int) $request->get('product'));
 
         return response()->json([

@@ -2,6 +2,7 @@
 
 namespace StatamicRadPack\Shopify\Tags;
 
+use Illuminate\Support\Collection;
 use Shopify\Clients\Graphql;
 use Statamic\Extensions\Pagination\LengthAwarePaginator;
 use Statamic\Facades\Entry;
@@ -198,7 +199,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     /**
      * Return the collection back so we can use it on the front end.
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function variants()
     {
@@ -369,7 +370,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     /**
      * Get the data associated with the customer, or the current user
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function addressForm()
     {
@@ -380,6 +381,9 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             $endpoint = route('statamic.shopify.address.store', ['id' => $id]);
         }
 
+        // customer_id is still accepted as a param so it isn't rendered as a form
+        // attribute, but it is deliberately ignored - the address endpoints scope
+        // to the logged in user and no longer trust a client-supplied id.
         $knownParams = ['redirect', 'error_redirect', 'address_id', 'customer_id'];
 
         $html = $this->formOpen($endpoint, 'POST', $knownParams);
@@ -395,22 +399,10 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
         }
 
         if (! $this->parser) {
-            return array_merge([
+            return [
                 'attrs' => $this->formAttrs($endpoint, 'post', $knownParams),
                 'params' => $this->formMetaPrefix($this->formParams('post', $params)),
-            ], $data);
-        }
-
-        $id = $this->params->get('customer_id');
-
-        if (! $id) {
-            if ($user = User::current()) {
-                $id = $user->get('shopify_id');
-            }
-        }
-
-        if ($id) {
-            $html .= '<input type="hidden" name="customer_id" value="'.$id.'" />';
+            ];
         }
 
         $html .= $this->formMetaFields($params);
@@ -423,7 +415,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     /**
      * Get the data associated with the customer, or the current user
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function customer()
     {
@@ -481,7 +473,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     /**
      * Get the customer addresses
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function customerAddresses()
     {
@@ -549,7 +541,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     /**
      * Get the customer orders
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function customerOrders()
     {

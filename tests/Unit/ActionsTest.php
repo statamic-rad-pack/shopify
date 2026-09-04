@@ -7,10 +7,18 @@ use PHPUnit\Framework\Attributes\Test;
 use Shopify\Clients\Graphql;
 use Shopify\Clients\HttpResponse;
 use Statamic\Facades;
+use Statamic\Facades\User;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
 class ActionsTest extends TestCase
 {
+    private function actingAsCustomer(int $shopifyId = 1)
+    {
+        $user = tap(User::make()->email('customer@example.com')->set('shopify_id', $shopifyId))->save();
+
+        return $this->actingAs($user);
+    }
+
     #[Test]
     public function gets_correct_data_from_action_url()
     {
@@ -63,8 +71,45 @@ class ActionsTest extends TestCase
     }
 
     #[Test]
+    public function address_endpoints_require_authentication()
+    {
+        $this->postJson('/!/shopify/address', ['firstName' => 'a', 'lastName' => 'b', 'address1' => 'c', 'city' => 'd', 'province' => 'e', 'zip' => 'f', 'country' => 'g'])
+            ->assertStatus(401);
+
+        $this->postJson('/!/shopify/address/1', ['firstName' => 'a', 'lastName' => 'b', 'address1' => 'c', 'city' => 'd', 'province' => 'e', 'zip' => 'f', 'country' => 'g'])
+            ->assertStatus(401);
+
+        $this->postJson('/!/shopify/address/1', ['_method' => 'delete'])
+            ->assertStatus(401);
+    }
+
+    #[Test]
+    public function address_is_scoped_to_the_logged_in_user_not_a_supplied_customer_id()
+    {
+        $captured = null;
+
+        $this->mock(Graphql::class, function (MockInterface $mock) use (&$captured) {
+            $mock
+                ->shouldReceive('query')
+                ->andReturnUsing(function ($args) use (&$captured) {
+                    $captured = $args;
+
+                    return new HttpResponse(status: 200, body: '{"data":{"customerAddressCreate":{"address":{"id":"gid://shopify/MailingAddress/1"},"userErrors":[]}}}');
+                });
+        });
+
+        $this->actingAsCustomer(555)
+            ->postJson('/!/shopify/address', ['customer_id' => 999, 'firstName' => 'a', 'lastName' => 'b', 'address1' => 'c', 'city' => 'd', 'province' => 'e', 'zip' => 'f', 'country' => 'g'])
+            ->assertStatus(200);
+
+        $this->assertSame('gid://shopify/Customer/555', $captured['variables']['customerId']);
+    }
+
+    #[Test]
     public function creates_an_address()
     {
+        $this->actingAsCustomer();
+
         $this->mock(Graphql::class, function (MockInterface $mock) {
             $mock
                 ->shouldReceive('query')
@@ -97,16 +142,15 @@ class ActionsTest extends TestCase
         $response = $this->postJson('/!/shopify/address', []);
         $response->assertStatus(422);
 
-        $response = $this->postJson('/!/shopify/address', ['customer_id' => 1]);
-        $response->assertStatus(422);
-
-        $response = $this->postJson('/!/shopify/address', ['customer_id' => 1, 'firstName' => 'a', 'lastName' => 'b', 'address1' => 'c', 'city' => 'd', 'province' => 'e', 'zip' => 'f', 'country' => 'g']);
+        $response = $this->postJson('/!/shopify/address', ['firstName' => 'a', 'lastName' => 'b', 'address1' => 'c', 'city' => 'd', 'province' => 'e', 'zip' => 'f', 'country' => 'g']);
         $response->assertStatus(200);
     }
 
     #[Test]
     public function updates_an_address()
     {
+        $this->actingAsCustomer();
+
         $this->mock(Graphql::class, function (MockInterface $mock) {
             $mock
                 ->shouldReceive('query')
@@ -139,16 +183,15 @@ class ActionsTest extends TestCase
         $response = $this->postJson('/!/shopify/address/1', []);
         $response->assertStatus(422);
 
-        $response = $this->postJson('/!/shopify/address/1', ['customer_id' => 1]);
-        $response->assertStatus(422);
-
-        $response = $this->postJson('/!/shopify/address/1', ['customer_id' => 1, 'firstName' => 'a', 'lastName' => 'b', 'address1' => 'c', 'city' => 'd', 'province' => 'e', 'zip' => 'f', 'country' => 'g']);
+        $response = $this->postJson('/!/shopify/address/1', ['firstName' => 'a', 'lastName' => 'b', 'address1' => 'c', 'city' => 'd', 'province' => 'e', 'zip' => 'f', 'country' => 'g']);
         $response->assertStatus(200);
     }
 
     #[Test]
     public function deletes_an_address()
     {
+        $this->actingAsCustomer();
+
         $this->mock(Graphql::class, function (MockInterface $mock) {
             $mock
                 ->shouldReceive('query')
@@ -166,9 +209,6 @@ class ActionsTest extends TestCase
         });
 
         $response = $this->postJson('/!/shopify/address/1', ['_method' => 'delete']);
-        $response->assertStatus(422);
-
-        $response = $this->postJson('/!/shopify/address/1', ['_method' => 'delete', 'customer_id' => 1]);
         $response->assertStatus(200);
     }
 
@@ -176,6 +216,7 @@ class ActionsTest extends TestCase
     public function can_use_precognition_when_creating_an_address()
     {
         $response = $this
+            ->actingAsCustomer()
             ->withPrecognition()
             ->postJson('/!/shopify/address', []);
 
@@ -187,6 +228,7 @@ class ActionsTest extends TestCase
     public function can_use_precognition_when_updating_an_address()
     {
         $response = $this
+            ->actingAsCustomer()
             ->withPrecognition()
             ->postJson('/!/shopify/address/1', []);
 

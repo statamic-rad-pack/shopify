@@ -387,7 +387,8 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04' };
 
         $this->assertEquals('<form method="POST" action="http://localhost/!/shopify/address/1"><input type="hidden" name="_token" value="">Some content</form>', str_replace(' autocomplete="off"', '', $this->tag('{{ shopify:address_form address_id="1" }}Some content{{ /shopify:address_form }}')));
 
-        $this->assertEquals('<form method="POST" action="http://localhost/!/shopify/address"><input type="hidden" name="_token" value=""><input type="hidden" name="customer_id" value="1" />Some content</form>', str_replace(' autocomplete="off"', '', $this->tag('{{ shopify:address_form customer_id="1"  }}Some content{{ /shopify:address_form }}')));
+        // customer_id is accepted but ignored - it must not leak into the form as a field or attribute.
+        $this->assertEquals('<form method="POST" action="http://localhost/!/shopify/address"><input type="hidden" name="_token" value="">Some content</form>', str_replace(' autocomplete="off"', '', $this->tag('{{ shopify:address_form customer_id="1"  }}Some content{{ /shopify:address_form }}')));
     }
 
     #[Test]
