@@ -10,7 +10,7 @@ use StatamicRadPack\Shopify\Http\Middleware\VerifyShopifyHeaders;
 Route::name('shopify.')
     ->group(function () {
         Route::prefix('address')
-            ->middleware([HandlePrecognitiveRequests::class])
+            ->middleware(['auth', 'throttle:60,1', HandlePrecognitiveRequests::class])
             ->group(function () {
                 Route::post('/', [AddressController::class, 'create'])
                     ->name('address.create');

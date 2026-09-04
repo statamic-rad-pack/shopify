@@ -387,7 +387,8 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04' };
 
         $this->assertEquals('<form method="POST" action="http://localhost/!/shopify/address/1"><input type="hidden" name="_token" value="">Some content</form>', str_replace(' autocomplete="off"', '', $this->tag('{{ shopify:address_form address_id="1" }}Some content{{ /shopify:address_form }}')));
 
-        $this->assertEquals('<form method="POST" action="http://localhost/!/shopify/address"><input type="hidden" name="_token" value=""><input type="hidden" name="customer_id" value="1" />Some content</form>', str_replace(' autocomplete="off"', '', $this->tag('{{ shopify:address_form customer_id="1"  }}Some content{{ /shopify:address_form }}')));
+        // customer_id is accepted but ignored - it must not leak into the form as a field or attribute.
+        $this->assertEquals('<form method="POST" action="http://localhost/!/shopify/address"><input type="hidden" name="_token" value="">Some content</form>', str_replace(' autocomplete="off"', '', $this->tag('{{ shopify:address_form customer_id="1"  }}Some content{{ /shopify:address_form }}')));
     }
 
     #[Test]
@@ -418,11 +419,13 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04' };
             ])
         )->save();
 
-        $this->assertEquals('706405506930370000 - bob@biller.com', $this->tag('{{ shopify:customer customer_id="706405506930370000" }}{{ shopify_id }} - {{ email }}{{ /shopify:customer }}'));
-
-        $this->assertEquals('yes', $this->tag('{{ shopify:customer customer_id="706405506930370001" }}{{ if not_found }}yes{{ /if }}{{ /shopify:customer }}'));
+        // No logged in user: nothing to return, even with a customer_id param.
+        $this->assertEquals('yes', $this->tag('{{ shopify:customer customer_id="706405506930370000" }}{{ if not_found }}yes{{ /if }}{{ /shopify:customer }}'));
 
         $this->actingAs($user);
+
+        // customer_id is ignored - the tag always resolves to the logged in user.
+        $this->assertEquals('706405506930370000 - bob@biller.com', $this->tag('{{ shopify:customer customer_id="999" }}{{ shopify_id }} - {{ email }}{{ /shopify:customer }}'));
         $this->assertEquals('706405506930370000 - bob@biller.com', $this->tag('{{ shopify:customer }}{{ shopify_id }} - {{ email }}{{ /shopify:customer }}'));
     }
 
@@ -472,11 +475,13 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04' };
             ])
         )->save();
 
-        $this->assertEquals('207119551 - Chestnut Street 92', $this->tag('{{ shopify:customer:addresses customer_id="706405506930370000" }}{{ addresses }}{{ id }} - {{ address1 }}{{ /addresses }}{{ /shopify:customer:addresses }}'));
-
-        $this->assertEquals('0', $this->tag('{{ shopify:customer:addresses customer_id="706405506930370001" }}{{ addresses_count }}{{ /shopify:customer:addresses }}'));
+        // No logged in user: nothing to return, even with a customer_id param.
+        $this->assertEquals('0', $this->tag('{{ shopify:customer:addresses customer_id="706405506930370000" }}{{ addresses_count }}{{ /shopify:customer:addresses }}'));
 
         $this->actingAs($user);
+
+        // customer_id is ignored - addresses are always for the logged in user.
+        $this->assertEquals('207119551 - Chestnut Street 92', $this->tag('{{ shopify:customer:addresses customer_id="999" }}{{ addresses }}{{ id }} - {{ address1 }}{{ /addresses }}{{ /shopify:customer:addresses }}'));
         $this->assertEquals('207119551 - Chestnut Street 92', $this->tag('{{ shopify:customer:addresses }}{{ addresses }}{{ id }} - {{ address1 }}{{ /addresses }}{{ /shopify:customer:addresses }}'));
     }
 
@@ -1506,11 +1511,13 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04' };
             ])
         )->save();
 
-        $this->assertEquals('450789469', $this->tag('{{ shopify:customer:orders customer_id="706405506930370000" }}{{ orders }}{{ id }}{{ /orders }}{{ /shopify:customer:orders }}'));
-
-        $this->assertEquals('0', $this->tag('{{ shopify:customer:orders customer_id="706405506930370001" }}{{ orders_count }}{{ /shopify:customer:orders }}'));
+        // No logged in user: nothing to return, even with a customer_id param.
+        $this->assertEquals('0', $this->tag('{{ shopify:customer:orders customer_id="706405506930370000" }}{{ orders_count }}{{ /shopify:customer:orders }}'));
 
         $this->actingAs($user);
+
+        // customer_id is ignored - orders are always for the logged in user.
+        $this->assertEquals('450789469', $this->tag('{{ shopify:customer:orders customer_id="999" }}{{ orders }}{{ id }}{{ /orders }}{{ /shopify:customer:orders }}'));
         $this->assertEquals('450789469', $this->tag('{{ shopify:customer:orders }}{{ orders }}{{ id }}{{ /orders }}{{ /shopify:customer:orders }}'));
 
         $this->assertEquals('450789469', $this->tag('{{ shopify:customer:orders paginate="1" }}{{ orders }}{{ id }}{{ /orders }}{{ /shopify:customer:orders }}'));

@@ -2,6 +2,7 @@
 
 namespace StatamicRadPack\Shopify\Tags;
 
+use Illuminate\Support\Collection;
 use Shopify\Clients\Graphql;
 use Statamic\Extensions\Pagination\LengthAwarePaginator;
 use Statamic\Facades\Entry;
@@ -198,7 +199,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     /**
      * Return the collection back so we can use it on the front end.
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function variants()
     {
@@ -369,7 +370,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     /**
      * Get the data associated with the customer, or the current user
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function addressForm()
     {
@@ -380,6 +381,9 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             $endpoint = route('statamic.shopify.address.store', ['id' => $id]);
         }
 
+        // customer_id is still accepted as a param so it isn't rendered as a form
+        // attribute, but it is deliberately ignored - the address endpoints scope
+        // to the logged in user and no longer trust a client-supplied id.
         $knownParams = ['redirect', 'error_redirect', 'address_id', 'customer_id'];
 
         $html = $this->formOpen($endpoint, 'POST', $knownParams);
@@ -395,22 +399,10 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
         }
 
         if (! $this->parser) {
-            return array_merge([
+            return [
                 'attrs' => $this->formAttrs($endpoint, 'post', $knownParams),
                 'params' => $this->formMetaPrefix($this->formParams('post', $params)),
-            ], $data);
-        }
-
-        $id = $this->params->get('customer_id');
-
-        if (! $id) {
-            if ($user = User::current()) {
-                $id = $user->get('shopify_id');
-            }
-        }
-
-        if ($id) {
-            $html .= '<input type="hidden" name="customer_id" value="'.$id.'" />';
+            ];
         }
 
         $html .= $this->formMetaFields($params);
@@ -421,32 +413,16 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     }
 
     /**
-     * Get the data associated with the customer, or the current user
+     * Get the Shopify data for the logged in user's linked customer.
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function customer()
     {
         $storeParam = $this->params->get('store');
-        $id = $this->params->get('customer_id');
-        $user = false;
 
-        if (! $id) {
-            $user = User::current();
-
-            if (! $user) {
-                return ['not_found' => true];
-            }
-        }
-
-        if (! $user) {
-            $user = User::query()
-                ->where('shopify_id', $id)
-                ->first();
-
-            if (! $user) {
-                return ['not_found' => true];
-            }
+        if (! $user = User::current()) {
+            return ['not_found' => true];
         }
 
         [$customerId, $graphql] = $this->resolveCustomerGraphql($user, $storeParam);
@@ -466,45 +442,31 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
 
         $response = $graphql->query(['query' => $query]);
 
-        if ($data = Arr::get($response->getDecodedBody() ?? [], 'data.customer', [])) {
+        $data = [];
+
+        if ($customer = Arr::get($response->getDecodedBody() ?? [], 'data.customer', [])) {
             $data = [
-                'email' => $data['email'],
-                'name' => $data['displayName'],
-                'last_order_id' => Arr::get($data, 'lastOrder.id'),
-                'note' => $data['note'],
+                'email' => $customer['email'],
+                'name' => $customer['displayName'],
+                'last_order_id' => Arr::get($customer, 'lastOrder.id'),
+                'note' => $customer['note'],
             ];
         }
 
-        return array_merge($data, $user?->data()->all() ?? []);
+        return array_merge($data, $user->data()->all());
     }
 
     /**
      * Get the customer addresses
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function customerAddresses()
     {
         $storeParam = $this->params->get('store');
-        $id = $this->params->get('customer_id');
-        $user = false;
 
-        if (! $id) {
-            $user = User::current();
-
-            if (! $user) {
-                return ['addresses' => [], 'addresses_count' => 0];
-            }
-        }
-
-        if (! $user) {
-            $user = User::query()
-                ->where('shopify_id', $id)
-                ->first();
-
-            if (! $user) {
-                return ['addresses' => [], 'addresses_count' => 0];
-            }
+        if (! $user = User::current()) {
+            return ['addresses' => [], 'addresses_count' => 0];
         }
 
         [$customerId, $graphql] = $this->resolveCustomerGraphql($user, $storeParam);
@@ -549,30 +511,14 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     /**
      * Get the customer orders
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function customerOrders()
     {
         $storeParam = $this->params->get('store');
-        $id = $this->params->get('customer_id');
-        $user = false;
 
-        if (! $id) {
-            $user = User::current();
-
-            if (! $user) {
-                return ['orders' => [], 'orders_count' => 0];
-            }
-        }
-
-        if (! $user) {
-            $user = User::query()
-                ->where('shopify_id', $id)
-                ->first();
-
-            if (! $user) {
-                return ['orders' => [], 'orders_count' => 0];
-            }
+        if (! $user = User::current()) {
+            return ['orders' => [], 'orders_count' => 0];
         }
 
         $status = '';

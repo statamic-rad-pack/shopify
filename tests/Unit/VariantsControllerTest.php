@@ -117,4 +117,35 @@ class VariantsControllerTest extends TestCase
         $response->assertJsonPath('0.price', '12.00');
         $response->assertJsonPath('0.sku', 'DE-1');
     }
+
+    #[Test]
+    public function fetch_and_update_require_the_access_shopify_permission()
+    {
+        $variant = $this->makeVariant('variant-en', ['title' => 'Origin Title', 'price' => '9.99', 'sku' => 'ORIGIN-1']);
+
+        $user = tap(User::make()->email('nobody@example.com'))->save();
+
+        $this->actingAs($user)
+            ->getJson(cp_route('shopify.variants.index', 'test-product'))
+            ->assertForbidden();
+
+        $this->actingAs($user)
+            ->patchJson(cp_route('shopify.variants.edit', $variant->id()), ['title' => 'Hacked'])
+            ->assertForbidden();
+
+        $this->assertSame('Origin Title', $variant->fresh()->get('title'));
+    }
+
+    #[Test]
+    public function update_refuses_to_touch_entries_outside_the_variants_collection()
+    {
+        Facades\Collection::make('pages')->save();
+        $page = tap(Facades\Entry::make()->collection('pages')->slug('about')->data(['title' => 'About us']))->save();
+
+        $this->actingAsSuperUser()
+            ->patchJson(cp_route('shopify.variants.edit', $page->id()), ['title' => 'Overwritten'])
+            ->assertNotFound();
+
+        $this->assertSame('About us', $page->fresh()->get('title'));
+    }
 }
