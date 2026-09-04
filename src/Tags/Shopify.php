@@ -413,32 +413,16 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     }
 
     /**
-     * Get the data associated with the customer, or the current user
+     * Get the Shopify data for the logged in user's linked customer.
      *
      * @return Collection|null
      */
     public function customer()
     {
         $storeParam = $this->params->get('store');
-        $id = $this->params->get('customer_id');
-        $user = false;
 
-        if (! $id) {
-            $user = User::current();
-
-            if (! $user) {
-                return ['not_found' => true];
-            }
-        }
-
-        if (! $user) {
-            $user = User::query()
-                ->where('shopify_id', $id)
-                ->first();
-
-            if (! $user) {
-                return ['not_found' => true];
-            }
+        if (! $user = User::current()) {
+            return ['not_found' => true];
         }
 
         [$customerId, $graphql] = $this->resolveCustomerGraphql($user, $storeParam);
@@ -458,16 +442,18 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
 
         $response = $graphql->query(['query' => $query]);
 
-        if ($data = Arr::get($response->getDecodedBody() ?? [], 'data.customer', [])) {
+        $data = [];
+
+        if ($customer = Arr::get($response->getDecodedBody() ?? [], 'data.customer', [])) {
             $data = [
-                'email' => $data['email'],
-                'name' => $data['displayName'],
-                'last_order_id' => Arr::get($data, 'lastOrder.id'),
-                'note' => $data['note'],
+                'email' => $customer['email'],
+                'name' => $customer['displayName'],
+                'last_order_id' => Arr::get($customer, 'lastOrder.id'),
+                'note' => $customer['note'],
             ];
         }
 
-        return array_merge($data, $user?->data()->all() ?? []);
+        return array_merge($data, $user->data()->all());
     }
 
     /**
@@ -478,25 +464,9 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     public function customerAddresses()
     {
         $storeParam = $this->params->get('store');
-        $id = $this->params->get('customer_id');
-        $user = false;
 
-        if (! $id) {
-            $user = User::current();
-
-            if (! $user) {
-                return ['addresses' => [], 'addresses_count' => 0];
-            }
-        }
-
-        if (! $user) {
-            $user = User::query()
-                ->where('shopify_id', $id)
-                ->first();
-
-            if (! $user) {
-                return ['addresses' => [], 'addresses_count' => 0];
-            }
+        if (! $user = User::current()) {
+            return ['addresses' => [], 'addresses_count' => 0];
         }
 
         [$customerId, $graphql] = $this->resolveCustomerGraphql($user, $storeParam);
@@ -546,25 +516,9 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     public function customerOrders()
     {
         $storeParam = $this->params->get('store');
-        $id = $this->params->get('customer_id');
-        $user = false;
 
-        if (! $id) {
-            $user = User::current();
-
-            if (! $user) {
-                return ['orders' => [], 'orders_count' => 0];
-            }
-        }
-
-        if (! $user) {
-            $user = User::query()
-                ->where('shopify_id', $id)
-                ->first();
-
-            if (! $user) {
-                return ['orders' => [], 'orders_count' => 0];
-            }
+        if (! $user = User::current()) {
+            return ['orders' => [], 'orders_count' => 0];
         }
 
         $status = '';
