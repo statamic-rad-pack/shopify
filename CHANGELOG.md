@@ -1,5 +1,17 @@
 # Changelog
 
+## v7.12.0 - 2026-09-17
+
+### What's Changed
+* Update alpine.js by @robdekort in https://github.com/statamic-rad-pack/shopify/pull/369
+* Use template on cart.antlers.html to help screen readers by @robdekort in https://github.com/statamic-rad-pack/shopify/pull/368
+* FIx missing currency in non-multi, non-market stores by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/370
+
+### New Contributors
+* @robdekort made their first contribution in https://github.com/statamic-rad-pack/shopify/pull/369
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.11.0...v7.12.0
+
 ## v7.11.0 - 2026-09-04
 
 ### What's Changed
