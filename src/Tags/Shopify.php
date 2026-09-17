@@ -111,7 +111,7 @@ window.shopifyConfig = { url: '{$url}', token: '{$token}', apiVersion: '{$apiVer
         }
 
         return "<script>
-window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('shopify.url'))."', token: '".config('shopify.storefront_token')."', apiVersion: '".config('shopify.api_version')."' };
+window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('shopify.url'))."', token: '".config('shopify.storefront_token')."', apiVersion: '".config('shopify.api_version')."', currency: '".config('shopify.currency', '$')."' };
 </script>";
     }
 
