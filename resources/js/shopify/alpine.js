@@ -104,7 +104,10 @@ const createData = (Alpine) => {
             }
 
             this.selectedVariant = variants[0];
-            this.variantEl.value = this.selectedVariant.slug;
+            
+            if (this.variantEl) {
+                this.variantEl.value = this.selectedVariant.slug;
+            }
 
             for (const [key, value] of Object.entries(options)) {
                 this.selected[key] = this.selectedVariant[key];
