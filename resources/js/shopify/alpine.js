@@ -61,6 +61,7 @@ const createStore = (Alpine) => {
                     title: line.merchandise.product.title,
                     variant: {
                         title: line.merchandise.title,
+                        id: line.merchandise.id,
                     },
                     price:this.formatCurrency(line.cost.amountPerQuantity.amount),
                     qty: qty,
