@@ -1,5 +1,17 @@
 # Changelog
 
+## v7.12.1 - 2026-09-22
+
+### What's Changed
+* Update alpine.js by @robdekort in https://github.com/statamic-rad-pack/shopify/pull/371
+* Fix cart line attributes being dropped and userErrors not logged by @lwekuiper in https://github.com/statamic-rad-pack/shopify/pull/372
+* Create the storefront client on first use by @lwekuiper in https://github.com/statamic-rad-pack/shopify/pull/373
+
+### New Contributors
+* @lwekuiper made their first contribution in https://github.com/statamic-rad-pack/shopify/pull/372
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.12.0...v7.12.1
+
 ## v7.12.0 - 2026-09-17
 
 ### What's Changed
