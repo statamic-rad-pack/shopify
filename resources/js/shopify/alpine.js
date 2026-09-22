@@ -52,7 +52,7 @@ const createStore = (Alpine) => {
                 line = line.node;
 
                 let attrs = {};
-                line.attributes.forEach((attr) => attrs[key] = attr.value);
+                line.attributes.forEach((attr) => attrs[attr.key] = attr.value);
 
                 let qty = line.quantity;
 
