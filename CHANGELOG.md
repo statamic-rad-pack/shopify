@@ -1,5 +1,13 @@
 # Changelog
 
+## v7.12.2 - 2026-10-02
+
+### What's Changed
+* Fall back to `null` in `to_json` modifier by @robdekort in https://github.com/statamic-rad-pack/shopify/pull/374
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.12.1...v7.12.2
+
 ## v7.12.1 - 2026-09-22
 
 ### What's Changed
