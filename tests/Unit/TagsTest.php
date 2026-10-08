@@ -1525,6 +1525,40 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04', curr
     }
 
     #[Test]
+    public function paginates_customer_orders()
+    {
+        $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock
+                ->shouldReceive('query')
+                ->andReturn(new HttpResponse(
+                    status: 200,
+                    body: json_encode(['data' => ['orders' => [
+                        'nodes' => collect(range(1, 5))->map(fn ($id) => [
+                            'id' => "gid://shopify/Order/$id",
+                            'lineItems' => ['nodes' => []],
+                        ])->all(),
+                        'pageInfo' => ['hasNextPage' => false, 'endCursor' => null],
+                    ]]])
+                ));
+        });
+
+        $this->actingAs(tap(Facades\User::make()
+            ->email('test@test.com')
+            ->data(['shopify_id' => '706405506930370000'])
+        )->save());
+
+        $template = '{{ shopify:customer:orders paginate="2" }}{{ orders }}{{ id }}{{ /orders }}|{{ paginate:total_items }}|{{ paginate:current_page }}|{{ orders_count }}{{ /shopify:customer:orders }}';
+
+        $this->assertEquals('12|5|1|5', $this->tag($template));
+
+        $this->get('/?page=2');
+        $this->assertEquals('34|5|2|5', $this->tag($template));
+
+        $this->get('/?page=3');
+        $this->assertEquals('5|5|3|5', $this->tag($template));
+    }
+
+    #[Test]
     public function passes_sort_param_to_customer_orders_query()
     {
         $sent = [];

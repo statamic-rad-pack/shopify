@@ -2,6 +2,7 @@
 
 namespace StatamicRadPack\Shopify\Tags;
 
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Shopify\Clients\Graphql;
 use Statamic\Extensions\Pagination\LengthAwarePaginator;
@@ -656,17 +657,22 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             $this->params->put('as', 'orders');
         }
 
-        $data = collect($items ?? []);
+        $data = collect($items);
+        $total = $data->count();
 
         if ($paginate = $this->params->int('paginate')) {
+            $page = Paginator::resolveCurrentPage();
+
             $data = new LengthAwarePaginator(
-                $data,
-                count($data),
-                $paginate
+                $data->forPage($page, $paginate)->values(),
+                $total,
+                $paginate,
+                $page,
+                ['path' => Paginator::resolveCurrentPath()]
             );
         }
 
-        return array_merge($this->output($data), ['orders_count' => count($data ?? [])]);
+        return array_merge($this->output($data), ['orders_count' => $total]);
     }
 
     /**
