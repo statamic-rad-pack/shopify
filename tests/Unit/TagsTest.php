@@ -1523,4 +1523,40 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04', curr
         $this->assertEquals('450789469', $this->tag('{{ shopify:customer:orders paginate="1" }}{{ orders }}{{ id }}{{ /orders }}{{ /shopify:customer:orders }}'));
         $this->assertEquals('1', $this->tag('{{ shopify:customer:orders paginate="1" }}{{ paginate:total_items }}{{ /shopify:customer:orders }}'));
     }
+
+    #[Test]
+    public function passes_sort_param_to_customer_orders_query()
+    {
+        $sent = [];
+
+        $this->mock(Graphql::class, function (MockInterface $mock) use (&$sent) {
+            $mock
+                ->shouldReceive('query')
+                ->andReturnUsing(function ($data) use (&$sent) {
+                    $sent[] = $data['variables'];
+
+                    return new HttpResponse(
+                        status: 200,
+                        body: '{"data": {"orders": {"nodes": [], "pageInfo": {"hasNextPage": false, "endCursor": null}}}}'
+                    );
+                });
+        });
+
+        $this->actingAs(tap(Facades\User::make()
+            ->email('test@test.com')
+            ->data(['shopify_id' => '706405506930370000'])
+        )->save());
+
+        $this->tag('{{ shopify:customer:orders }}{{ /shopify:customer:orders }}');
+        $this->tag('{{ shopify:customer:orders sort="created_at:desc" }}{{ /shopify:customer:orders }}');
+        $this->tag('{{ shopify:customer:orders sort="total_price:asc" }}{{ /shopify:customer:orders }}');
+        $this->tag('{{ shopify:customer:orders sort="order_number" }}{{ /shopify:customer:orders }}');
+        $this->tag('{{ shopify:customer:orders sort="not_a_field:desc" }}{{ /shopify:customer:orders }}');
+
+        $this->assertSame([null, false], [$sent[0]['sortKey'], $sent[0]['reverse']]);
+        $this->assertSame(['CREATED_AT', true], [$sent[1]['sortKey'], $sent[1]['reverse']]);
+        $this->assertSame(['TOTAL_PRICE', false], [$sent[2]['sortKey'], $sent[2]['reverse']]);
+        $this->assertSame(['ORDER_NUMBER', false], [$sent[3]['sortKey'], $sent[3]['reverse']]);
+        $this->assertSame([null, false], [$sent[4]['sortKey'], $sent[4]['reverse']]);
+    }
 }

@@ -526,11 +526,13 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             $status = ' AND status = '.$this->context->get('status');
         }
 
+        [$sortKey, $reverse] = $this->resolveOrderSort($this->params->get('sort'));
+
         [$userId, $graphql] = $this->resolveCustomerGraphql($user, $storeParam);
 
         $query = <<<QUERY
-            query (\$numItems: Int!, \$cursor: String) {
-              orders(first: \$numItems, after: \$cursor, query: "customer_id:$userId $status") {
+            query (\$numItems: Int!, \$cursor: String, \$sortKey: OrderSortKeys, \$reverse: Boolean) {
+              orders(first: \$numItems, after: \$cursor, sortKey: \$sortKey, reverse: \$reverse, query: "customer_id:$userId $status") {
                 nodes {
                   id
                   billingAddress {
@@ -622,6 +624,8 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
                 'variables' => [
                     'numItems' => 100,
                     'cursor' => Arr::get($data, 'data.orders.pageInfo.endCursor', null),
+                    'sortKey' => $sortKey,
+                    'reverse' => $reverse,
                 ],
             ]);
 
@@ -663,6 +667,41 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
         }
 
         return array_merge($this->output($data), ['orders_count' => count($data ?? [])]);
+    }
+
+    /**
+     * Resolve a `sort="field:direction"` param into a Shopify OrderSortKeys value and reverse flag.
+     * Returns [$sortKey, $reverse].
+     */
+    protected function resolveOrderSort(?string $sort): array
+    {
+        if (! $sort) {
+            return [null, false];
+        }
+
+        $field = Str::of(Str::before($sort, ':'))->trim()->upper()->replace('-', '_')->toString();
+        $direction = Str::lower(trim(Str::after($sort, ':')));
+
+        $allowed = [
+            'CREATED_AT',
+            'CUSTOMER_NAME',
+            'DESTINATION',
+            'FINANCIAL_STATUS',
+            'FULFILLMENT_STATUS',
+            'ID',
+            'ORDER_NUMBER',
+            'PO_NUMBER',
+            'PROCESSED_AT',
+            'TOTAL_ITEMS_QUANTITY',
+            'TOTAL_PRICE',
+            'UPDATED_AT',
+        ];
+
+        if (! in_array($field, $allowed)) {
+            return [null, false];
+        }
+
+        return [$field, Str::contains($sort, ':') && $direction === 'desc'];
     }
 
     /**
