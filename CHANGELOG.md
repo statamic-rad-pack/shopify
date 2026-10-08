@@ -1,5 +1,13 @@
 # Changelog
 
+## v7.13.0 - 2026-10-08
+
+### What's Changed
+* Add sorting to orders tag by @GarethFrost in https://github.com/statamic-rad-pack/shopify/pull/376
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.12.3...v7.13.0
+
 ## v7.12.3 - 2026-10-08
 
 ### What's Changed
