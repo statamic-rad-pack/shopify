@@ -1,5 +1,13 @@
 # Changelog
 
+## v7.12.3 - 2026-10-08
+
+### What's Changed
+* Use the class-based unique rule on the variant slug by @lwekuiper in https://github.com/statamic-rad-pack/shopify/pull/375
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.12.2...v7.12.3
+
 ## v7.12.2 - 2026-10-02
 
 ### What's Changed
