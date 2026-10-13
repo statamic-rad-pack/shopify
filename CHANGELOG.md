@@ -1,5 +1,13 @@
 # Changelog
 
+## v8.0.0 - 2026-10-13
+
+### What's Changed
+* Move underlying library to shopify/shopify-app-php by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/358
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.13.1...v8.0.0
+
 ## v7.13.1 - 2026-10-08
 
 ### What's Changed
