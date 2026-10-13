@@ -68,7 +68,7 @@ const addLines = async (cartId, lines) => {
     }
 
     if (data.cartLinesAdd.userErrors.length > 0) {
-        console.warn(errors);
+        console.warn(data.cartLinesAdd.userErrors);
 
         return;
     }

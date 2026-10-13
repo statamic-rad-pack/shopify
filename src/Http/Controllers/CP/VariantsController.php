@@ -10,8 +10,12 @@ use StatamicRadPack\Shopify\Blueprints\VariantBlueprint;
 
 class VariantsController extends CpController
 {
-    public function fetch($product)
+    public function fetch(Request $request, $product)
     {
+        if ($request->user()->cannot('access shopify')) {
+            abort(403);
+        }
+
         $site = Site::selected()->handle();
 
         return Entry::query()
@@ -31,9 +35,20 @@ class VariantsController extends CpController
 
     public function update(Request $request)
     {
+        if ($request->user()->cannot('access shopify')) {
+            abort(403);
+        }
+
         if (! $request->id) {
             // TODO: Throw error
             return;
+        }
+
+        // Find the entry, and make sure it's actually a variant before we touch it.
+        $variant = Entry::find($request->id);
+
+        if (! $variant || $variant->collectionHandle() !== 'variants') {
+            abort(404);
         }
 
         // Match the values to the blueprint, validate.
@@ -42,8 +57,6 @@ class VariantsController extends CpController
         $fields->validate();
         $values = $fields->process()->values()->toArray();
 
-        // Find and update the entry
-        $variant = Entry::find($request->id);
         $variant->data($values);
         $variant->save();
     }

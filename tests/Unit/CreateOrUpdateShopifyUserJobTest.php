@@ -23,7 +23,8 @@ class CreateOrUpdateShopifyUserJobTest extends TestCase
             $mock
                 ->shouldReceive('query')
                 ->withArgs(function ($query) {
-                    return str_contains($query['query'], 'query: "email:');
+                    return str_contains($query['query'], 'customers(first: 1, query: $query)')
+                        && $query['variables']['query'] === 'email:test@test.com';
                 })
                 ->andReturn(new HttpResponse(
                     status: 200,
@@ -62,7 +63,8 @@ class CreateOrUpdateShopifyUserJobTest extends TestCase
             $mock
                 ->shouldReceive('query')
                 ->withArgs(function ($query) {
-                    return str_contains($query['query'], 'query: "email:');
+                    return str_contains($query['query'], 'customers(first: 1, query: $query)')
+                        && $query['variables']['query'] === 'email:test@test.com';
                 })
                 ->andReturn(new HttpResponse(
                     status: 200,
@@ -78,7 +80,8 @@ class CreateOrUpdateShopifyUserJobTest extends TestCase
             $mock
                 ->shouldReceive('query')
                 ->withArgs(function ($query) {
-                    return str_contains($query['query'], 'mutation customerCreate');
+                    return str_contains($query['query'], 'mutation customerCreate($input: CustomerInput!)')
+                        && $query['variables']['input']['email'] === 'test@test.com';
                 })
                 ->andReturn(new HttpResponse(
                     status: 200,

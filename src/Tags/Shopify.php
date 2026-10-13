@@ -2,6 +2,8 @@
 
 namespace StatamicRadPack\Shopify\Tags;
 
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Collection;
 use Statamic\Extensions\Pagination\LengthAwarePaginator;
 use Statamic\Facades\Entry;
 use Statamic\Facades\User;
@@ -26,11 +28,11 @@ class Shopify extends Tags
      */
     public function inStock()
     {
-        if (! $this->context->get('slug')) {
+        if (! $slug = $this->params->get('slug', $this->context->get('slug'))) {
             return null;
         }
 
-        $variants = $this->fetchProductVariants($this->context->get('slug'));
+        $variants = $this->fetchProductVariants($slug);
 
         if (! $variants) {
             return null;
@@ -48,11 +50,11 @@ class Shopify extends Tags
      */
     public function productPrice()
     {
-        if (! $this->context->get('slug')) {
+        if (! $slug = $this->params->get('slug', $this->context->get('slug'))) {
             return null;
         }
 
-        $variants = $this->fetchProductVariants($this->context->get('slug'));
+        $variants = $this->fetchProductVariants($slug);
 
         if (! $variants) {
             return null;
@@ -110,7 +112,7 @@ window.shopifyConfig = { url: '{$url}', token: '{$token}', apiVersion: '{$apiVer
         }
 
         return "<script>
-window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('shopify.url'))."', token: '".config('shopify.storefront_token')."', apiVersion: '".config('shopify.api_version')."' };
+window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('shopify.url'))."', token: '".config('shopify.storefront_token')."', apiVersion: '".config('shopify.api_version')."', currency: '".config('shopify.currency', '$')."' };
 </script>";
     }
 
@@ -144,7 +146,9 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
      */
     private function variantGenerate()
     {
-        $variants = $this->fetchProductVariants($this->context->get('slug'));
+        $slug = $this->params->get('slug', $this->context->get('slug'));
+
+        $variants = $this->fetchProductVariants($slug);
 
         if (! $variants) {
             return;
@@ -196,11 +200,11 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     /**
      * Return the collection back so we can use it on the front end.
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function variants()
     {
-        $variants = $this->fetchProductVariants($this->context->get('slug'));
+        $variants = $this->fetchProductVariants($this->params->get('slug', $this->context->get('slug')));
 
         if (! $variants) {
             return null;
@@ -367,7 +371,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     /**
      * Get the data associated with the customer, or the current user
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function addressForm()
     {
@@ -378,6 +382,9 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             $endpoint = route('statamic.shopify.address.store', ['id' => $id]);
         }
 
+        // customer_id is still accepted as a param so it isn't rendered as a form
+        // attribute, but it is deliberately ignored - the address endpoints scope
+        // to the logged in user and no longer trust a client-supplied id.
         $knownParams = ['redirect', 'error_redirect', 'address_id', 'customer_id'];
 
         $html = $this->formOpen($endpoint, 'POST', $knownParams);
@@ -393,22 +400,10 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
         }
 
         if (! $this->parser) {
-            return array_merge([
+            return [
                 'attrs' => $this->formAttrs($endpoint, 'post', $knownParams),
                 'params' => $this->formMetaPrefix($this->formParams('post', $params)),
-            ], $data);
-        }
-
-        $id = $this->params->get('customer_id');
-
-        if (! $id) {
-            if ($user = User::current()) {
-                $id = $user->get('shopify_id');
-            }
-        }
-
-        if ($id) {
-            $html .= '<input type="hidden" name="customer_id" value="'.$id.'" />';
+            ];
         }
 
         $html .= $this->formMetaFields($params);
@@ -419,32 +414,16 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     }
 
     /**
-     * Get the data associated with the customer, or the current user
+     * Get the Shopify data for the logged in user's linked customer.
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function customer()
     {
         $storeParam = $this->params->get('store');
-        $id = $this->params->get('customer_id');
-        $user = false;
 
-        if (! $id) {
-            $user = User::current();
-
-            if (! $user) {
-                return ['not_found' => true];
-            }
-        }
-
-        if (! $user) {
-            $user = User::query()
-                ->where('shopify_id', $id)
-                ->first();
-
-            if (! $user) {
-                return ['not_found' => true];
-            }
+        if (! $user = User::current()) {
+            return ['not_found' => true];
         }
 
         [$customerId, $graphql] = $this->resolveCustomerGraphql($user, $storeParam);
@@ -464,45 +443,31 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
 
         $response = $graphql->query(['query' => $query]);
 
-        if ($data = Arr::get($response->getDecodedBody() ?? [], 'data.customer', [])) {
+        $data = [];
+
+        if ($customer = Arr::get($response->getDecodedBody() ?? [], 'data.customer', [])) {
             $data = [
-                'email' => $data['email'],
-                'name' => $data['displayName'],
-                'last_order_id' => Arr::get($data, 'lastOrder.id'),
-                'note' => $data['note'],
+                'email' => $customer['email'],
+                'name' => $customer['displayName'],
+                'last_order_id' => Arr::get($customer, 'lastOrder.id'),
+                'note' => $customer['note'],
             ];
         }
 
-        return array_merge($data, $user?->data()->all() ?? []);
+        return array_merge($data, $user->data()->all());
     }
 
     /**
      * Get the customer addresses
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function customerAddresses()
     {
         $storeParam = $this->params->get('store');
-        $id = $this->params->get('customer_id');
-        $user = false;
 
-        if (! $id) {
-            $user = User::current();
-
-            if (! $user) {
-                return ['addresses' => [], 'addresses_count' => 0];
-            }
-        }
-
-        if (! $user) {
-            $user = User::query()
-                ->where('shopify_id', $id)
-                ->first();
-
-            if (! $user) {
-                return ['addresses' => [], 'addresses_count' => 0];
-            }
+        if (! $user = User::current()) {
+            return ['addresses' => [], 'addresses_count' => 0];
         }
 
         [$customerId, $graphql] = $this->resolveCustomerGraphql($user, $storeParam);
@@ -547,30 +512,14 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     /**
      * Get the customer orders
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return Collection|null
      */
     public function customerOrders()
     {
         $storeParam = $this->params->get('store');
-        $id = $this->params->get('customer_id');
-        $user = false;
 
-        if (! $id) {
-            $user = User::current();
-
-            if (! $user) {
-                return ['orders' => [], 'orders_count' => 0];
-            }
-        }
-
-        if (! $user) {
-            $user = User::query()
-                ->where('shopify_id', $id)
-                ->first();
-
-            if (! $user) {
-                return ['orders' => [], 'orders_count' => 0];
-            }
+        if (! $user = User::current()) {
+            return ['orders' => [], 'orders_count' => 0];
         }
 
         $status = '';
@@ -578,11 +527,13 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             $status = ' AND status = '.$this->context->get('status');
         }
 
+        [$sortKey, $reverse] = $this->resolveOrderSort($this->params->get('sort'));
+
         [$userId, $graphql] = $this->resolveCustomerGraphql($user, $storeParam);
 
         $query = <<<QUERY
-            query (\$numItems: Int!, \$cursor: String) {
-              orders(first: \$numItems, after: \$cursor, query: "customer_id:$userId $status") {
+            query (\$numItems: Int!, \$cursor: String, \$sortKey: OrderSortKeys, \$reverse: Boolean) {
+              orders(first: \$numItems, after: \$cursor, sortKey: \$sortKey, reverse: \$reverse, query: "customer_id:$userId $status") {
                 nodes {
                   id
                   billingAddress {
@@ -674,6 +625,8 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
                 'variables' => [
                     'numItems' => 100,
                     'cursor' => Arr::get($data, 'data.orders.pageInfo.endCursor', null),
+                    'sortKey' => $sortKey,
+                    'reverse' => $reverse,
                 ],
             ]);
 
@@ -704,17 +657,57 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             $this->params->put('as', 'orders');
         }
 
-        $data = collect($items ?? []);
+        $data = collect($items);
+        $total = $data->count();
 
         if ($paginate = $this->params->int('paginate')) {
+            $page = Paginator::resolveCurrentPage();
+
             $data = new LengthAwarePaginator(
-                $data,
-                count($data),
-                $paginate
+                $data->forPage($page, $paginate)->values(),
+                $total,
+                $paginate,
+                $page,
+                ['path' => Paginator::resolveCurrentPath()]
             );
         }
 
-        return array_merge($this->output($data), ['orders_count' => count($data ?? [])]);
+        return array_merge($this->output($data), ['orders_count' => $total]);
+    }
+
+    /**
+     * Resolve a `sort="field:direction"` param into a Shopify OrderSortKeys value and reverse flag.
+     * Returns [$sortKey, $reverse].
+     */
+    protected function resolveOrderSort(?string $sort): array
+    {
+        if (! $sort) {
+            return [null, false];
+        }
+
+        $field = Str::of(Str::before($sort, ':'))->trim()->upper()->replace('-', '_')->toString();
+        $direction = Str::lower(trim(Str::after($sort, ':')));
+
+        $allowed = [
+            'CREATED_AT',
+            'CUSTOMER_NAME',
+            'DESTINATION',
+            'FINANCIAL_STATUS',
+            'FULFILLMENT_STATUS',
+            'ID',
+            'ORDER_NUMBER',
+            'PO_NUMBER',
+            'PROCESSED_AT',
+            'TOTAL_ITEMS_QUANTITY',
+            'TOTAL_PRICE',
+            'UPDATED_AT',
+        ];
+
+        if (! in_array($field, $allowed)) {
+            return [null, false];
+        }
+
+        return [$field, Str::contains($sort, ':') && $direction === 'desc'];
     }
 
     /**

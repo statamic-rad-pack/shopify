@@ -24,7 +24,7 @@ class TagsTest extends TestCase
         config()->set('shopify.storefront_token', '1234');
 
         $this->assertEquals(str_replace(["\r", "\n"], '', "<script>
-window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04' };
+window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04', currency: '£' };
 </script>"),
             str_replace(["\r", "\n"], '', $this->tag('{{ shopify:tokens }}'))
         );
@@ -83,6 +83,47 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04' };
         $variant2->set('price', 9.99)->save();
 
         $this->assertEquals('£9.99', $this->tag('{{ shopify:product_price show_from="true" }}', ['slug' => 'obi-wan']));
+    }
+
+    #[Test]
+    public function slug_can_be_passed_as_a_parameter()
+    {
+        $product = Facades\Entry::make()->data([
+            'title' => 'Obi wan',
+            'vendor' => 'Kenobe',
+            'slug' => 'obi-wan',
+            'product_id' => 1,
+        ])
+            ->collection(config('shopify.collection_handle', 'products'));
+
+        $product->save();
+
+        $variant = Facades\Entry::make()->data([
+            'title' => 'T-shirt',
+            'slug' => 'obi-wan-tshirt',
+            'sku' => 'obi-wan-tshirt',
+            'product_slug' => 'obi-wan',
+            'price' => 9.99,
+            'inventory_quantity' => 10,
+            'variant_id' => 'abc',
+            'inventory_policy' => 'deny',
+            'inventory_management' => 'shopify',
+        ])
+            ->collection('variants');
+
+        $variant->save();
+
+        // No slug in context, provided as a parameter instead.
+        $this->assertEquals('£9.99', $this->tag('{{ shopify:product_price slug="obi-wan" }}'));
+        $this->assertEquals('Yes', $this->tag('{{ if {shopify:in_stock slug="obi-wan"} }}Yes{{ /if }}'));
+        $this->assertEquals('<input type="hidden" name="ss-product-variant" value="obi-wan-tshirt">', trim($this->tag('{{ shopify:variants:generate slug="obi-wan" }}')));
+        $this->assertEquals('abc', $this->tag('{{ shopify:variants slug="obi-wan" }}{{ variant_id }}{{ /shopify:variants }}'));
+
+        // Parameter takes precedence over the context.
+        $this->assertEquals('£9.99', $this->tag('{{ shopify:product_price slug="obi-wan" }}', ['slug' => 'wrong-slug']));
+        $this->assertEquals('Yes', $this->tag('{{ if {shopify:in_stock slug="obi-wan"} }}Yes{{ /if }}', ['slug' => 'wrong-slug']));
+        $this->assertEquals('<input type="hidden" name="ss-product-variant" value="obi-wan-tshirt">', trim($this->tag('{{ shopify:variants:generate slug="obi-wan" }}', ['slug' => 'wrong-slug'])));
+        $this->assertEquals('abc', $this->tag('{{ shopify:variants slug="obi-wan" }}{{ variant_id }}{{ /shopify:variants }}', ['slug' => 'wrong-slug']));
     }
 
     #[Test]
@@ -346,7 +387,8 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04' };
 
         $this->assertEquals('<form method="POST" action="http://localhost/!/shopify/address/1"><input type="hidden" name="_token" value="">Some content</form>', str_replace(' autocomplete="off"', '', $this->tag('{{ shopify:address_form address_id="1" }}Some content{{ /shopify:address_form }}')));
 
-        $this->assertEquals('<form method="POST" action="http://localhost/!/shopify/address"><input type="hidden" name="_token" value=""><input type="hidden" name="customer_id" value="1" />Some content</form>', str_replace(' autocomplete="off"', '', $this->tag('{{ shopify:address_form customer_id="1"  }}Some content{{ /shopify:address_form }}')));
+        // customer_id is accepted but ignored - it must not leak into the form as a field or attribute.
+        $this->assertEquals('<form method="POST" action="http://localhost/!/shopify/address"><input type="hidden" name="_token" value="">Some content</form>', str_replace(' autocomplete="off"', '', $this->tag('{{ shopify:address_form customer_id="1"  }}Some content{{ /shopify:address_form }}')));
     }
 
     #[Test]
@@ -377,11 +419,13 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04' };
             ])
         )->save();
 
-        $this->assertEquals('706405506930370000 - bob@biller.com', $this->tag('{{ shopify:customer customer_id="706405506930370000" }}{{ shopify_id }} - {{ email }}{{ /shopify:customer }}'));
-
-        $this->assertEquals('yes', $this->tag('{{ shopify:customer customer_id="706405506930370001" }}{{ if not_found }}yes{{ /if }}{{ /shopify:customer }}'));
+        // No logged in user: nothing to return, even with a customer_id param.
+        $this->assertEquals('yes', $this->tag('{{ shopify:customer customer_id="706405506930370000" }}{{ if not_found }}yes{{ /if }}{{ /shopify:customer }}'));
 
         $this->actingAs($user);
+
+        // customer_id is ignored - the tag always resolves to the logged in user.
+        $this->assertEquals('706405506930370000 - bob@biller.com', $this->tag('{{ shopify:customer customer_id="999" }}{{ shopify_id }} - {{ email }}{{ /shopify:customer }}'));
         $this->assertEquals('706405506930370000 - bob@biller.com', $this->tag('{{ shopify:customer }}{{ shopify_id }} - {{ email }}{{ /shopify:customer }}'));
     }
 
@@ -431,11 +475,13 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04' };
             ])
         )->save();
 
-        $this->assertEquals('207119551 - Chestnut Street 92', $this->tag('{{ shopify:customer:addresses customer_id="706405506930370000" }}{{ addresses }}{{ id }} - {{ address1 }}{{ /addresses }}{{ /shopify:customer:addresses }}'));
-
-        $this->assertEquals('0', $this->tag('{{ shopify:customer:addresses customer_id="706405506930370001" }}{{ addresses_count }}{{ /shopify:customer:addresses }}'));
+        // No logged in user: nothing to return, even with a customer_id param.
+        $this->assertEquals('0', $this->tag('{{ shopify:customer:addresses customer_id="706405506930370000" }}{{ addresses_count }}{{ /shopify:customer:addresses }}'));
 
         $this->actingAs($user);
+
+        // customer_id is ignored - addresses are always for the logged in user.
+        $this->assertEquals('207119551 - Chestnut Street 92', $this->tag('{{ shopify:customer:addresses customer_id="999" }}{{ addresses }}{{ id }} - {{ address1 }}{{ /addresses }}{{ /shopify:customer:addresses }}'));
         $this->assertEquals('207119551 - Chestnut Street 92', $this->tag('{{ shopify:customer:addresses }}{{ addresses }}{{ id }} - {{ address1 }}{{ /addresses }}{{ /shopify:customer:addresses }}'));
     }
 
@@ -1465,14 +1511,86 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04' };
             ])
         )->save();
 
-        $this->assertEquals('450789469', $this->tag('{{ shopify:customer:orders customer_id="706405506930370000" }}{{ orders }}{{ id }}{{ /orders }}{{ /shopify:customer:orders }}'));
-
-        $this->assertEquals('0', $this->tag('{{ shopify:customer:orders customer_id="706405506930370001" }}{{ orders_count }}{{ /shopify:customer:orders }}'));
+        // No logged in user: nothing to return, even with a customer_id param.
+        $this->assertEquals('0', $this->tag('{{ shopify:customer:orders customer_id="706405506930370000" }}{{ orders_count }}{{ /shopify:customer:orders }}'));
 
         $this->actingAs($user);
+
+        // customer_id is ignored - orders are always for the logged in user.
+        $this->assertEquals('450789469', $this->tag('{{ shopify:customer:orders customer_id="999" }}{{ orders }}{{ id }}{{ /orders }}{{ /shopify:customer:orders }}'));
         $this->assertEquals('450789469', $this->tag('{{ shopify:customer:orders }}{{ orders }}{{ id }}{{ /orders }}{{ /shopify:customer:orders }}'));
 
         $this->assertEquals('450789469', $this->tag('{{ shopify:customer:orders paginate="1" }}{{ orders }}{{ id }}{{ /orders }}{{ /shopify:customer:orders }}'));
         $this->assertEquals('1', $this->tag('{{ shopify:customer:orders paginate="1" }}{{ paginate:total_items }}{{ /shopify:customer:orders }}'));
+    }
+
+    #[Test]
+    public function paginates_customer_orders()
+    {
+        $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock
+                ->shouldReceive('query')
+                ->andReturn(new HttpResponse(
+                    status: 200,
+                    body: json_encode(['data' => ['orders' => [
+                        'nodes' => collect(range(1, 5))->map(fn ($id) => [
+                            'id' => "gid://shopify/Order/$id",
+                            'lineItems' => ['nodes' => []],
+                        ])->all(),
+                        'pageInfo' => ['hasNextPage' => false, 'endCursor' => null],
+                    ]]])
+                ));
+        });
+
+        $this->actingAs(tap(Facades\User::make()
+            ->email('test@test.com')
+            ->data(['shopify_id' => '706405506930370000'])
+        )->save());
+
+        $template = '{{ shopify:customer:orders paginate="2" }}{{ orders }}{{ id }}{{ /orders }}|{{ paginate:total_items }}|{{ paginate:current_page }}|{{ orders_count }}{{ /shopify:customer:orders }}';
+
+        $this->assertEquals('12|5|1|5', $this->tag($template));
+
+        $this->get('/?page=2');
+        $this->assertEquals('34|5|2|5', $this->tag($template));
+
+        $this->get('/?page=3');
+        $this->assertEquals('5|5|3|5', $this->tag($template));
+    }
+
+    #[Test]
+    public function passes_sort_param_to_customer_orders_query()
+    {
+        $sent = [];
+
+        $this->mock(Graphql::class, function (MockInterface $mock) use (&$sent) {
+            $mock
+                ->shouldReceive('query')
+                ->andReturnUsing(function ($data) use (&$sent) {
+                    $sent[] = $data['variables'];
+
+                    return new HttpResponse(
+                        status: 200,
+                        body: '{"data": {"orders": {"nodes": [], "pageInfo": {"hasNextPage": false, "endCursor": null}}}}'
+                    );
+                });
+        });
+
+        $this->actingAs(tap(Facades\User::make()
+            ->email('test@test.com')
+            ->data(['shopify_id' => '706405506930370000'])
+        )->save());
+
+        $this->tag('{{ shopify:customer:orders }}{{ /shopify:customer:orders }}');
+        $this->tag('{{ shopify:customer:orders sort="created_at:desc" }}{{ /shopify:customer:orders }}');
+        $this->tag('{{ shopify:customer:orders sort="total_price:asc" }}{{ /shopify:customer:orders }}');
+        $this->tag('{{ shopify:customer:orders sort="order_number" }}{{ /shopify:customer:orders }}');
+        $this->tag('{{ shopify:customer:orders sort="not_a_field:desc" }}{{ /shopify:customer:orders }}');
+
+        $this->assertSame([null, false], [$sent[0]['sortKey'], $sent[0]['reverse']]);
+        $this->assertSame(['CREATED_AT', true], [$sent[1]['sortKey'], $sent[1]['reverse']]);
+        $this->assertSame(['TOTAL_PRICE', false], [$sent[2]['sortKey'], $sent[2]['reverse']]);
+        $this->assertSame(['ORDER_NUMBER', false], [$sent[3]['sortKey'], $sent[3]['reverse']]);
+        $this->assertSame([null, false], [$sent[4]['sortKey'], $sent[4]['reverse']]);
     }
 }

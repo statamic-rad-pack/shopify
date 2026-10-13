@@ -10,7 +10,7 @@ use StatamicRadPack\Shopify\Http\Middleware\VerifyShopifyHeaders;
 Route::name('shopify.')
     ->group(function () {
         Route::prefix('address')
-            ->middleware([HandlePrecognitiveRequests::class])
+            ->middleware(['auth', 'throttle:60,1', HandlePrecognitiveRequests::class])
             ->group(function () {
                 Route::post('/', [AddressController::class, 'create'])
                     ->name('address.create');
@@ -28,7 +28,12 @@ Route::name('shopify.')
         Route::get('oauth-redirect', fn () => redirect()->route('statamic.cp.shopify.index'));
 
         Route::prefix('webhook')
-            ->withoutMiddleware(['App\Http\Middleware\VerifyCsrfToken', 'Illuminate\Foundation\Http\Middleware\VerifyCsrfToken'])
+            ->withoutMiddleware([
+                'App\Http\Middleware\VerifyCsrfToken',
+                'Illuminate\Foundation\Http\Middleware\VerifyCsrfToken',
+                'Illuminate\Foundation\Http\Middleware\ValidateCsrfToken',
+                'Illuminate\Foundation\Http\Middleware\PreventRequestForgery',
+            ])
             ->middleware([VerifyShopifyHeaders::class])
             ->group(function () {
                 Route::post('collection/create', [Webhooks\CollectionCreateUpdateController::class, 'create'])

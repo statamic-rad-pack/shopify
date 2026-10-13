@@ -94,7 +94,7 @@ class MultiStoreTagsTest extends TestCase
         $output = str_replace(["\r", "\n"], '', $this->tag('{{ shopify:tokens }}'));
 
         $this->assertEquals(
-            str_replace(["\r", "\n"], '', "<script>window.shopifyConfig = { url: 'single-store.myshopify.com', token: 'single-token', apiVersion: '2025-04' };</script>"),
+            str_replace(["\r", "\n"], '', "<script>window.shopifyConfig = { url: 'single-store.myshopify.com', token: 'single-token', apiVersion: '2025-04', currency: '£' };</script>"),
             $output
         );
     }

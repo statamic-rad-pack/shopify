@@ -13,18 +13,18 @@ class AddressController extends BaseActionController
 {
     public function create(Requests\CreateOrUpdateAddressRequest $request)
     {
-        $customerId = request()->input('customer_id') ?? User::current()?->get('shopify_id') ?? false;
+        $customerId = User::current()?->get('shopify_id') ?: false;
 
         if (! $customerId) {
-            return $this->withErrors($request, __('No customer_id to associate the address with'));
+            return $this->withErrors($request, __('No Shopify customer is associated with the current user'));
         }
 
         $validatedData = $request->validated();
 
         try {
             $query = <<<'QUERY'
-            mutation customerAddressCreate(\$address: MailingAddressInput!, \$customerId: ID!, \$setAsDefault: Boolean) {
-              customerAddressCreate(address: \$address, customerId: \$customerId, setAsDefault: \$setAsDefault) {
+            mutation customerAddressCreate($address: MailingAddressInput!, $customerId: ID!, $setAsDefault: Boolean) {
+              customerAddressCreate(address: $address, customerId: $customerId, setAsDefault: $setAsDefault) {
                 address {
                   id
                   firstName
@@ -75,10 +75,10 @@ class AddressController extends BaseActionController
 
     public function destroy(Request $request, $id)
     {
-        $customerId = request()->input('customer_id') ?? User::current()?->get('shopify_id') ?? false;
+        $customerId = User::current()?->get('shopify_id') ?: false;
 
         if (! $customerId) {
-            return $this->withErrors($request, __('No customer_id to associate the address with'));
+            return $this->withErrors($request, __('No Shopify customer is associated with the current user'));
         }
 
         try {
@@ -115,18 +115,18 @@ class AddressController extends BaseActionController
 
     public function store(Requests\CreateOrUpdateAddressRequest $request, $id)
     {
-        $customerId = request()->input('customer_id') ?? User::current()?->get('shopify_id') ?? false;
+        $customerId = User::current()?->get('shopify_id') ?: false;
 
         if (! $customerId) {
-            return $this->withErrors($request, __('No customer_id to associate the address with'));
+            return $this->withErrors($request, __('No Shopify customer is associated with the current user'));
         }
 
         $validatedData = $request->validated();
 
         try {
             $query = <<<'QUERY'
-            mutation customerAddressUpdate(\$address: MailingAddressInput!, $addressId: ID!, \$customerId: ID!, \$setAsDefault: Boolean) {
-              customerAddressUpdate(address: \$address, addressId: \$addressId, customerId: \$customerId, setAsDefault: \$setAsDefault) {
+            mutation customerAddressUpdate($address: MailingAddressInput!, $addressId: ID!, $customerId: ID!, $setAsDefault: Boolean) {
+              customerAddressUpdate(address: $address, addressId: $addressId, customerId: $customerId, setAsDefault: $setAsDefault) {
                 address {
                   id
                   firstName

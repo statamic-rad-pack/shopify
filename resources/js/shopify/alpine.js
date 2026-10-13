@@ -52,7 +52,7 @@ const createStore = (Alpine) => {
                 line = line.node;
 
                 let attrs = {};
-                line.attributes.forEach((attr) => attrs[key] = attr.value);
+                line.attributes.forEach((attr) => attrs[attr.key] = attr.value);
 
                 let qty = line.quantity;
 
@@ -61,6 +61,7 @@ const createStore = (Alpine) => {
                     title: line.merchandise.product.title,
                     variant: {
                         title: line.merchandise.title,
+                        id: line.merchandise.id,
                     },
                     price:this.formatCurrency(line.cost.amountPerQuantity.amount),
                     qty: qty,
@@ -100,10 +101,14 @@ const createData = (Alpine) => {
 
             if (! options) {
                 options = {};
+                this.options = options;
             }
 
             this.selectedVariant = variants[0];
-            this.variantEl.value = this.selectedVariant.slug;
+            
+            if (this.variantEl) {
+                this.variantEl.value = this.selectedVariant.slug;
+            }
 
             for (const [key, value] of Object.entries(options)) {
                 this.selected[key] = this.selectedVariant[key];

@@ -1,5 +1,106 @@
 # Changelog
 
+## v7.13.1 - 2026-10-08
+
+### What's Changed
+* Fix order history pagination by @GarethFrost in https://github.com/statamic-rad-pack/shopify/pull/377
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.13.0...v7.13.1
+
+## v7.13.0 - 2026-10-08
+
+### What's Changed
+* Add sorting to orders tag by @GarethFrost in https://github.com/statamic-rad-pack/shopify/pull/376
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.12.3...v7.13.0
+
+## v7.12.3 - 2026-10-08
+
+### What's Changed
+* Use the class-based unique rule on the variant slug by @lwekuiper in https://github.com/statamic-rad-pack/shopify/pull/375
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.12.2...v7.12.3
+
+## v7.12.2 - 2026-10-02
+
+### What's Changed
+* Fall back to `null` in `to_json` modifier by @robdekort in https://github.com/statamic-rad-pack/shopify/pull/374
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.12.1...v7.12.2
+
+## v7.12.1 - 2026-09-22
+
+### What's Changed
+* Update alpine.js by @robdekort in https://github.com/statamic-rad-pack/shopify/pull/371
+* Fix cart line attributes being dropped and userErrors not logged by @lwekuiper in https://github.com/statamic-rad-pack/shopify/pull/372
+* Create the storefront client on first use by @lwekuiper in https://github.com/statamic-rad-pack/shopify/pull/373
+
+### New Contributors
+* @lwekuiper made their first contribution in https://github.com/statamic-rad-pack/shopify/pull/372
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.12.0...v7.12.1
+
+## v7.12.0 - 2026-09-17
+
+### What's Changed
+* Update alpine.js by @robdekort in https://github.com/statamic-rad-pack/shopify/pull/369
+* Use template on cart.antlers.html to help screen readers by @robdekort in https://github.com/statamic-rad-pack/shopify/pull/368
+* FIx missing currency in non-multi, non-market stores by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/370
+
+### New Contributors
+* @robdekort made their first contribution in https://github.com/statamic-rad-pack/shopify/pull/369
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.11.0...v7.12.0
+
+## v7.11.0 - 2026-09-04
+
+### What's Changed
+* Fix customer graphql mutations by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/366
+* Various security hardening fixes by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/367
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.10.0...v7.11.0
+
+## v7.10.0 - 2026-09-04
+
+### What's Changed
+* Add ProductHasStock query scope by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/363
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.9.1...v7.10.0
+
+## v7.9.1 - 2026-09-03
+
+### What's Changed
+* Add param for slug to tags to override context by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/362
+* Add PreventRequestForgery to webhook middleware exclusions by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/364
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.9.0...v7.9.1
+
+## v7.9.0 - 2026-09-03
+
+### What's Changed
+* Add slug param to tags to override context by @ryanmitchell in https://github.com/statamic-rad-pack/shopify/pull/361
+
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.8.6...v7.9.0
+
+## v7.8.6 - 2026-09-02
+
+### What's Changed
+* docs: note JS prerequisites where the scripts are published by @digitalnativgmbh in https://github.com/statamic-rad-pack/shopify/pull/359
+* fix: assign the normalised options object to this.options by @digitalnativgmbh in https://github.com/statamic-rad-pack/shopify/pull/360
+
+### New Contributors
+* @digitalnativgmbh made their first contribution in https://github.com/statamic-rad-pack/shopify/pull/359
+
+**Full Changelog**: https://github.com/statamic-rad-pack/shopify/compare/v7.8.5...v7.8.6
+
 ## v7.8.5 - 2026-08-28
 
 ### What's Changed

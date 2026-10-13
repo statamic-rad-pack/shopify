@@ -20,7 +20,7 @@ sections:
           display: 'Variant ID'
           validate:
             - required
-            - 'unique_entry_value:{collection},{id},{site}'
+            - 'new \Statamic\Rules\UniqueEntryValue({collection}, {id}, {site})'
           width: 50
       -
         handle: sku
