@@ -3,10 +3,10 @@
 namespace StatamicRadPack\Shopify\Http\Controllers\Actions;
 
 use Illuminate\Http\Request;
-use Shopify\Clients\Graphql;
 use Statamic\Facades\User;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Http\Requests;
 
 class AddressController extends BaseActionController

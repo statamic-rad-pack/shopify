@@ -4,9 +4,9 @@ namespace StatamicRadPack\Shopify\Http\Controllers\CP;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Shopify\Clients\Graphql;
 use Statamic\Http\Controllers\CP\CpController;
 use Statamic\Support\Arr;
+use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Enums\WebhookTopic;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 

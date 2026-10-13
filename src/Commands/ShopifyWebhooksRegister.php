@@ -3,8 +3,8 @@
 namespace StatamicRadPack\Shopify\Commands;
 
 use Illuminate\Console\Command;
-use Shopify\Clients\Graphql;
 use Statamic\Support\Arr;
+use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Enums\WebhookTopic;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 

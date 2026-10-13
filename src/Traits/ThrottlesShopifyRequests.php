@@ -2,8 +2,8 @@
 
 namespace StatamicRadPack\Shopify\Traits;
 
-use Shopify\Clients\Graphql;
 use Statamic\Support\Arr;
+use StatamicRadPack\Shopify\Clients\Graphql;
 
 trait ThrottlesShopifyRequests
 {

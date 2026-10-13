@@ -4,8 +4,8 @@ namespace StatamicRadPack\Shopify\Tests\Unit;
 
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
-use Shopify\Clients\Graphql;
-use Shopify\Clients\HttpResponse;
+use StatamicRadPack\Shopify\Clients\Graphql;
+use StatamicRadPack\Shopify\Clients\HttpResponse;
 use StatamicRadPack\Shopify\Tests\TestCase;
 use StatamicRadPack\Shopify\Traits\ThrottlesShopifyRequests;
 

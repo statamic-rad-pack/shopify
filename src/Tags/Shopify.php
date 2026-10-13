@@ -4,7 +4,6 @@ namespace StatamicRadPack\Shopify\Tags;
 
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
-use Shopify\Clients\Graphql;
 use Statamic\Extensions\Pagination\LengthAwarePaginator;
 use Statamic\Facades\Entry;
 use Statamic\Facades\User;
@@ -17,6 +16,7 @@ use Statamic\Tags\Concerns\QueriesConditions;
 use Statamic\Tags\Concerns\QueriesOrderBys;
 use Statamic\Tags\Concerns\RendersForms;
 use Statamic\Tags\Tags;
+use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 
 class Shopify extends Tags
