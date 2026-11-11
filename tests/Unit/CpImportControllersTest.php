@@ -2,12 +2,16 @@
 
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
+use Illuminate\Support\Facades\Bus;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades\User;
 use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Clients\HttpResponse;
+use StatamicRadPack\Shopify\Jobs\ImportAllCollectionsJob;
+use StatamicRadPack\Shopify\Jobs\ImportAllProductsJob;
+use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
 class CpImportControllersTest extends TestCase
@@ -52,5 +56,39 @@ class CpImportControllersTest extends TestCase
             ->getJson(cp_route('shopify.products.fetch', ['product' => 1]))
             ->assertOk()
             ->assertJsonPath('message', 'Product import has been queued.');
+    }
+
+    #[Test]
+    public function importing_all_products_and_collections_is_queued()
+    {
+        Bus::fake();
+
+        $this->actingAsSuperUser()
+            ->getJson(cp_route('shopify.products.fetchAll'))
+            ->assertOk();
+
+        $this->actingAsSuperUser()
+            ->getJson(cp_route('shopify.collections.fetchAll'))
+            ->assertOk();
+
+        Bus::assertDispatched(ImportAllProductsJob::class);
+        Bus::assertDispatched(ImportAllCollectionsJob::class);
+    }
+
+    #[Test]
+    public function the_import_all_products_job_queues_each_product()
+    {
+        $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock->shouldReceive('query')->andReturn(new HttpResponse(
+                status: 200,
+                body: '{"data":{"products":{"nodes":[{"id":"gid://shopify/Product/1"},{"id":"gid://shopify/Product/2"}],"pageInfo":{"hasNextPage":false,"endCursor":null}}}}'
+            ));
+        });
+
+        Bus::fake([ImportSingleProductJob::class]);
+
+        (new ImportAllProductsJob)->handle();
+
+        Bus::assertDispatchedTimes(ImportSingleProductJob::class, 2);
     }
 }

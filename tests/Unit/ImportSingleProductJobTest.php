@@ -3,9 +3,11 @@
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Contracts\Entries\Entry;
+use Statamic\Events\EntrySaved;
 use Statamic\Facades;
 use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Clients\HttpResponse;
@@ -76,30 +78,28 @@ class ImportSingleProductJobTest extends TestCase
             $mock
                 ->shouldReceive('query')
                 ->withArgs(function ($query) {
-                    return str_contains($query['query'], 'translatableResource(resourceId: "');
+                    return str_contains($query['query'], 'translatableResourcesByIds(')
+                        && $query['variables']['locale'] === 'fr'
+                        && in_array('gid://shopify/Product/108828309', $query['variables']['resourceIds']);
                 })
                 ->andReturn(new HttpResponse(
                     status: 200,
                     body: '{
                     "data": {
-                      "translatableResource": {
-                        "resourceId": "gid://shopify/Product/1007901140",
-                        "translations": [
+                      "translatableResourcesByIds": {
+                        "nodes": [
                           {
-                            "key": "title",
-                            "value": "Featured items"
-                          },
-                          {
-                            "key": "body_html",
-                            "value": null
-                          },
-                          {
-                            "key": "meta_title",
-                            "value": null
-                          },
-                          {
-                            "key": "meta_description",
-                            "value": null
+                            "resourceId": "gid://shopify/Product/108828309",
+                            "translations": [
+                              {
+                                "key": "title",
+                                "value": "Featured items"
+                              },
+                              {
+                                "key": "body_html",
+                                "value": null
+                              }
+                            ]
                           }
                         ]
                       }
@@ -803,5 +803,96 @@ class ImportSingleProductJobTest extends TestCase
 
         $product = Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->first();
         $this->assertSame(5, $product->get('total_purchased')['lifetime']);
+    }
+
+    #[Test]
+    public function stores_a_price_and_stock_summary_on_the_product()
+    {
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
+        Facades\Collection::make('variants')->save();
+        Facades\Taxonomy::make()->handle('collections')->save();
+        Facades\Taxonomy::make()->handle('tags')->save();
+        Facades\Taxonomy::make()->handle('type')->save();
+        Facades\Taxonomy::make()->handle('vendor')->save();
+
+        $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock->shouldReceive('query')->andReturn(new HttpResponse(status: 200, body: $this->getProductJson()));
+        });
+
+        Jobs\ImportSingleProductJob::dispatch(1);
+
+        $product = Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->first();
+
+        $this->assertSame('23.00', $product->get('price_min'));
+        $this->assertSame('23.00', $product->get('price_max'));
+        $this->assertFalse($product->get('in_stock'));
+        $this->assertFalse($product->get('on_sale'));
+    }
+
+    #[Test]
+    public function saves_the_product_entry_once_per_import()
+    {
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
+        Facades\Collection::make('variants')->save();
+        Facades\Taxonomy::make()->handle('collections')->save();
+        Facades\Taxonomy::make()->handle('tags')->save();
+        Facades\Taxonomy::make()->handle('type')->save();
+        Facades\Taxonomy::make()->handle('vendor')->save();
+
+        $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock->shouldReceive('query')->andReturn(new HttpResponse(status: 200, body: $this->getProductJson()));
+        });
+
+        $saves = 0;
+        Event::listen(EntrySaved::class, function ($event) use (&$saves) {
+            if ($event->entry->collectionHandle() === config('shopify.collection_handle', 'products')) {
+                $saves++;
+            }
+        });
+
+        Jobs\ImportSingleProductJob::dispatch(1);
+
+        $this->assertSame(1, $saves);
+    }
+
+    #[Test]
+    public function fetches_product_and_variant_translations_in_one_query_per_site()
+    {
+        Facades\Site::setSites([
+            'en' => ['url' => '/', 'locale' => 'en_US'],
+            'fr' => ['url' => '/fr/', 'locale' => 'fr_FR'],
+        ]);
+
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->sites(['en', 'fr'])->save();
+        Facades\Collection::make('variants')->sites(['en', 'fr'])->save();
+        Facades\Taxonomy::make()->handle('collections')->save();
+        Facades\Taxonomy::make()->handle('tags')->save();
+        Facades\Taxonomy::make()->handle('type')->save();
+        Facades\Taxonomy::make()->handle('vendor')->save();
+
+        $translationQueries = [];
+
+        $this->mock(Graphql::class, function (MockInterface $mock) use (&$translationQueries) {
+            $mock->shouldReceive('query')->andReturnUsing(function ($query) use (&$translationQueries) {
+                if (! str_contains($query['query'], 'translatableResourcesByIds(')) {
+                    return new HttpResponse(status: 200, body: $this->getProductJson());
+                }
+
+                $translationQueries[] = $query['variables'];
+
+                return new HttpResponse(status: 200, body: json_encode(['data' => ['translatableResourcesByIds' => ['nodes' => [
+                    ['resourceId' => 'gid://shopify/Product/108828309', 'translations' => [['key' => 'title', 'value' => 'Produit']]],
+                    ['resourceId' => 'gid://shopify/ProductVariant/1', 'translations' => [['key' => 'title', 'value' => 'Variante']]],
+                ]]]]));
+            });
+        });
+
+        Jobs\ImportSingleProductJob::dispatch(1);
+
+        $this->assertCount(1, $translationQueries);
+        $this->assertSame(['gid://shopify/Product/108828309', 'gid://shopify/ProductVariant/1'], $translationQueries[0]['resourceIds']);
+
+        $this->assertSame('Produit', Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->firstWhere('locale', 'fr')->get('title'));
+        $this->assertSame('Variante', Facades\Entry::whereCollection('variants')->firstWhere('locale', 'fr')->get('title'));
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
@@ -16,6 +17,7 @@ use Statamic\Support\Str;
 use Statamic\Support\Traits\Hookable;
 use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Events\ProductImportFailed;
+use StatamicRadPack\Shopify\Support\ProductSummary;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
 use StatamicRadPack\Shopify\Traits\ThrottlesShopifyRequests;
@@ -196,7 +198,10 @@ class ImportSingleProductJob implements ShouldQueue
         $entry->slug($this->data['handle']);
 
         // Import Variant
-        $this->importVariants($this->data['variants'], $this->data['handle'], $graphql);
+        $variantEntries = $this->importVariants($this->data['variants'], $this->data['handle']);
+
+        // Store price/stock summary on the product so listings don't need to query variants
+        $data = array_merge($data, ProductSummary::fromVariants($variantEntries));
 
         // Import Images
         foreach (Arr::get($this->data, 'media.edges', []) as $index => $edge) {
@@ -231,29 +236,23 @@ class ImportSingleProductJob implements ShouldQueue
         // means we can just test individual parts of the job
         try {
 
-            // collections
+            // collections (only those already imported as terms)
             try {
-                $collections = collect(Arr::get($this->data, 'collections.edges', []))
-                    ->map(function ($collection) {
-                        if (! $node = $collection['node'] ?? []) {
-                            return [];
-                        }
-
-                        $term = Term::query()
-                            ->where('slug', $node['handle'])
-                            ->where('taxonomy', config('shopify.taxonomies.collections'))
-                            ->first();
-
-                        if (! $term) {
-                            return;
-                        }
-
-                        return $node['handle'];
-                    })
+                $handles = collect(Arr::get($this->data, 'collections.edges', []))
+                    ->map(fn ($collection) => Arr::get($collection, 'node.handle'))
                     ->filter()
-                    ->all();
+                    ->values();
 
-                $entry->set(config('shopify.taxonomies.collections'), $collections)->save();
+                $existing = $handles->isEmpty() ? collect() : Term::query()
+                    ->where('taxonomy', config('shopify.taxonomies.collections'))
+                    ->whereIn('slug', $handles->all())
+                    ->get()
+                    ->map->slug();
+
+                $entry->set(
+                    config('shopify.taxonomies.collections'),
+                    $handles->filter(fn ($handle) => $existing->contains($handle))->values()->all()
+                );
             } catch (Throwable $e) {
                 Log::error('Could not retrieve collections for product '.$this->data['id']);
                 Log::error($e->getMessage());
@@ -315,49 +314,101 @@ class ImportSingleProductJob implements ShouldQueue
 
         // if we are multisite, get translations
         if (Site::hasMultiple()) {
-            $collectionSites = $entry->collection()->sites();
+            $this->importTranslations($entry, $variantEntries, $graphql);
+        }
+    }
 
-            Site::all()->each(function ($site) use ($collectionSites, $entry, $graphql) {
-                if (Site::default()->handle() == $site->handle()) {
+    /**
+     * Fetch translations for the product and all of its variants in one query per site,
+     * rather than one query per resource per site.
+     */
+    private function importTranslations($product, $variants, Graphql $graphql): void
+    {
+        $productSites = $product->collection()->sites();
+        $variantSites = $variants->first()?->collection()->sites() ?? collect();
+        $productGid = 'gid://shopify/Product/'.$this->data['id'];
+
+        Site::all()->each(function ($site) use ($product, $variants, $graphql, $productSites, $variantSites, $productGid) {
+            if (Site::default()->handle() == $site->handle()) {
+                return;
+            }
+
+            $resources = collect();
+
+            if ($productSites->contains($site->handle())) {
+                $resources->put($productGid, $product);
+            }
+
+            if ($variantSites->contains($site->handle())) {
+                $variants->each(fn ($variant) => $resources->put('gid://shopify/ProductVariant/'.$variant->slug(), $variant));
+            }
+
+            if ($resources->isEmpty()) {
+                return;
+            }
+
+            $translations = $this->fetchTranslations($graphql, $resources->keys()->all(), $site->lang());
+
+            $resources->each(function ($entry, $gid) use ($site, $translations, $productGid) {
+                $rows = $translations[$gid] ?? [];
+
+                if (! $rows && ! $entry->collection()->propagate()) {
                     return;
                 }
 
-                if (! $collectionSites->contains($site->handle())) {
-                    return;
-                }
+                $localizedEntry = $entry->in($site->handle()) ?? $entry->makeLocalization($site);
 
-                $query = <<<QUERY
-                  query {
-                    translatableResource(resourceId: "gid://shopify/Product/{$this->data['id']}") {
-                      resourceId
-                      translations(locale: "{$site->lang()}") {
-                        key
-                        value
-                      }
-                    }
-                  }
-                QUERY;
-
-                $response = $this->queryWithThrottle($graphql, ['query' => $query]);
-
-                $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
-
-                if ($translations || $entry->collection()->propagate()) {
-                    $localizedEntry = $entry->in($site->handle());
-
-                    if (! $localizedEntry) {
-                        $localizedEntry = $entry->makeLocalization($site);
-                    }
-
+                if ($gid === $productGid) {
                     // All localizations should have the same handle for correct connections to variants
                     $localizedEntry->slug($entry->slug());
-
-                    $data = collect($translations)->mapWithKeys(fn ($row) => [$row['key'] == 'body_html' ? 'content' : $row['key'] => $row['value']]);
-
-                    $localizedEntry->merge($data)->save();
                 }
+
+                $data = collect($rows)->mapWithKeys(fn ($row) => [
+                    ($gid === $productGid && $row['key'] == 'body_html') ? 'content' : $row['key'] => $row['value'],
+                ]);
+
+                $localizedEntry->merge($data)->save();
             });
+        });
+    }
+
+    /**
+     * @return array<string, array> translations keyed by resource gid
+     */
+    private function fetchTranslations(Graphql $graphql, array $resourceIds, string $locale): array
+    {
+        $query = <<<'QUERY'
+            query ($resourceIds: [ID!]!, $first: Int!, $locale: String!) {
+              translatableResourcesByIds(first: $first, resourceIds: $resourceIds) {
+                nodes {
+                  resourceId
+                  translations(locale: $locale) {
+                    key
+                    value
+                  }
+                }
+              }
+            }
+            QUERY;
+
+        $translations = [];
+
+        foreach (array_chunk($resourceIds, 250) as $chunk) {
+            $response = $this->queryWithThrottle($graphql, [
+                'query' => $query,
+                'variables' => [
+                    'resourceIds' => $chunk,
+                    'first' => count($chunk),
+                    'locale' => $locale,
+                ],
+            ]);
+
+            foreach (Arr::get($response->getDecodedBody(), 'data.translatableResourcesByIds.nodes', []) as $node) {
+                $translations[$node['resourceId']] = $node['translations'] ?? [];
+            }
         }
+
+        return $translations;
     }
 
     /**
@@ -526,30 +577,33 @@ class ImportSingleProductJob implements ShouldQueue
         // 'Tag foo, Tag bar' => ['tag-foo' => 'Tag foo', 'tag-bar' => 'Tag bar']
         $tags = collect($tags)
             ->filter()
-            ->mapWithKeys(fn ($tagTitle) => [Str::slug($tagTitle) => $tagTitle])
-            ->each(function ($tagTitle, $tagSlug) use ($taxonomyHandle) {
-                $term = Term::query()
-                    ->where('taxonomy', $taxonomyHandle)
-                    ->where('slug', $tagSlug)
-                    ->first();
+            ->mapWithKeys(fn ($tagTitle) => [Str::slug($tagTitle) => $tagTitle]);
 
-                if (! $term) {
-                    $term = Term::make()
-                        ->taxonomy($taxonomyHandle)
-                        ->slug($tagSlug);
+        if ($tags->isEmpty()) {
+            return [];
+        }
 
-                    $term->data([
-                        'title' => $tagTitle,
-                    ]);
+        $existing = Term::query()
+            ->where('taxonomy', $taxonomyHandle)
+            ->whereIn('slug', $tags->keys()->all())
+            ->get()
+            ->map->slug();
 
-                    $term->save();
-                }
-            });
+        $tags
+            ->reject(fn ($tagTitle, $tagSlug) => $existing->contains($tagSlug))
+            ->each(fn ($tagTitle, $tagSlug) => Term::make()
+                ->taxonomy($taxonomyHandle)
+                ->slug($tagSlug)
+                ->data(['title' => $tagTitle])
+                ->save());
 
-        return $tags->keys()->toArray();
+        return $tags->keys()->all();
     }
 
-    private function importVariants(array $returnedVariants, string $product_slug, Graphql $graphql)
+    /**
+     * @return Collection<int, \Statamic\Contracts\Entries\Entry> the saved variant entries
+     */
+    private function importVariants(array $returnedVariants, string $product_slug)
     {
         $variants = [];
         foreach ($returnedVariants['edges'] as $variant) {
@@ -563,14 +617,17 @@ class ImportSingleProductJob implements ShouldQueue
 
         $variantSite = $this->resolveSite();
 
-        foreach ($variants as $variant) {
-            $entry = Entry::query()
-                ->where('collection', 'variants')
-                ->where('slug', $variant['id'])
-                ->where('site', $variantSite)
-                ->first();
+        $existing = Entry::query()
+            ->where('collection', 'variants')
+            ->where('site', $variantSite)
+            ->whereIn('slug', array_map('strval', array_column($variants, 'id')))
+            ->get()
+            ->keyBy(fn ($entry) => (string) $entry->slug());
 
-            if (! $entry) {
+        $saved = collect();
+
+        foreach ($variants as $variant) {
+            if (! $entry = $existing->get((string) $variant['id'])) {
                 $entry = Entry::make()
                     ->collection('variants')
                     ->locale($variantSite)
@@ -644,54 +701,10 @@ class ImportSingleProductJob implements ShouldQueue
 
             $entry->save();
 
-            // Skip multi-site translation loop when handling a multi-store job
-            if ($this->storeHandle) {
-                continue;
-            }
-
-            // if we are multisite, get translations
-            if (Site::hasMultiple()) {
-                $collectionSites = $entry->collection()->sites();
-
-                Site::all()->each(function ($site) use ($collectionSites, $entry, $variant, $graphql) {
-                    if (Site::default()->handle() == $site->handle()) {
-                        return;
-                    }
-
-                    if (! $collectionSites->contains($site->handle())) {
-                        return;
-                    }
-
-                    $query = <<<QUERY
-                      query {
-                        translatableResource(resourceId: "gid://shopify/ProductVariant/{$variant['id']}") {
-                          resourceId
-                          translations(locale: "{$site->lang()}") {
-                            key
-                            value
-                          }
-                        }
-                      }
-                    QUERY;
-
-                    $response = $this->queryWithThrottle($graphql, ['query' => $query]);
-
-                    $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
-
-                    if ($translations || $entry->collection()->propagate()) {
-                        $localizedEntry = $entry->in($site->handle());
-
-                        if (! $localizedEntry) {
-                            $localizedEntry = $entry->makeLocalization($site);
-                        }
-
-                        $data = collect($translations)->mapWithKeys(fn ($row) => [$row['key'] => $row['value']]);
-
-                        $localizedEntry->merge($data)->save();
-                    }
-                });
-            }
+            $saved->push($entry);
         }
+
+        return $saved;
     }
 
     /**

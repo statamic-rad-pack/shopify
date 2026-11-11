@@ -7,6 +7,7 @@ use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
 use Statamic\Http\Controllers\CP\CpController;
 use StatamicRadPack\Shopify\Blueprints\VariantBlueprint;
+use StatamicRadPack\Shopify\Support\ProductSummary;
 
 class VariantsController extends CpController
 {
@@ -59,5 +60,7 @@ class VariantsController extends CpController
 
         $variant->data($values);
         $variant->save();
+
+        ProductSummary::syncForVariant($variant);
     }
 }
