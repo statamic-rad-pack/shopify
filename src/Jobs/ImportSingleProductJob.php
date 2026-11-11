@@ -112,8 +112,13 @@ class ImportSingleProductJob implements ShouldQueue
               }
             }
             options {
+              id
               name
               values
+              optionValues {
+                id
+                name
+              }
             }
             productType
             resourcePublications(onlyPublished: false, first: 100) {
@@ -342,8 +347,9 @@ class ImportSingleProductJob implements ShouldQueue
     }
 
     /**
-     * Fetch translations for the product and all of its variants in one query per site,
-     * rather than one query per resource per site.
+     * Fetch translations for the product, its options and option values in one query per
+     * site. Variants aren't a translatable resource in Shopify: their option values (and
+     * so their titles) are translated through the product's option values.
      */
     private function importTranslations($product, $variants, Graphql $graphql): void
     {
@@ -351,48 +357,92 @@ class ImportSingleProductJob implements ShouldQueue
         $variantSites = $variants->first()?->collection()->sites() ?? collect();
         $productGid = 'gid://shopify/Product/'.$this->data['id'];
 
-        Site::all()->each(function ($site) use ($product, $variants, $graphql, $productSites, $variantSites, $productGid) {
+        $options = collect($this->data['options'] ?? []);
+        $resourceIds = collect([$productGid])
+            ->merge($options->pluck('id'))
+            ->merge($options->pluck('optionValues')->flatten(1)->pluck('id'))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $selectedOptions = collect(Arr::get($this->data, 'variants.edges', []))
+            ->mapWithKeys(fn ($edge) => [(string) Str::afterLast($edge['node']['id'], '/') => $edge['node']['selectedOptions'] ?? []]);
+
+        Site::all()->each(function ($site) use ($product, $variants, $graphql, $productSites, $variantSites, $productGid, $options, $resourceIds, $selectedOptions) {
             if (Site::default()->handle() == $site->handle()) {
                 return;
             }
 
-            $resources = collect();
+            $inProductSite = $productSites->contains($site->handle());
+            $inVariantSite = $variantSites->contains($site->handle());
 
-            if ($productSites->contains($site->handle())) {
-                $resources->put($productGid, $product);
-            }
-
-            if ($variantSites->contains($site->handle())) {
-                $variants->each(fn ($variant) => $resources->put('gid://shopify/ProductVariant/'.$variant->slug(), $variant));
-            }
-
-            if ($resources->isEmpty()) {
+            if (! $inProductSite && ! $inVariantSite) {
                 return;
             }
 
-            $translations = $this->fetchTranslations($graphql, $resources->keys()->all(), $site->lang());
+            $translations = $this->fetchTranslations($graphql, $resourceIds, $site->lang());
+            $translated = fn (?string $gid, string $key) => $gid
+                ? (collect($translations[$gid] ?? [])->firstWhere('key', $key)['value'] ?? null)
+                : null;
 
-            $resources->each(function ($entry, $gid) use ($site, $translations, $productGid) {
-                $rows = $translations[$gid] ?? [];
+            if ($inProductSite) {
+                $data = collect($translations[$productGid] ?? [])
+                    ->mapWithKeys(fn ($row) => [$row['key'] == 'body_html' ? 'content' : $row['key'] => $row['value']]);
 
-                if (! $rows && ! $entry->collection()->propagate()) {
-                    return;
+                $optionNames = $options
+                    ->mapWithKeys(fn ($option, $index) => [
+                        'option'.($index + 1) => $option['name'] == 'Title' ? null : ($translated($option['id'] ?? null, 'name') ?? $option['name']),
+                    ])
+                    ->filter();
+
+                if ($options->contains(fn ($option) => $translated($option['id'] ?? null, 'name'))) {
+                    $data['options'] = $optionNames->all();
                 }
 
-                $localizedEntry = $entry->in($site->handle()) ?? $entry->makeLocalization($site);
+                $this->saveTranslation($product, $site, $data->all(), keepSlug: true);
+            }
 
-                if ($gid === $productGid) {
-                    // All localizations should have the same handle for correct connections to variants
-                    $localizedEntry->slug($entry->slug());
-                }
+            if ($inVariantSite) {
+                $variants->each(function ($variant) use ($site, $selectedOptions, $translated) {
+                    $selected = $selectedOptions[(string) $variant->slug()] ?? [];
+                    $values = collect($selected)->map(fn ($option) => $translated(Arr::get($option, 'optionValue.id'), 'name'));
 
-                $data = collect($rows)->mapWithKeys(fn ($row) => [
-                    ($gid === $productGid && $row['key'] == 'body_html') ? 'content' : $row['key'] => $row['value'],
-                ]);
+                    $data = $values
+                        ->mapWithKeys(fn ($value, $index) => ['option'.($index + 1) => $value])
+                        ->filter()
+                        ->all();
 
-                $localizedEntry->merge($data)->save();
-            });
+                    if ($data && $variant->get('title') !== 'Default') {
+                        $data['title'] = collect($selected)
+                            ->map(fn ($option, $index) => $values[$index] ?? $option['value'])
+                            ->join(' / ');
+                    }
+
+                    $this->saveTranslation($variant, $site, $data);
+                });
+            }
         });
+    }
+
+    /**
+     * Save translated values onto the entry's localization, creating it when there are
+     * translations or the collection propagates.
+     */
+    private function saveTranslation($entry, $site, array $data, bool $keepSlug = false): void
+    {
+        if (! $data && ! $entry->collection()->propagate()) {
+            return;
+        }
+
+        $localizedEntry = $entry->in($site->handle()) ?? $entry->makeLocalization($site);
+
+        if ($keepSlug) {
+            // All localizations should have the same handle for correct connections to variants
+            $localizedEntry->slug($entry->slug());
+        }
+
+        $localizedEntry->merge($data)->save();
     }
 
     /**
