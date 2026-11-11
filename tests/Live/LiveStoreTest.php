@@ -209,7 +209,7 @@ class LiveStoreTest extends TestCase
     #[Test]
     public function creates_updates_and_deletes_a_customer_address()
     {
-        [$customerId] = $this->findCustomerWithOrders();
+        $customerId = $this->findAnyCustomer();
 
         $this->actingAs(tap(Facades\User::make()->email('live-test@example.com')->set('shopify_id', $customerId))->save());
 
@@ -307,15 +307,41 @@ class LiveStoreTest extends TestCase
      */
     private function findCustomerWithOrders(): array
     {
-        $node = Arr::get($this->graphql->query(['query' => '{ customers(first: 1, query: "orders_count:>0") { nodes { id numberOfOrders } } }'])->getDecodedBody(), 'data.customers.nodes.0');
+        // go via orders: the customer search index can lag behind new orders
+        $customers = collect(Arr::get($this->graphql->query(['query' => '{ orders(first: 50, sortKey: CREATED_AT, reverse: true) { nodes { customer { id } } } }'])->getDecodedBody(), 'data.orders.nodes', []))
+            ->pluck('customer.id')
+            ->filter()
+            ->countBy()
+            ->sortDesc();
 
         $this->assertNoGraphqlErrors();
 
-        if (! $node) {
-            $this->markTestSkipped('The store has no customers with orders');
+        if ($customers->isEmpty()) {
+            $this->markTestSkipped('The store has no orders with a customer');
         }
 
-        return [(int) Str::afterLast($node['id'], '/'), (int) $node['numberOfOrders']];
+        $id = $customers->keys()->first();
+
+        // the total the tag should report, counted the same way the tag queries orders
+        $count = Arr::get($this->graphql->query([
+            'query' => 'query ($search: String) { ordersCount(query: $search, limit: null) { count } }',
+            'variables' => ['search' => 'customer_id:'.Str::afterLast($id, '/')],
+        ])->getDecodedBody(), 'data.ordersCount.count');
+
+        return [(int) Str::afterLast($id, '/'), (int) $count];
+    }
+
+    private function findAnyCustomer(): int
+    {
+        $id = Arr::get($this->graphql->query(['query' => '{ customers(first: 1) { nodes { id } } }'])->getDecodedBody(), 'data.customers.nodes.0.id');
+
+        $this->assertNoGraphqlErrors();
+
+        if (! $id) {
+            $this->markTestSkipped('The store has no customers');
+        }
+
+        return (int) Str::afterLast($id, '/');
     }
 
     private function assertNoGraphqlErrors(): void
