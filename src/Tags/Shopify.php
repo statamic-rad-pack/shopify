@@ -17,7 +17,6 @@ use Statamic\Tags\Concerns\QueriesConditions;
 use Statamic\Tags\Concerns\QueriesOrderBys;
 use Statamic\Tags\Concerns\RendersForms;
 use Statamic\Tags\Tags;
-use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Support\ProductSummary;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 
@@ -34,18 +33,8 @@ class Shopify extends Tags
             return $summary['price_min'] === null ? null : (bool) $summary['in_stock'];
         }
 
-        if (! $slug = $this->params->get('slug', $this->context->get('slug'))) {
+        if (! $variants = $this->resolveVariants()) {
             return null;
-        }
-
-        $variants = $this->fetchProductVariants($slug);
-
-        if (! $variants) {
-            return null;
-        }
-
-        if ($store = $this->params->get('store')) {
-            $variants = $this->applyStoreData($variants, $store);
         }
 
         return $this->isInStock($variants);
@@ -64,18 +53,8 @@ class Shopify extends Tags
             );
         }
 
-        if (! $slug = $this->params->get('slug', $this->context->get('slug'))) {
+        if (! $variants = $this->resolveVariants()) {
             return null;
-        }
-
-        $variants = $this->fetchProductVariants($slug);
-
-        if (! $variants) {
-            return null;
-        }
-
-        if ($store = $this->params->get('store')) {
-            $variants = $this->applyStoreData($variants, $store);
         }
 
         // Lowest Price
@@ -131,33 +110,31 @@ class Shopify extends Tags
     {
         $store = $this->params->get('store');
 
+        $config = [
+            'url' => config('shopify.storefront_url') ?? config('shopify.url'),
+            'token' => config('shopify.storefront_token'),
+            'apiVersion' => config('shopify.api_version'),
+            'currency' => config('shopify.currency', '$'),
+        ];
+
         if ($store && StoreConfig::isMarketsMode()) {
-            $marketConfig = StoreConfig::getMarket($store) ?? [];
-            $url = config('shopify.storefront_url') ?? config('shopify.url');
-            $token = config('shopify.storefront_token');
-            $apiVersion = config('shopify.api_version');
-            $currency = $marketConfig['currency'] ?? config('shopify.currency', '$');
-
-            return "<script>
-window.shopifyConfig = { url: '{$url}', token: '{$token}', apiVersion: '{$apiVersion}', currency: '{$currency}', market: '{$store}' };
-</script>";
-        }
-
-        if ($store && StoreConfig::isMultiStore()) {
+            // markets share the single store's storefront, with a market-specific currency
+            $config['currency'] = StoreConfig::getMarket($store)['currency'] ?? $config['currency'];
+            $config['market'] = $store;
+        } elseif ($store && StoreConfig::isMultiStore()) {
             $storeConfig = StoreConfig::findByHandle($store) ?? [];
-            $url = $storeConfig['storefront_url'] ?? $storeConfig['url'] ?? config('shopify.url');
-            $token = $storeConfig['storefront_token'] ?? config('shopify.storefront_token');
-            $apiVersion = $storeConfig['api_version'] ?? config('shopify.api_version');
-            $currency = $storeConfig['currency'] ?? config('shopify.currency', '$');
 
-            return "<script>
-window.shopifyConfig = { url: '{$url}', token: '{$token}', apiVersion: '{$apiVersion}', currency: '{$currency}' };
-</script>";
+            $config = [
+                'url' => $storeConfig['storefront_url'] ?? $storeConfig['url'] ?? config('shopify.url'),
+                'token' => $storeConfig['storefront_token'] ?? $config['token'],
+                'apiVersion' => $storeConfig['api_version'] ?? $config['apiVersion'],
+                'currency' => $storeConfig['currency'] ?? $config['currency'],
+            ];
         }
 
-        return "<script>
-window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('shopify.url'))."', token: '".config('shopify.storefront_token')."', apiVersion: '".config('shopify.api_version')."', currency: '".config('shopify.currency', '$')."' };
-</script>";
+        $json = json_encode($config, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
+
+        return "<script>\nwindow.shopifyConfig = {$json};\n</script>";
     }
 
     /**
@@ -190,16 +167,8 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
      */
     private function variantGenerate()
     {
-        $slug = $this->params->get('slug', $this->context->get('slug'));
-
-        $variants = $this->fetchProductVariants($slug);
-
-        if (! $variants) {
+        if (! $variants = $this->resolveVariants()) {
             return;
-        }
-
-        if ($store = $this->params->get('store')) {
-            $variants = $this->applyStoreData($variants, $store);
         }
 
         return view('shopify::fields.variant_form', [
@@ -248,9 +217,20 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
      */
     public function variants()
     {
-        $variants = $this->fetchProductVariants($this->params->get('slug', $this->context->get('slug')));
+        return $this->resolveVariants();
+    }
 
-        if (! $variants) {
+    /**
+     * The variants for the product (the `slug` param, or the product in context), with
+     * any `store` param's pricing and stock applied.
+     */
+    protected function resolveVariants()
+    {
+        if (! $slug = $this->params->get('slug', $this->context->get('slug'))) {
+            return null;
+        }
+
+        if (! $variants = $this->fetchProductVariants($slug)) {
             return null;
         }
 
@@ -259,71 +239,6 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
         }
 
         return $variants;
-    }
-
-    /*
-     * @deprecated
-     */
-    private function variantLoop()
-    {
-        return 'No longer supported, use {{ shopify:variants }} instead';
-    }
-
-    /*
-     * @deprecated
-     */
-    private function variantFromTitle()
-    {
-        return 'No longer supported, use {{ shopify:variants title:is="title" }} instead';
-    }
-
-    /*
-     * @deprecated
-     */
-    private function variantFromIndex()
-    {
-        return 'No longer supported, use {{ {shopify:variants}[index] }} instead';
-    }
-
-    /**
-     * Turn a variant into a select option
-     *
-     * @param  array  $variants
-     */
-    private function variantSelectOptions($variants): string
-    {
-        $html = '';
-
-        foreach ($variants as $variant) {
-            $title = $variant['title'];
-            $out_of_stock = false;
-
-            if (isset($variant['inventory_policy'])) {
-                if (
-                    strtolower($variant['inventory_policy']) === 'deny' &&
-                    $variant['inventory_quantity'] <= 0
-                ) {
-                    $out_of_stock = true;
-                }
-            }
-
-            $langKey = 'shopify::messages.option_title';
-            $langParams = ['title' => $title];
-
-            if ($this->params->get('show_price')) {
-                $langKey .= '_price';
-                $payload = $this->formatPrice($variant['price']);
-                $langParams['price'] = __('shopify::messages.display_price', ['currency' => $payload->currency, 'price' => $payload->price]);
-            }
-
-            if ($this->params->get('show_out_of_stock') && $out_of_stock) {
-                $langKey .= '_nostock';
-            }
-
-            $html .= '<option value="'.$variant['id'].'" data-in-stock="'.($out_of_stock ? 'false' : 'true').'"'.($out_of_stock ? ' disabled' : '').'>'.__($langKey, $langParams).'</option>';
-        }
-
-        return $html;
     }
 
     /**
@@ -380,7 +295,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
             });
         }
 
-        if (! StoreConfig::isMultiStore() || StoreConfig::getMode() !== 'unified') {
+        if (! StoreConfig::isUnifiedMode()) {
             return $variants;
         }
 
@@ -783,16 +698,11 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
      */
     protected function resolveCustomerGraphql($user, ?string $storeParam): array
     {
-        if ($storeParam && StoreConfig::isMultiStore()) {
-            $customerId = Arr::get($user->get('shopify_ids', []), $storeParam, 'none');
-            $storeConfig = StoreConfig::findByHandle($storeParam);
-            $graphql = $storeConfig ? StoreConfig::makeGraphqlClient($storeConfig) : app(Graphql::class);
-        } else {
-            $customerId = $user->get('shopify_id') ?? 'none';
-            $graphql = app(Graphql::class);
-        }
+        $customerId = $storeParam && StoreConfig::isMultiStore()
+            ? Arr::get($user->get('shopify_ids', []), $storeParam, 'none')
+            : ($user->get('shopify_id') ?? 'none');
 
-        return [$customerId, $graphql];
+        return [$customerId, StoreConfig::clientFor($storeParam)];
     }
 
     protected function paginatedOutput($paginator)

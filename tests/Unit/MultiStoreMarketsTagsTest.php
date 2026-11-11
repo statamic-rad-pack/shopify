@@ -57,10 +57,10 @@ class MultiStoreMarketsTagsTest extends TestCase
 
         $output = str_replace(["\r", "\n"], '', $this->tag('{{ shopify:tokens store="GB" }}'));
 
-        $this->assertStringContainsString("currency: '£'", $output);
-        $this->assertStringContainsString("market: 'GB'", $output);
-        $this->assertStringContainsString("url: 'single-store.myshopify.com'", $output);
-        $this->assertStringContainsString("token: 'single-token'", $output);
+        $this->assertStringContainsString('"currency":"£"', $output);
+        $this->assertStringContainsString('"market":"GB"', $output);
+        $this->assertStringContainsString('"url":"single-store.myshopify.com"', $output);
+        $this->assertStringContainsString('"token":"single-token"', $output);
     }
 
     #[Test]

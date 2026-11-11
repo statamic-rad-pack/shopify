@@ -7,3 +7,4 @@ mix-manifest.json
 yarn.lock
 .idea/
 .claude/
+.env.live

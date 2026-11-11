@@ -25,7 +25,7 @@ export default {
             this.message = '';
             this.processing = true;
 
-            axios.get(this.url)
+            axios.post(this.url)
                 .then(res => {
                     this.message = res.data.message
 

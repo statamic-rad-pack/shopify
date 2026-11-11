@@ -29,19 +29,19 @@ class CpImportControllersTest extends TestCase
     public static function guardedEndpoints(): array
     {
         return [
-            'import all products' => ['shopify.products.fetchAll'],
-            'import single product' => ['shopify.products.fetch'],
-            'import all collections' => ['shopify.collections.fetchAll'],
-            'list products' => ['shopify.products'],
+            'import all products' => ['shopify.products.fetchAll', 'postJson'],
+            'import single product' => ['shopify.products.fetch', 'postJson'],
+            'import all collections' => ['shopify.collections.fetchAll', 'postJson'],
+            'list products' => ['shopify.products', 'getJson'],
         ];
     }
 
     #[Test]
     #[DataProvider('guardedEndpoints')]
-    public function endpoints_require_the_access_shopify_permission(string $route)
+    public function endpoints_require_the_access_shopify_permission(string $route, string $method)
     {
         $this->actingAsPlainUser()
-            ->getJson(cp_route($route))
+            ->{$method}(cp_route($route))
             ->assertForbidden();
     }
 
@@ -53,7 +53,7 @@ class CpImportControllersTest extends TestCase
         });
 
         $this->actingAsSuperUser()
-            ->getJson(cp_route('shopify.products.fetch', ['product' => 1]))
+            ->postJson(cp_route('shopify.products.fetch'), ['product' => 1])
             ->assertOk()
             ->assertJsonPath('message', 'Product import has been queued.');
     }
@@ -64,11 +64,11 @@ class CpImportControllersTest extends TestCase
         Bus::fake();
 
         $this->actingAsSuperUser()
-            ->getJson(cp_route('shopify.products.fetchAll'))
+            ->postJson(cp_route('shopify.products.fetchAll'))
             ->assertOk();
 
         $this->actingAsSuperUser()
-            ->getJson(cp_route('shopify.collections.fetchAll'))
+            ->postJson(cp_route('shopify.collections.fetchAll'))
             ->assertOk();
 
         Bus::assertDispatched(ImportAllProductsJob::class);
@@ -90,5 +90,17 @@ class CpImportControllersTest extends TestCase
         (new ImportAllProductsJob)->handle();
 
         Bus::assertDispatchedTimes(ImportSingleProductJob::class, 2);
+    }
+
+    #[Test]
+    public function import_endpoints_do_not_accept_get_requests()
+    {
+        Bus::fake();
+
+        $this->actingAsSuperUser()->getJson(cp_route('shopify.products.fetchAll'));
+        $this->actingAsSuperUser()->getJson(cp_route('shopify.collections.fetchAll'));
+
+        Bus::assertNotDispatched(ImportAllProductsJob::class);
+        Bus::assertNotDispatched(ImportAllCollectionsJob::class);
     }
 }

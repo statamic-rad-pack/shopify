@@ -11,6 +11,7 @@ use Statamic\Contracts\Auth\User;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
 use StatamicRadPack\Shopify\Clients\Graphql;
+use StatamicRadPack\Shopify\Traits\ThrottlesShopifyRequests;
 
 class CreateOrUpdateShopifyUser implements ShouldQueue
 {
@@ -18,6 +19,7 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+    use ThrottlesShopifyRequests;
 
     public function __construct(public User $user) {}
 
@@ -48,7 +50,7 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
             }
             QUERY;
 
-        $response = app(Graphql::class)->query([
+        $response = $this->queryWithThrottle(app(Graphql::class), [
             'query' => $query,
             'variables' => [
                 'query' => "email:{$email}",
@@ -82,7 +84,7 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
             }
             QUERY;
 
-        $response = app(Graphql::class)->query([
+        $response = $this->queryWithThrottle(app(Graphql::class), [
             'query' => $query,
             'variables' => [
                 'input' => $this->generatePayloadBody(),
@@ -119,7 +121,7 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
             }
             QUERY;
 
-        $response = app(Graphql::class)->query([
+        $response = $this->queryWithThrottle(app(Graphql::class), [
             'query' => $query,
             'variables' => [
                 'input' => [

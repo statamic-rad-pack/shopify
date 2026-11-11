@@ -10,7 +10,6 @@ use Statamic\Facades\Site;
 use Statamic\Facades\Term;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
-use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
 use StatamicRadPack\Shopify\Traits\ThrottlesShopifyRequests;
@@ -25,6 +24,10 @@ class ImportCollectionJob implements ShouldQueue
 
     private array $collection = [];
 
+    public $tries = 3;
+
+    public $backoff = [10, 60];
+
     public function __construct(public int $collectionId, public ?string $storeHandle = null)
     {
         if ($queue = config('shopify.queue')) {
@@ -34,7 +37,7 @@ class ImportCollectionJob implements ShouldQueue
 
     public function handle()
     {
-        $graphql = $this->resolveGraphqlClient();
+        $graphql = StoreConfig::clientFor($this->storeHandle);
 
         $query = <<<QUERY
             {
@@ -138,22 +141,5 @@ class ImportCollectionJob implements ShouldQueue
         }
 
         $term->merge($data)->save();
-    }
-
-    /**
-     * Resolve the Graphql client for this job.
-     * In multi-store mode, uses the store-specific client.
-     */
-    private function resolveGraphqlClient(): Graphql
-    {
-        if ($this->storeHandle && StoreConfig::isMultiStore()) {
-            $storeConfig = StoreConfig::findByHandle($this->storeHandle);
-
-            if ($storeConfig) {
-                return StoreConfig::makeGraphqlClient($storeConfig);
-            }
-        }
-
-        return app(Graphql::class);
     }
 }

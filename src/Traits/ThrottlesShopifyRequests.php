@@ -10,8 +10,6 @@ use StatamicRadPack\Shopify\Exceptions\GraphqlException;
 
 trait ThrottlesShopifyRequests
 {
-    protected int $throttleThreshold = 500;
-
     protected int $throttleRetries = 3;
 
     /**
@@ -33,13 +31,13 @@ trait ThrottlesShopifyRequests
             $throttled = $this->isThrottled($body);
 
             if ($throttled && ++$attempt < $this->throttleRetries) {
-                $this->throttleSleep($this->secondsUntilAvailable($body, (float) Arr::get($body, 'extensions.cost.requestedQueryCost', $this->throttleThreshold)));
+                $this->throttleSleep($this->secondsUntilAvailable($body, (float) Arr::get($body, 'extensions.cost.requestedQueryCost', $this->throttleThreshold())));
             }
         } while ($throttled && $attempt < $this->throttleRetries);
 
         $this->guardAgainstErrors($response, $params);
 
-        if (($seconds = $this->secondsUntilAvailable($body, $this->throttleThreshold)) > 0) {
+        if (($seconds = $this->secondsUntilAvailable($body, $this->throttleThreshold())) > 0) {
             $this->throttleSleep($seconds);
         }
 
@@ -99,6 +97,11 @@ trait ThrottlesShopifyRequests
             'errors' => $errors,
             'query' => $params['query'] ?? null,
         ]);
+    }
+
+    protected function throttleThreshold(): int
+    {
+        return (int) config('shopify.throttle_threshold', 500);
     }
 
     /**

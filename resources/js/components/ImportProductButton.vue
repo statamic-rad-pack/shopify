@@ -55,7 +55,7 @@ export default {
             this.message = '';
             this.processing = true;
 
-            axios.get(`${this.url}?product=${this.selectedProduct.product_id}`)
+            axios.post(this.url, { product: this.selectedProduct.product_id })
                 .then(res => {
                     this.message = res.data.message
 

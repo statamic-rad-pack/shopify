@@ -38,7 +38,7 @@ class ReimportProduct extends Action
         $entries->each(function (Entry $entry) {
             $storeHandle = null;
 
-            if (StoreConfig::isMultiStore() && StoreConfig::getMode() === 'localized') {
+            if (StoreConfig::isLocalizedMode()) {
                 $storeHandle = StoreConfig::findBySite($entry->locale())['handle'] ?? null;
             }
 

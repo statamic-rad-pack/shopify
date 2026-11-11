@@ -2,6 +2,6 @@
 
 namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 
-use Statamic\Http\Controllers\CP\CpController;
+use Statamic\Http\Controllers\Controller;
 
-class WebhooksController extends CpController {}
+class WebhooksController extends Controller {}

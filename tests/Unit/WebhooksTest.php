@@ -688,4 +688,24 @@ class WebhooksTest extends TestCase
         $this->assertCount(0, Facades\Entry::whereCollection(config('shopify.collection_handle', 'products')));
         $this->assertCount(0, Facades\Entry::whereCollection('variants'));
     }
+
+    #[Test]
+    public function ignores_a_webhook_delivery_it_has_already_processed()
+    {
+        config()->set('shopify.ignore_webhook_integrity_check', true);
+
+        Bus::fake();
+
+        $headers = ['X-Shopify-Topic' => 'products/update', 'X-Shopify-Webhook-Id' => 'abc-123'];
+
+        $this->postJson('/!/shopify/webhook/product/update', ['id' => 1], $headers)->assertOk();
+        $this->postJson('/!/shopify/webhook/product/update', ['id' => 1], $headers)
+            ->assertOk()
+            ->assertJsonPath('message', 'Webhook already processed');
+
+        // a different delivery is processed as normal
+        $this->postJson('/!/shopify/webhook/product/update', ['id' => 1], ['X-Shopify-Webhook-Id' => 'def-456'] + $headers)->assertOk();
+
+        Bus::assertDispatchedTimes(ImportSingleProductJob::class, 2);
+    }
 }

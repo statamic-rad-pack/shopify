@@ -3,12 +3,10 @@
 namespace StatamicRadPack\Shopify\Http\Controllers\CP;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Statamic\Http\Controllers\CP\CpController;
-use Statamic\Support\Arr;
-use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Enums\WebhookTopic;
 use StatamicRadPack\Shopify\Support\StoreConfig;
+use StatamicRadPack\Shopify\Support\WebhookSubscriptions;
 
 class WebhooksStatusController extends CpController
 {
@@ -21,14 +19,7 @@ class WebhooksStatusController extends CpController
         $storeHandle = $request->get('store');
 
         try {
-            if ($storeHandle && StoreConfig::isMultiStore()) {
-                $storeConfig = StoreConfig::findByHandle($storeHandle);
-                $graphql = $storeConfig ? StoreConfig::makeGraphqlClient($storeConfig) : app(Graphql::class);
-            } else {
-                $graphql = app(Graphql::class);
-            }
-
-            $registered = $this->fetchWebhooks($graphql);
+            $registered = WebhookSubscriptions::fetch(StoreConfig::clientFor($storeHandle));
         } catch (\Throwable $e) {
             return response()->json(['error' => 'Could not connect to Shopify: '.$e->getMessage()], 500);
         }
@@ -40,51 +31,12 @@ class WebhooksStatusController extends CpController
         $webhooks = collect($registered)->map(fn ($webhook) => array_merge($webhook, [
             'expected' => isset($expected[$webhook['topic']])
                 && $webhook['callbackUrl'] === $expected[$webhook['topic']],
-            'last_received_at' => $this->getLastReceivedAt($webhook['topic'], $storeHandle),
+            'last_received_at' => WebhookSubscriptions::lastReceived($webhook['topic'], $storeHandle),
         ]))->all();
 
         return response()->json([
             'webhooks' => $webhooks,
             'expected' => $expected,
         ]);
-    }
-
-    private function getLastReceivedAt(string $topic, ?string $storeHandle): ?string
-    {
-        $cacheKey = $storeHandle
-            ? "shopify::webhook_last_received::{$storeHandle}::{$topic}"
-            : "shopify::webhook_last_received::{$topic}";
-
-        return Cache::get($cacheKey);
-    }
-
-    private function fetchWebhooks(Graphql $graphql): array
-    {
-        $query = <<<'QUERY'
-        {
-          webhookSubscriptions(first: 100) {
-            nodes {
-              id
-              topic
-              endpoint {
-                ... on WebhookHttpEndpoint {
-                  callbackUrl
-                }
-              }
-              createdAt
-            }
-          }
-        }
-        QUERY;
-
-        $response = $graphql->query(['query' => $query]);
-        $nodes = Arr::get($response->getDecodedBody(), 'data.webhookSubscriptions.nodes', []);
-
-        return collect($nodes)->map(fn ($node) => [
-            'id' => $node['id'],
-            'topic' => $node['topic'],
-            'callbackUrl' => Arr::get($node, 'endpoint.callbackUrl', ''),
-            'createdAt' => $node['createdAt'],
-        ])->all();
     }
 }

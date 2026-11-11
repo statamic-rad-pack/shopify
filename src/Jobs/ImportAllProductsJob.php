@@ -29,9 +29,7 @@ class ImportAllProductsJob implements ShouldQueue
 
     public function handle(): void
     {
-        $client = $this->storeHandle && ($store = StoreConfig::findByHandle($this->storeHandle))
-            ? StoreConfig::makeGraphqlClient($store)
-            : null;
+        $client = StoreConfig::clientFor($this->storeHandle);
 
         foreach ($this->fetchProducts($client) as $productId) {
             $this->callJob($productId, $this->storeHandle);
