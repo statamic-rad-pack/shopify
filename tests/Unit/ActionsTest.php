@@ -235,4 +235,44 @@ class ActionsTest extends TestCase
         $this->assertSame('true', $response->headers->get('precognition'));
         $response->assertStatus(422);
     }
+
+    #[Test]
+    public function sends_default_as_set_as_default_and_strips_fields_not_in_mailing_address_input()
+    {
+        $captured = null;
+
+        $this->mock(Graphql::class, function (MockInterface $mock) use (&$captured) {
+            $mock
+                ->shouldReceive('query')
+                ->andReturnUsing(function ($args) use (&$captured) {
+                    $captured = $args;
+
+                    return new HttpResponse(status: 200, body: '{"data":{"customerAddressCreate":{"address":{"id":"gid://shopify/MailingAddress/1"},"userErrors":[]}}}');
+                });
+        });
+
+        $this->actingAsCustomer()
+            ->postJson('/!/shopify/address', ['firstName' => 'a', 'lastName' => 'b', 'address1' => 'c', 'city' => 'd', 'provinceCode' => 'ENG', 'zip' => 'f', 'countryCode' => 'GB', 'name' => 'a b', 'default' => true])
+            ->assertStatus(200);
+
+        $this->assertTrue($captured['variables']['setAsDefault']);
+        $this->assertArrayNotHasKey('default', $captured['variables']['address']);
+        $this->assertArrayNotHasKey('name', $captured['variables']['address']);
+        $this->assertSame('GB', $captured['variables']['address']['countryCode']);
+    }
+
+    #[Test]
+    public function returns_shopify_user_errors_when_creating_an_address()
+    {
+        $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock
+                ->shouldReceive('query')
+                ->andReturn(new HttpResponse(status: 200, body: '{"data":{"customerAddressCreate":{"address":null,"userErrors":[{"field":["address","zip"],"message":"Zip is invalid"}]}}}'));
+        });
+
+        $this->actingAsCustomer()
+            ->postJson('/!/shopify/address', ['firstName' => 'a', 'lastName' => 'b', 'address1' => 'c', 'city' => 'd', 'province' => 'e', 'zip' => 'f', 'country' => 'g'])
+            ->assertStatus(422)
+            ->assertJson(['message' => 'Zip is invalid']);
+    }
 }

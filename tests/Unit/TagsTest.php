@@ -1593,4 +1593,31 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04', curr
         $this->assertSame(['ORDER_NUMBER', false], [$sent[3]['sortKey'], $sent[3]['reverse']]);
         $this->assertSame([null, false], [$sent[4]['sortKey'], $sent[4]['reverse']]);
     }
+
+    #[Test]
+    public function is_in_stock_when_any_variant_can_be_purchased()
+    {
+        Facades\Entry::make()->data(['title' => 'Obi wan', 'product_id' => 1])
+            ->slug('obi-wan')
+            ->collection(config('shopify.collection_handle', 'products'))
+            ->save();
+
+        Facades\Entry::make()->data([
+            'title' => 'Sold out',
+            'product_slug' => 'obi-wan',
+            'variant_id' => 1,
+            'inventory_quantity' => 0,
+            'inventory_policy' => 'deny',
+        ])->collection('variants')->save();
+
+        Facades\Entry::make()->data([
+            'title' => 'Made to order',
+            'product_slug' => 'obi-wan',
+            'variant_id' => 2,
+            'inventory_quantity' => 0,
+            'inventory_policy' => 'continue',
+        ])->collection('variants')->save();
+
+        $this->assertEquals('Yes', $this->tag('{{ if {shopify:in_stock} }}Yes{{ /if }}', ['slug' => 'obi-wan']));
+    }
 }

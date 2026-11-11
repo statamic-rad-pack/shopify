@@ -4,6 +4,7 @@ namespace StatamicRadPack\Shopify\Tests\Unit;
 
 use Illuminate\Support\Facades\Bus;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Facades;
 use StatamicRadPack\Shopify\Jobs\ImportCollectionJob;
 use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 use StatamicRadPack\Shopify\Tests\TestCase;
@@ -205,5 +206,49 @@ class MultiStoreWebhooksTest extends TestCase
         Bus::assertDispatched(ImportSingleProductJob::class, function ($job) {
             return $job->storeHandle === null;
         });
+    }
+
+    #[Test]
+    public function product_delete_in_unified_mode_only_removes_that_stores_data()
+    {
+        config()->set('shopify.multi_store', $this->multiStoreConfig());
+        config()->set('shopify.ignore_webhook_integrity_check', true);
+
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
+        Facades\Collection::make('variants')->save();
+
+        tap(Facades\Entry::make()->collection(config('shopify.collection_handle', 'products'))->slug('obi-wan')->data(['product_id' => 5]))->save();
+        tap(Facades\Entry::make()->collection('variants')->slug('50')->data([
+            'product_slug' => 'obi-wan',
+            'multi_store_data' => ['uk' => ['price' => 10], 'us' => ['price' => 12]],
+        ]))->save();
+
+        $this->postJson('/!/shopify/webhook/product/delete', ['id' => 5], ['X-Shopify-Shop-Domain' => 'us-store.myshopify.com'])
+            ->assertStatus(200);
+
+        $this->assertCount(1, Facades\Entry::whereCollection(config('shopify.collection_handle', 'products')));
+        $variant = Facades\Entry::whereCollection('variants')->first();
+        $this->assertSame(['uk' => ['price' => 10]], $variant->get('multi_store_data'));
+
+        // once the last store deletes it, the entries go
+        $this->postJson('/!/shopify/webhook/product/delete', ['id' => 5], ['X-Shopify-Shop-Domain' => 'uk-store.myshopify.com'])
+            ->assertStatus(200);
+
+        $this->assertCount(0, Facades\Entry::whereCollection(config('shopify.collection_handle', 'products')));
+        $this->assertCount(0, Facades\Entry::whereCollection('variants'));
+    }
+
+    #[Test]
+    public function customer_delete_removes_only_that_stores_shopify_id()
+    {
+        config()->set('shopify.multi_store', $this->multiStoreConfig());
+        config()->set('shopify.ignore_webhook_integrity_check', true);
+
+        $user = tap(Facades\User::make()->email('a@b.com')->set('shopify_ids', ['uk' => 1, 'us' => 2]))->save();
+
+        $this->postJson('/!/shopify/webhook/customer/delete', ['id' => 2], ['X-Shopify-Shop-Domain' => 'us-store.myshopify.com'])
+            ->assertStatus(200);
+
+        $this->assertSame(['uk' => 1], $user->fresh()->get('shopify_ids'));
     }
 }

@@ -15,17 +15,30 @@ class OrderCreateController extends WebhooksController
         $data = json_decode($request->getContent());
 
         $storeHandle = $request->attributes->get('shopify_store_handle');
+        $date = Carbon::parse($data->created_at ?? null);
 
-        foreach ($data->line_items as $item) {
-            ImportSingleProductJob::dispatch(
-                $item->product_id,
-                [
-                    'quantity' => [$item->sku => $item->quantity ?? 1],
-                    'date' => Carbon::parse($data->created_at),
-                ],
-                $storeHandle
-            );
-        }
+        // One job per product (not per line item), skipping custom/deleted products.
+        // Quantities are keyed by variant id where available, falling back to SKU.
+        collect($data->line_items ?? [])
+            ->filter(fn ($item) => ! empty($item->product_id))
+            ->groupBy(fn ($item) => $item->product_id)
+            ->each(function ($items, $productId) use ($date, $storeHandle) {
+                $quantities = [];
+
+                foreach ($items as $item) {
+                    $key = (string) ($item->variant_id ?? $item->sku ?? '');
+                    $quantities[$key] = ($quantities[$key] ?? 0) + ($item->quantity ?? 1);
+                }
+
+                ImportSingleProductJob::dispatch(
+                    (int) $productId,
+                    [
+                        'quantity' => $quantities,
+                        'date' => $date,
+                    ],
+                    $storeHandle
+                );
+            });
 
         Events\OrderCreate::dispatch($data);
 

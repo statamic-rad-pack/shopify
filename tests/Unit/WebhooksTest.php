@@ -622,4 +622,70 @@ class WebhooksTest extends TestCase
 
         $this->assertSame('[]', $response->getContent());
     }
+
+    #[Test]
+    public function rejects_a_webhook_without_an_hmac_header()
+    {
+        config()->set('shopify.webhook_secret', 'secret');
+
+        $this->postJson('/!/shopify/webhook/product/delete', ['id' => 1])
+            ->assertStatus(403);
+    }
+
+    #[Test]
+    public function groups_order_line_items_by_product_and_skips_custom_items()
+    {
+        config()->set('shopify.ignore_webhook_integrity_check', true);
+
+        Bus::fake();
+
+        $this->postJson('/!/shopify/webhook/order', [
+            'created_at' => '2024-01-01T00:00:00Z',
+            'line_items' => [
+                ['product_id' => 10, 'variant_id' => 100, 'sku' => 'a', 'quantity' => 1],
+                ['product_id' => 10, 'variant_id' => 101, 'sku' => 'b', 'quantity' => 2],
+                ['product_id' => 10, 'variant_id' => 100, 'sku' => 'a', 'quantity' => 3],
+                ['product_id' => null, 'variant_id' => null, 'sku' => null, 'quantity' => 1, 'title' => 'Custom item'],
+            ],
+        ])->assertStatus(200);
+
+        Bus::assertDispatchedTimes(ImportSingleProductJob::class, 1);
+        Bus::assertDispatched(ImportSingleProductJob::class, function ($job) {
+            return $job->productId === 10 && $job->orderData['quantity'] === ['100' => 4, '101' => 2];
+        });
+    }
+
+    #[Test]
+    public function ignores_a_customer_delete_webhook_without_an_id()
+    {
+        config()->set('shopify.ignore_webhook_integrity_check', true);
+
+        $this->postJson('/!/shopify/webhook/customer/delete', ['email' => 'a@b.com'])
+            ->assertStatus(200);
+    }
+
+    #[Test]
+    public function deletes_localized_products_and_variants()
+    {
+        config()->set('shopify.ignore_webhook_integrity_check', true);
+
+        Facades\Site::setSites([
+            'en' => ['url' => '/', 'locale' => 'en_US', 'name' => 'English'],
+            'fr' => ['url' => '/fr/', 'locale' => 'fr_FR', 'name' => 'French'],
+        ]);
+
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->sites(['en', 'fr'])->save();
+        Facades\Collection::make('variants')->sites(['en', 'fr'])->save();
+
+        $product = tap(Facades\Entry::make()->collection(config('shopify.collection_handle', 'products'))->locale('en')->slug('obi-wan')->data(['product_id' => 5]))->save();
+        $product->makeLocalization('fr')->save();
+
+        $variant = tap(Facades\Entry::make()->collection('variants')->locale('en')->slug('50')->data(['product_slug' => 'obi-wan']))->save();
+        $variant->makeLocalization('fr')->save();
+
+        $this->postJson('/!/shopify/webhook/product/delete', ['id' => 5])->assertStatus(200);
+
+        $this->assertCount(0, Facades\Entry::whereCollection(config('shopify.collection_handle', 'products')));
+        $this->assertCount(0, Facades\Entry::whereCollection('variants'));
+    }
 }

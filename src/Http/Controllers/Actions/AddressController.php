@@ -11,62 +11,51 @@ use StatamicRadPack\Shopify\Http\Requests;
 
 class AddressController extends BaseActionController
 {
+    private const ADDRESS_FIELDS = <<<'FIELDS'
+        id
+        firstName
+        lastName
+        company
+        address1
+        address2
+        city
+        province
+        country
+        zip
+        phone
+        name
+        FIELDS;
+
     public function create(Requests\CreateOrUpdateAddressRequest $request)
     {
-        $customerId = User::current()?->get('shopify_id') ?: false;
-
-        if (! $customerId) {
+        if (! $customerId = $this->customerId()) {
             return $this->withErrors($request, __('No Shopify customer is associated with the current user'));
         }
 
-        $validatedData = $request->validated();
+        $fields = self::ADDRESS_FIELDS;
 
         try {
-            $query = <<<'QUERY'
-            mutation customerAddressCreate($address: MailingAddressInput!, $customerId: ID!, $setAsDefault: Boolean) {
-              customerAddressCreate(address: $address, customerId: $customerId, setAsDefault: $setAsDefault) {
-                address {
-                  id
-                  firstName
-                  lastName
-                  company
-                  address1
-                  address2
-                  city
-                  province
-                  country
-                  zip
-                  phone
-                  name
+            $address = $this->mutate('customerAddressCreate', <<<QUERY
+                mutation customerAddressCreate(\$address: MailingAddressInput!, \$customerId: ID!, \$setAsDefault: Boolean) {
+                  customerAddressCreate(address: \$address, customerId: \$customerId, setAsDefault: \$setAsDefault) {
+                    address {
+                      {$fields}
+                    }
+                    userErrors {
+                      field
+                      message
+                    }
+                  }
                 }
-                userErrors {
-                  field
-                  message
-                }
-              }
-            }
-            QUERY;
-
-            $response = app(Graphql::class)->query([
-                'query' => $query,
-                'variables' => [
-                    'address' => $validatedData,
-                    'customerId' => 'gid://shopify/Customer/'.$customerId,
-                ],
+                QUERY, [
+                'address' => $this->addressInput($request->validated()),
+                'customerId' => 'gid://shopify/Customer/'.$customerId,
+                'setAsDefault' => (bool) $request->validated('default', false),
             ]);
-
-            $body = $response->getDecodedBody();
-
-            if ($message = Arr::get($body, 'data.customerAddressCreate.userErrors.message')) {
-                throw new \Exception($message);
-            }
-
-            $data = Arr::get($body, 'data.customerAddressCreate.address');
-            $data['id'] = Str::of($data['id'])->afterLast('/')->before('?');
 
             return $this->withSuccess($request, [
                 'message' => __('Address created'),
-                'address' => $data,
+                'address' => $this->formatAddress($address),
             ]);
         } catch (\Exception $error) {
             return $this->withErrors($request, $error->getMessage());
@@ -75,35 +64,25 @@ class AddressController extends BaseActionController
 
     public function destroy(Request $request, $id)
     {
-        $customerId = User::current()?->get('shopify_id') ?: false;
-
-        if (! $customerId) {
+        if (! $customerId = $this->customerId()) {
             return $this->withErrors($request, __('No Shopify customer is associated with the current user'));
         }
 
         try {
-            $query = <<<'QUERY'
-            mutation customerAddressDelete($addressId: ID!, $customerId: ID!) {
-                customerAddressDelete(addressId: $addressId, customerId: $customerId) {
+            $this->mutate('customerAddressDelete', <<<'QUERY'
+                mutation customerAddressDelete($addressId: ID!, $customerId: ID!) {
+                  customerAddressDelete(addressId: $addressId, customerId: $customerId) {
                     deletedAddressId
                     userErrors {
-                        message
+                      field
+                      message
                     }
+                  }
                 }
-            }
-            QUERY;
-
-            $response = app(Graphql::class)->query([
-                'query' => $query,
-                'variables' => [
-                    'customerId' => 'gid://shopify/Customer/'.$customerId,
-                    'addressId' => 'gid://shopify/MailingAddress/'.$id.'?model_name=CustomerAddress',
-                ],
-            ]);
-
-            if ($message = Arr::get($response->getDecodedBody(), 'data.customerAddressDelete.userErrors.message')) {
-                throw new \Exception($message);
-            }
+                QUERY, [
+                'customerId' => 'gid://shopify/Customer/'.$customerId,
+                'addressId' => $this->addressGid($id),
+            ], 'deletedAddressId');
 
             return $this->withSuccess($request, [
                 'message' => __('Address deleted'),
@@ -115,64 +94,85 @@ class AddressController extends BaseActionController
 
     public function store(Requests\CreateOrUpdateAddressRequest $request, $id)
     {
-        $customerId = User::current()?->get('shopify_id') ?: false;
-
-        if (! $customerId) {
+        if (! $customerId = $this->customerId()) {
             return $this->withErrors($request, __('No Shopify customer is associated with the current user'));
         }
 
-        $validatedData = $request->validated();
+        $fields = self::ADDRESS_FIELDS;
 
         try {
-            $query = <<<'QUERY'
-            mutation customerAddressUpdate($address: MailingAddressInput!, $addressId: ID!, $customerId: ID!, $setAsDefault: Boolean) {
-              customerAddressUpdate(address: $address, addressId: $addressId, customerId: $customerId, setAsDefault: $setAsDefault) {
-                address {
-                  id
-                  firstName
-                  lastName
-                  company
-                  address1
-                  address2
-                  city
-                  province
-                  country
-                  zip
-                  phone
-                  name
+            $address = $this->mutate('customerAddressUpdate', <<<QUERY
+                mutation customerAddressUpdate(\$address: MailingAddressInput!, \$addressId: ID!, \$customerId: ID!, \$setAsDefault: Boolean) {
+                  customerAddressUpdate(address: \$address, addressId: \$addressId, customerId: \$customerId, setAsDefault: \$setAsDefault) {
+                    address {
+                      {$fields}
+                    }
+                    userErrors {
+                      field
+                      message
+                    }
+                  }
                 }
-                userErrors {
-                  field
-                  message
-                }
-              }
-            }
-            QUERY;
-
-            $response = app(Graphql::class)->query([
-                'query' => $query,
-                'variables' => [
-                    'address' => $validatedData,
-                    'addressId' => 'gid://shopify/MailingAddress/'.$id.'?model_name=CustomerAddress',
-                    'customerId' => 'gid://shopify/Customer/'.$customerId,
-                ],
+                QUERY, [
+                'address' => $this->addressInput($request->validated()),
+                'addressId' => $this->addressGid($id),
+                'customerId' => 'gid://shopify/Customer/'.$customerId,
+                'setAsDefault' => (bool) $request->validated('default', false),
             ]);
-
-            $body = $response->getDecodedBody();
-
-            if ($message = Arr::get($body, 'data.customerAddressUpdate.userErrors.message')) {
-                throw new \Exception($message);
-            }
-
-            $data = Arr::get($body, 'data.customerAddressUpdate.address');
-            $data['id'] = Str::of($data['id'])->afterLast('/')->before('?');
 
             return $this->withSuccess($request, [
                 'message' => __('Address updated'),
-                'address' => $data,
+                'address' => $this->formatAddress($address),
             ]);
         } catch (\Exception $error) {
             return $this->withErrors($request, $error->getMessage());
         }
+    }
+
+    private function customerId(): mixed
+    {
+        return User::current()?->get('shopify_id') ?: null;
+    }
+
+    /**
+     * Run a mutation and return its payload key, throwing on any GraphQL or user error.
+     */
+    private function mutate(string $operation, string $query, array $variables, string $resultKey = 'address'): mixed
+    {
+        $response = app(Graphql::class)->query([
+            'query' => $query,
+            'variables' => $variables,
+        ]);
+
+        if ($message = $response->firstError($operation)) {
+            throw new \Exception($message);
+        }
+
+        if (! $result = Arr::get($response->getDecodedBody(), "data.{$operation}.{$resultKey}")) {
+            throw new \Exception(__('Shopify did not return a result'));
+        }
+
+        return $result;
+    }
+
+    /**
+     * MailingAddressInput has no `default` or `name` field; `default` is sent
+     * separately as setAsDefault.
+     */
+    private function addressInput(array $validated): array
+    {
+        return Arr::except($validated, ['default', 'name']);
+    }
+
+    private function addressGid($id): string
+    {
+        return 'gid://shopify/MailingAddress/'.$id.'?model_name=CustomerAddress';
+    }
+
+    private function formatAddress(array $address): array
+    {
+        $address['id'] = (string) Str::of($address['id'])->afterLast('/')->before('?');
+
+        return $address;
     }
 }

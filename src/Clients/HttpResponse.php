@@ -2,6 +2,8 @@
 
 namespace StatamicRadPack\Shopify\Clients;
 
+use Statamic\Support\Arr;
+
 /**
  * Drop-in replacement for Shopify\Clients\HttpResponse (shopify/shopify-api).
  *
@@ -38,5 +40,17 @@ class HttpResponse
         }
 
         return json_decode($this->body ?: '{}', true) ?? [];
+    }
+
+    /**
+     * The first top-level GraphQL error, or the first userError returned by the
+     * given mutation (e.g. 'customerAddressCreate'), if any.
+     */
+    public function firstError(?string $operation = null): ?string
+    {
+        $body = $this->getDecodedBody();
+
+        return Arr::get($body, 'errors.0.message')
+            ?? ($operation ? Arr::get($body, "data.{$operation}.userErrors.0.message") : null);
     }
 }

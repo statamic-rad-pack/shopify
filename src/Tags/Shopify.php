@@ -344,28 +344,17 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
     }
 
     /**
-     * Check if all variants are in stock
+     * A product is in stock if any of its variants can be purchased: either it has
+     * stock, or it doesn't deny overselling (CONTINUE / untracked).
      *
-     * @param  array  $variants
+     * @param  iterable  $variants
      */
     protected function isInStock($variants): bool
     {
-        $stock = 0;
-        $deny = false;
-
-        foreach ($variants as $variant) {
-            $stock += $variant['inventory_quantity'];
-
-            if (! $deny && isset($variant['inventory_policy'])) {
-                $deny = strtolower($variant['inventory_policy']) === 'deny';
-            }
-        }
-
-        if ($stock <= 0 and $deny) {
-            return false;
-        }
-
-        return true;
+        return collect($variants)->contains(
+            fn ($variant) => strtolower($variant['inventory_policy'] ?? '') !== 'deny'
+                || ($variant['inventory_quantity'] ?? 0) > 0
+        );
     }
 
     /**

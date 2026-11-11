@@ -81,6 +81,10 @@ class StoreConfig
     /**
      * Create (or retrieve from container) a Graphql client for the given store config.
      * Binds the client under 'shopify.graphql.{handle}' so tests can easily mock it.
+     *
+     * The binding is a factory rather than a fixed instance, so the access token is
+     * re-read from the cache on every resolve and long-running processes (queue
+     * workers, Octane) pick up a fresh token once the old one expires.
      */
     public static function makeGraphqlClient(array $storeConfig): Graphql
     {
@@ -88,25 +92,36 @@ class StoreConfig
         $abstract = 'shopify.graphql.'.$handle;
 
         if (! app()->bound($abstract)) {
-            $url = $storeConfig['url'] ?? config('shopify.url');
-            $apiVersion = $storeConfig['api_version'] ?? config('shopify.api_version', '2025-04');
-
-            // legacy admin_token, else OAuth client_credentials flow
-            if (! $token = ($storeConfig['admin_token'] ?? null)) {
-                $cacheKey = 'shopify::admin_token::'.$handle;
-
-                if (! $token = Cache::get($cacheKey)) {
-                    if ($token = static::exchangeClientCredentials($storeConfig)) {
-                        Cache::put($cacheKey, $token, 1400);
-                    }
-                }
-            }
-
-            $capturedToken = $token ?? 'none';
-            app()->bind($abstract, fn () => new Graphql($url, $capturedToken, $apiVersion));
+            app()->bind($abstract, fn () => new Graphql(
+                $storeConfig['url'] ?? config('shopify.url'),
+                static::accessToken($storeConfig) ?? 'none',
+                $storeConfig['api_version'] ?? config('shopify.api_version', '2025-04'),
+            ));
         }
 
         return app($abstract);
+    }
+
+    /**
+     * The legacy admin_token if configured, else a cached OAuth client_credentials token.
+     */
+    private static function accessToken(array $storeConfig): ?string
+    {
+        if ($token = ($storeConfig['admin_token'] ?? null)) {
+            return $token;
+        }
+
+        $cacheKey = 'shopify::admin_token::'.($storeConfig['handle'] ?? 'unknown');
+
+        if ($token = Cache::get($cacheKey)) {
+            return $token;
+        }
+
+        if ($token = static::exchangeClientCredentials($storeConfig)) {
+            Cache::put($cacheKey, $token, 1400);
+        }
+
+        return $token;
     }
 
     private static function exchangeClientCredentials(array $storeConfig): ?string

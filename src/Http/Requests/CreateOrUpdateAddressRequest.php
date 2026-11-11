@@ -20,13 +20,13 @@ class CreateOrUpdateAddressRequest extends FormRequest
             'address1' => ['required', 'string'],
             'address2' => ['nullable', 'string'],
             'city' => ['required', 'string'],
-            'province' => ['required', 'string'],
+            'province' => ['required_without:provinceCode', 'nullable', 'string'],
             'zip' => ['required', 'string'],
             'phone' => ['nullable', 'string'],
             'name' => ['nullable', 'string'],
             'provinceCode' => ['nullable', 'string'],
-            'country' => ['required', 'string'],
-            'countryCode' => ['required_without:country', 'string', 'size:2'],
+            'country' => ['required_without:countryCode', 'nullable', 'string'],
+            'countryCode' => ['required_without:country', 'nullable', 'string', 'size:2'],
             'default' => ['nullable', 'boolean'],
         ];
     }
