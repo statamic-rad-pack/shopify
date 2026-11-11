@@ -154,20 +154,44 @@ class LiveStoreTest extends TestCase
         $lang = Str::before($secondary['locale'], '-');
 
         Facades\Site::setSites([
-            'default' => ['url' => '/', 'locale' => 'en_US'],
+            'en' => ['url' => '/', 'locale' => 'en_US'],
             $lang => ['url' => '/'.$lang.'/', 'locale' => $lang],
         ]);
 
-        Facades\Collection::find(config('shopify.collection_handle', 'products'))->sites(['default', $lang])->save();
-        Facades\Collection::find('variants')->sites(['default', $lang])->save();
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->sites(['en', $lang])->save();
+        Facades\Collection::make('variants')->sites(['en', $lang])->save();
 
         ImportSingleProductJob::dispatchSync($this->findProduct()['id']);
 
         $this->assertNoGraphqlErrors();
-        $this->assertTrue(
-            collect($this->graphql->responses)->contains(fn ($response) => str_contains($response['query'], 'translatableResourcesByIds')),
-            'Translations were not requested'
-        );
+
+        $nodes = collect($this->graphql->responses)
+            ->filter(fn ($response) => str_contains($response['query'], 'translatableResourcesByIds'))
+            ->flatMap(fn ($response) => Arr::get($response['body'], 'data.translatableResourcesByIds.nodes', []));
+
+        $this->assertNotEmpty($nodes, 'Translations were not requested');
+
+        // anything translated in Shopify should land on the localized entries
+        $productTitle = collect($nodes->firstWhere(fn ($node) => str_contains($node['resourceId'], '/Product/'))['translations'] ?? [])
+            ->firstWhere('key', 'title')['value'] ?? null;
+        $optionValues = $nodes
+            ->filter(fn ($node) => str_contains($node['resourceId'], '/ProductOptionValue/'))
+            ->flatMap(fn ($node) => collect($node['translations'])->where('key', 'name')->pluck('value'));
+
+        fwrite(STDERR, sprintf("\n  [translations] product title %s, %d option value(s) translated", $productTitle ? 'translated' : 'not translated', $optionValues->count()));
+
+        if ($productTitle) {
+            $this->assertSame($productTitle, Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->firstWhere('locale', $lang)?->get('title'));
+        }
+
+        if ($optionValues->isNotEmpty()) {
+            $variantOptions = Facades\Entry::whereCollection('variants')
+                ->where('locale', $lang)
+                ->flatMap(fn ($variant) => [$variant->get('option1'), $variant->get('option2'), $variant->get('option3')])
+                ->filter();
+
+            $this->assertNotEmpty($variantOptions->intersect($optionValues), 'Translated option values were not applied to variants');
+        }
     }
 
     #[Test]
