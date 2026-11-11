@@ -872,27 +872,43 @@ class ImportSingleProductJobTest extends TestCase
 
         $translationQueries = [];
 
-        $this->mock(Graphql::class, function (MockInterface $mock) use (&$translationQueries) {
-            $mock->shouldReceive('query')->andReturnUsing(function ($query) use (&$translationQueries) {
+        $product = json_decode($this->getProductJson(), true);
+        $product['data']['product']['options'] = [
+            ['id' => 'gid://shopify/ProductOption/1', 'name' => 'Colour', 'optionValues' => [['id' => 'gid://shopify/ProductOptionValue/3', 'name' => 'Oxford Navy']]],
+            ['id' => 'gid://shopify/ProductOption/2', 'name' => 'Size', 'optionValues' => [['id' => 'gid://shopify/ProductOptionValue/2', 'name' => 'X Small (3-4yrs)']]],
+        ];
+
+        $this->mock(Graphql::class, function (MockInterface $mock) use (&$translationQueries, $product) {
+            $mock->shouldReceive('query')->andReturnUsing(function ($query) use (&$translationQueries, $product) {
                 if (! str_contains($query['query'], 'translatableResourcesByIds(')) {
-                    return new HttpResponse(status: 200, body: $this->getProductJson());
+                    return new HttpResponse(status: 200, body: json_encode($product));
                 }
 
                 $translationQueries[] = $query['variables'];
 
                 return new HttpResponse(status: 200, body: json_encode(['data' => ['translatableResourcesByIds' => ['nodes' => [
                     ['resourceId' => 'gid://shopify/Product/108828309', 'translations' => [['key' => 'title', 'value' => 'Produit']]],
-                    ['resourceId' => 'gid://shopify/ProductVariant/1', 'translations' => [['key' => 'title', 'value' => 'Variante']]],
+                    ['resourceId' => 'gid://shopify/ProductOption/1', 'translations' => [['key' => 'name', 'value' => 'Couleur']]],
+                    ['resourceId' => 'gid://shopify/ProductOptionValue/3', 'translations' => [['key' => 'name', 'value' => 'Bleu marine']]],
                 ]]]]));
             });
         });
 
         Jobs\ImportSingleProductJob::dispatch(1);
 
+        // product, its options and option values; variants aren't translatable resources
         $this->assertCount(1, $translationQueries);
-        $this->assertSame(['gid://shopify/Product/108828309', 'gid://shopify/ProductVariant/1'], $translationQueries[0]['resourceIds']);
+        $this->assertContains('gid://shopify/Product/108828309', $translationQueries[0]['resourceIds']);
+        $this->assertContains('gid://shopify/ProductOption/1', $translationQueries[0]['resourceIds']);
+        $this->assertContains('gid://shopify/ProductOptionValue/3', $translationQueries[0]['resourceIds']);
+        $this->assertEmpty(preg_grep('/ProductVariant/', $translationQueries[0]['resourceIds']));
 
-        $this->assertSame('Produit', Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->firstWhere('locale', 'fr')->get('title'));
-        $this->assertSame('Variante', Facades\Entry::whereCollection('variants')->firstWhere('locale', 'fr')->get('title'));
+        $product = Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->firstWhere('locale', 'fr');
+        $this->assertSame('Produit', $product->get('title'));
+        $this->assertSame('Couleur', $product->get('options')['option1']);
+
+        $variant = Facades\Entry::whereCollection('variants')->firstWhere('locale', 'fr');
+        $this->assertSame('Bleu marine', $variant->get('option1'));
+        $this->assertSame('Bleu marine / X Small (3-4yrs)', $variant->get('title'));
     }
 }
