@@ -6,6 +6,11 @@
       <directory suffix="Test.php">./tests</directory>
     </testsuite>
   </testsuites>
+  <groups>
+    <exclude>
+      <group>live</group>
+    </exclude>
+  </groups>
   <php>
     <env name="APP_ENV" value="testing"/>
     <env name="APP_KEY" value="base64:xRIcDp1ReW8Y8rd9V9D7hOVV4TI7ThCF3FKxRg01Rm8="/>
