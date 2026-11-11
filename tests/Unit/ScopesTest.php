@@ -5,6 +5,7 @@ namespace StatamicRadPack\Shopify\Tests\Unit;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades;
 use StatamicRadPack\Shopify\Tests\TestCase;
+use StatamicRadPack\Shopify\UpdateScripts\AddProductSummary;
 
 class ScopesTest extends TestCase
 {
@@ -144,6 +145,9 @@ class ScopesTest extends TestCase
             'inventory_quantity' => 0,
             'inventory_policy' => 'DENY',
         ])->collection('variants')->save();
+
+        // products imported before the summary existed get it from the update script
+        (new AddProductSummary('statamic-rad-pack/shopify'))->update();
 
         $this->assertEquals('in-stock,oversells,', $this->tag('{{ collection:products query_scope="product_has_stock" sort="product_id" }}{{ slug }},{{ /collection:products }}'));
     }

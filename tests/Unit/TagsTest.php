@@ -1620,4 +1620,77 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04', curr
 
         $this->assertEquals('Yes', $this->tag('{{ if {shopify:in_stock} }}Yes{{ /if }}', ['slug' => 'obi-wan']));
     }
+
+    #[Test]
+    public function uses_the_stored_product_summary_without_querying_variants()
+    {
+        $context = [
+            'slug' => 'no-variants-stored',
+            'price_min' => '5.00',
+            'price_max' => '9.00',
+            'in_stock' => true,
+            'on_sale' => false,
+        ];
+
+        $this->assertEquals('£5.00', $this->tag('{{ shopify:product_price }}', $context));
+        $this->assertEquals('From £5.00', $this->tag('{{ shopify:product_price show_from="true" }}', $context));
+        $this->assertEquals('Yes', $this->tag('{{ if {shopify:in_stock} }}Yes{{ /if }}', $context));
+
+        $context['in_stock'] = false;
+
+        $this->assertEquals('Out of Stock', $this->tag('{{ shopify:product_price }}', $context));
+        $this->assertEquals('', $this->tag('{{ if {shopify:in_stock} }}Yes{{ /if }}', $context));
+    }
+
+    #[Test]
+    public function does_not_call_shopify_for_users_without_a_linked_customer()
+    {
+        $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock->shouldNotReceive('query');
+        });
+
+        $this->actingAs(tap(Facades\User::make()->email('test@test.com')->set('name', 'Test User'))->save());
+
+        $this->assertEquals('0', $this->tag('{{ shopify:customer:addresses }}{{ addresses_count }}{{ /shopify:customer:addresses }}'));
+        $this->assertEquals('0', $this->tag('{{ shopify:customer:orders }}{{ orders_count }}{{ /shopify:customer:orders }}'));
+        $this->assertEquals('Test User', $this->tag('{{ shopify:customer }}{{ name }}{{ /shopify:customer }}'));
+    }
+
+    #[Test]
+    public function only_fetches_the_orders_needed_for_the_requested_page()
+    {
+        $sent = [];
+
+        $this->mock(Graphql::class, function (MockInterface $mock) use (&$sent) {
+            $mock->shouldReceive('query')->andReturnUsing(function ($data) use (&$sent) {
+                $sent[] = $data;
+
+                if (str_contains($data['query'], 'ordersCount')) {
+                    return new HttpResponse(status: 200, body: '{"data":{"ordersCount":{"count":40}}}');
+                }
+
+                return new HttpResponse(status: 200, body: json_encode(['data' => ['orders' => [
+                    'nodes' => collect(range(1, $data['variables']['numItems']))->map(fn ($id) => [
+                        'id' => "gid://shopify/Order/$id",
+                        'lineItems' => ['nodes' => []],
+                    ])->all(),
+                    'pageInfo' => ['hasNextPage' => true, 'endCursor' => 'next'],
+                ]]]));
+            });
+        });
+
+        $this->actingAs(tap(Facades\User::make()
+            ->email('test@test.com')
+            ->data(['shopify_id' => '706405506930370000'])
+        )->save());
+
+        $this->assertEquals(
+            '40|40',
+            $this->tag('{{ shopify:customer:orders paginate="2" }}{{ paginate:total_items }}|{{ orders_count }}{{ /shopify:customer:orders }}')
+        );
+
+        $this->assertCount(2, $sent);
+        $this->assertSame(2, $sent[0]['variables']['numItems']);
+        $this->assertStringContainsString('ordersCount', $sent[1]['query']);
+    }
 }

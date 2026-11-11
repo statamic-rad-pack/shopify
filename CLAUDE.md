@@ -90,6 +90,7 @@ CP assets are compiled to `dist/` (Vite-built). The `resources/js/shopify/` dire
 
 - `FetchAllProducts` / `FetchCollections` — paginate through Shopify product/collection IDs and dispatch import jobs. Both use `ThrottlesShopifyRequests`.
 - `SavesImagesAndMetafields` — downloads images to Statamic assets (with alt text), parses metafields via the configured parser.
+- `ProductSummary` (`src/Support`) — derives `price_min`, `price_max`, `in_stock`, `on_sale` from a product's variants. Written onto the product on import, on CP variant edit (`syncForVariant`), and backfilled by `UpdateScripts\AddProductSummary`. Used by the `product_has_stock` scope and, when a product is in context, the `product_price` / `in_stock` tags.
 - `ThrottlesShopifyRequests` — wraps `Graphql::query()` calls; inspects `extensions.cost.throttleStatus` and calls `throttleSleep()` if available budget < 500 points. Retries `THROTTLED` responses, throws `Exceptions\GraphqlException` when a query fails outright (no `data`), and only logs a warning for partial errors (e.g. a missing access scope on one field). The sleep is extracted into a protected method so tests can override it without actually sleeping.
 - Mutation error handling: use `HttpResponse::firstError('mutationName')`, which returns the first top-level `errors` message or the first `data.{mutation}.userErrors` message (`userErrors` is a list).
 

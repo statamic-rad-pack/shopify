@@ -5,6 +5,7 @@ namespace StatamicRadPack\Shopify\Tags;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Statamic\Extensions\Pagination\LengthAwarePaginator;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Entry;
 use Statamic\Facades\User;
 use Statamic\Support\Arr;
@@ -17,6 +18,7 @@ use Statamic\Tags\Concerns\QueriesOrderBys;
 use Statamic\Tags\Concerns\RendersForms;
 use Statamic\Tags\Tags;
 use StatamicRadPack\Shopify\Clients\Graphql;
+use StatamicRadPack\Shopify\Support\ProductSummary;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 
 class Shopify extends Tags
@@ -28,6 +30,10 @@ class Shopify extends Tags
      */
     public function inStock()
     {
+        if ($summary = $this->contextSummary()) {
+            return $summary['price_min'] === null ? null : (bool) $summary['in_stock'];
+        }
+
         if (! $slug = $this->params->get('slug', $this->context->get('slug'))) {
             return null;
         }
@@ -50,6 +56,14 @@ class Shopify extends Tags
      */
     public function productPrice()
     {
+        if ($summary = $this->contextSummary()) {
+            return $this->priceOutput(
+                $summary['price_min'],
+                (bool) $summary['in_stock'],
+                (float) $summary['price_min'] !== (float) $summary['price_max']
+            );
+        }
+
         if (! $slug = $this->params->get('slug', $this->context->get('slug'))) {
             return null;
         }
@@ -67,17 +81,47 @@ class Shopify extends Tags
         // Lowest Price
         $pricePluck = $variants->pluck('price');
 
-        $price = $pricePluck->sort()->first();
+        return $this->priceOutput(
+            $pricePluck->sort()->first(),
+            $this->isInStock($variants),
+            $pricePluck->unique()->count() > 1
+        );
+    }
+
+    private function priceOutput($price, bool $inStock, bool $hasMultiplePrices): ?string
+    {
+        if ($price === null) {
+            return null;
+        }
 
         $payload = $this->formatPrice($price);
 
         $langKey = match (true) {
-            ! $this->isInStock($variants) => 'out_of_stock',
-            $pricePluck->unique()->count() > 1 && $this->params->get('show_from') === true => 'display_price_from',
+            ! $inStock => 'out_of_stock',
+            $hasMultiplePrices && $this->params->get('show_from') === true => 'display_price_from',
             default => 'display_price',
         };
 
         return __('shopify::messages.'.$langKey, ['currency' => $payload->currency, 'price' => $payload->price]);
+    }
+
+    /**
+     * The price/stock summary stored on the product in context, used instead of querying
+     * its variants when nothing would change the result: no store override, no explicit
+     * slug and no variant query conditions. Null for products imported before the
+     * summary existed, which fall back to the variant query.
+     */
+    protected function contextSummary(): ?array
+    {
+        if ($this->params->except(['show_from'])->isNotEmpty()) {
+            return null;
+        }
+
+        $summary = collect(ProductSummary::FIELDS)
+            ->mapWithKeys(fn ($field) => [$field => $this->context->raw($field)])
+            ->all();
+
+        return $summary['in_stock'] === null ? null : $summary;
     }
 
     /**
@@ -289,6 +333,14 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
      */
     protected function fetchProductVariants($productSlug)
     {
+        // memoised per request: a product page often calls variants, product_price and in_stock
+        $key = $productSlug.'|'.md5(json_encode($this->params->all()));
+
+        return Blink::store('shopify-variants')->once($key, fn () => $this->queryProductVariants($productSlug));
+    }
+
+    private function queryProductVariants($productSlug)
+    {
         $query = Entry::query()
             ->where('collection', 'variants')
             ->where('product_slug', $productSlug);
@@ -351,10 +403,7 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
      */
     protected function isInStock($variants): bool
     {
-        return collect($variants)->contains(
-            fn ($variant) => strtolower($variant['inventory_policy'] ?? '') !== 'deny'
-                || ($variant['inventory_quantity'] ?? 0) > 0
-        );
+        return ProductSummary::inStock($variants);
     }
 
     /**
@@ -417,6 +466,10 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
 
         [$customerId, $graphql] = $this->resolveCustomerGraphql($user, $storeParam);
 
+        if ($customerId === 'none') {
+            return $user->data()->all();
+        }
+
         $query = <<<QUERY
             {
               customer(id: "gid://shopify/Customer/{$customerId}") {
@@ -460,6 +513,10 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
         }
 
         [$customerId, $graphql] = $this->resolveCustomerGraphql($user, $storeParam);
+
+        if ($customerId === 'none') {
+            return ['addresses' => [], 'addresses_count' => 0];
+        }
 
         $query = <<<QUERY
             {
@@ -520,9 +577,11 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
 
         [$userId, $graphql] = $this->resolveCustomerGraphql($user, $storeParam);
 
+        $search = "customer_id:$userId $status";
+
         $query = <<<QUERY
             query (\$numItems: Int!, \$cursor: String, \$sortKey: OrderSortKeys, \$reverse: Boolean) {
-              orders(first: \$numItems, after: \$cursor, sortKey: \$sortKey, reverse: \$reverse, query: "customer_id:$userId $status") {
+              orders(first: \$numItems, after: \$cursor, sortKey: \$sortKey, reverse: \$reverse, query: "$search") {
                 nodes {
                   id
                   billingAddress {
@@ -607,12 +666,20 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
 
         $data = [];
         $items = [];
+        $hasMore = false;
+
+        // When paginating, only fetch as many orders as the requested page needs
+        $needed = ($paginate = $this->params->int('paginate')) ? Paginator::resolveCurrentPage() * $paginate : null;
 
         do {
+            if ($userId === 'none') {
+                break;
+            }
+
             $response = $graphql->query([
                 'query' => $query,
                 'variables' => [
-                    'numItems' => 100,
+                    'numItems' => $needed ? min(100, max(1, $needed - count($items))) : 100,
                     'cursor' => Arr::get($data, 'data.orders.pageInfo.endCursor', null),
                     'sortKey' => $sortKey,
                     'reverse' => $reverse,
@@ -640,14 +707,15 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
                 })->all());
             }
 
-        } while (Arr::get($data, 'data.orders.pageInfo.hasNextPage', false));
+            $hasMore = (bool) Arr::get($data, 'data.orders.pageInfo.hasNextPage', false);
+        } while ($hasMore && (! $needed || count($items) < $needed));
 
         if (! $this->params->get('as')) {
             $this->params->put('as', 'orders');
         }
 
         $data = collect($items);
-        $total = $data->count();
+        $total = $hasMore ? $this->countOrders($graphql, $search) : $data->count();
 
         if ($paginate = $this->params->int('paginate')) {
             $page = Paginator::resolveCurrentPage();
@@ -662,6 +730,16 @@ window.shopifyConfig = { url: '".(config('shopify.storefront_url') ?? config('sh
         }
 
         return array_merge($this->output($data), ['orders_count' => $total]);
+    }
+
+    private function countOrders($graphql, string $search): int
+    {
+        $response = $graphql->query([
+            'query' => 'query ($search: String) { ordersCount(query: $search, limit: null) { count } }',
+            'variables' => ['search' => $search],
+        ]);
+
+        return (int) Arr::get($response->getDecodedBody(), 'data.ordersCount.count', 0);
     }
 
     /**

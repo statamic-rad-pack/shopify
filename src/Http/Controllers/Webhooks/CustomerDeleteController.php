@@ -23,9 +23,9 @@ class CustomerDeleteController extends WebhooksController
         $storeHandle = $request->attributes->get('shopify_store_handle');
 
         if ($storeHandle && StoreConfig::isMultiStore()) {
-            $customerEntry = User::all()->first(
-                fn ($user) => ($user->get('shopify_ids', [])[$storeHandle] ?? null) == $data->id
-            );
+            $customerEntry = User::query()
+                ->where('shopify_ids->'.$storeHandle, $data->id)
+                ->first();
 
             if ($customerEntry) {
                 $shopifyIds = $customerEntry->get('shopify_ids', []);

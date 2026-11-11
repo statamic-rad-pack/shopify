@@ -30,11 +30,9 @@ class CustomerCreateUpdateController extends WebhooksController
 
         // Look up user by store-specific Shopify ID or global Shopify ID
         if ($isMultiStore) {
-            $customerEntry = User::all()->first(function ($user) use ($data, $storeHandle) {
-                $shopifyIds = $user->get('shopify_ids', []);
-
-                return ($shopifyIds[$storeHandle] ?? null) == $data->id;
-            });
+            $customerEntry = User::query()
+                ->where('shopify_ids->'.$storeHandle, $data->id)
+                ->first();
         } else {
             $customerEntry = User::query()
                 ->where('shopify_id', $data->id)

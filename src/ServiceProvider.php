@@ -34,6 +34,8 @@ class ServiceProvider extends AddonServiceProvider
     ];
 
     protected $listen = [
+        Events\EntryDeleted::class => [Listeners\FlushVariantCache::class],
+        Events\EntrySaved::class => [Listeners\FlushVariantCache::class],
         Events\UserSaved::class => [Listeners\UserSavedListener::class],
     ];
 

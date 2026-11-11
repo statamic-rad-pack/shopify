@@ -5,22 +5,17 @@ namespace StatamicRadPack\Shopify\Http\Controllers\CP;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Statamic\Http\Controllers\CP\CpController;
-use StatamicRadPack\Shopify\Traits\FetchAllProducts;
+use StatamicRadPack\Shopify\Jobs;
 
 class ImportProductsController extends CpController
 {
-    use FetchAllProducts;
-
     public function fetchAll(Request $request): JsonResponse
     {
         if ($request->user()->cannot('access shopify')) {
             abort(403);
         }
 
-        collect($this->fetchProducts())
-            ->each(function ($productId) {
-                $this->callJob($productId);
-            });
+        Jobs\ImportAllProductsJob::dispatch();
 
         return response()->json([
             'message' => 'Product import has been queued.',
@@ -33,7 +28,7 @@ class ImportProductsController extends CpController
             abort(403);
         }
 
-        $this->callJob((int) $request->get('product'));
+        Jobs\ImportSingleProductJob::dispatch((int) $request->get('product'));
 
         return response()->json([
             'message' => 'Product import has been queued.',
