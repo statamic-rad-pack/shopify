@@ -90,8 +90,11 @@ CP assets are compiled to `dist/` (Vite-built). The `resources/js/shopify/` dire
 
 - `FetchAllProducts` / `FetchCollections` — paginate through Shopify product/collection IDs and dispatch import jobs. Both use `ThrottlesShopifyRequests`.
 - `SavesImagesAndMetafields` — downloads images to Statamic assets (with alt text), parses metafields via the configured parser.
+- `StoreConfig::clientFor(?string $handle)` — the one way to get a Graphql client: the store's client in multi-store mode, else the default. Use `StoreConfig::isUnifiedMode()` / `isLocalizedMode()` / `isMarketsMode()` rather than comparing `getMode()`.
+- `WebhookSubscriptions` (`src/Support`) — fetches registered webhook subscriptions and reads/writes the "last received" cache keys (shared by the register command, status controller and webhook middleware).
+- `ImportSingleProductJob` uses `WithoutOverlapping` keyed by product + store, so several queue workers are safe. `VerifyShopifyHeaders` skips duplicate deliveries by `X-Shopify-Webhook-Id` (only after a successful response).
 - `ProductSummary` (`src/Support`) — derives `price_min`, `price_max`, `in_stock`, `on_sale` from a product's variants. Written onto the product on import, on CP variant edit (`syncForVariant`), and backfilled by `UpdateScripts\AddProductSummary`. Used by the `product_has_stock` scope and, when a product is in context, the `product_price` / `in_stock` tags.
-- `ThrottlesShopifyRequests` — wraps `Graphql::query()` calls; inspects `extensions.cost.throttleStatus` and calls `throttleSleep()` if available budget < 500 points. Retries `THROTTLED` responses, throws `Exceptions\GraphqlException` when a query fails outright (no `data`), and only logs a warning for partial errors (e.g. a missing access scope on one field). The sleep is extracted into a protected method so tests can override it without actually sleeping.
+- `ThrottlesShopifyRequests` — wraps `Graphql::query()` calls; inspects `extensions.cost.throttleStatus` and calls `throttleSleep()` if available budget < `config('shopify.throttle_threshold')` points. Retries `THROTTLED` responses, throws `Exceptions\GraphqlException` when a query fails outright (no `data`), and only logs a warning for partial errors (e.g. a missing access scope on one field). The sleep is extracted into a protected method so tests can override it without actually sleeping.
 - Mutation error handling: use `HttpResponse::firstError('mutationName')`, which returns the first top-level `errors` message or the first `data.{mutation}.userErrors` message (`userErrors` is a list).
 
 ### Extensibility Points
@@ -112,7 +115,9 @@ Defined in `config/shopify.php` and set via environment variables:
 | `admin_token` | `SHOPIFY_ADMIN_TOKEN` | Legacy token auth |
 | `storefront_token` | `SHOPIFY_STOREFRONT_TOKEN` | Storefront API token |
 | `webhook_secret` | `SHOPIFY_WEBHOOK_SECRET` | Webhook HMAC secret |
-| `api_version` | `SHOPIFY_API_VERSION` | Defaults to `2025-04` |
+| `api_version` | `SHOPIFY_API_VERSION` | Defaults to `Graphql::DEFAULT_API_VERSION` (`2026-01`) |
+| `api_max_retries` | `SHOPIFY_API_MAX_RETRIES` | Library retries for 429 / 5xx responses (default 2) |
+| `throttle_threshold` | `SHOPIFY_THROTTLE_THRESHOLD` | Query cost budget below which imports pause (default 500) |
 | `queue` | `SHOPIFY_JOB_QUEUE` | Queue for import jobs |
 | `sales_channel` | `SHOPIFY_SALES_CHANNEL` | Publication channel name (default: `Online Store`) |
 

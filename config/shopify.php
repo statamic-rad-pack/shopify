@@ -1,5 +1,8 @@
 <?php
 
+use StatamicRadPack\Shopify\Actions\ParseMetafields;
+use StatamicRadPack\Shopify\Jobs\CreateOrUpdateShopifyUser;
+
 return [
     /**
      * Site URL
@@ -44,22 +47,25 @@ return [
     ],
 
     /**
-     * Admin API version - Set this to a fixed value (eg 2023-07) or null to let the library decide
+     * Admin API version - Set this to a fixed value (eg 2026-01)
      */
-    'api_version' => env('SHOPIFY_API_VERSION', '2025-04'),
+    'api_version' => env('SHOPIFY_API_VERSION', '2026-01'),
+
+    /**
+     * How many times to retry an Admin API request that fails with a 429 or 5xx response
+     */
+    'api_max_retries' => env('SHOPIFY_API_MAX_RETRIES', 2),
+
+    /**
+     * Imports pause when the available GraphQL query cost budget drops below this
+     * many points, giving the bucket time to refill
+     */
+    'throttle_threshold' => env('SHOPIFY_THROTTLE_THRESHOLD', 500),
 
     /**
      * Shop Currency
      */
     'currency' => '£',
-
-    /**
-     * Change some of the language variables used in the tags
-     */
-    'lang' => [
-        'out_of_stock' => 'Out of Stock',
-        'from' => 'From',
-    ],
 
     /**
      * Asset Container to Store the imported Assets
@@ -81,15 +87,15 @@ return [
     ],
 
     /**
-     * The queue connection you want the Shopify jobs to run on.
-     * Please note you having more than 1 process running at once on this queue may cause issues.
+     * The queue you want the Shopify jobs to run on. Imports of the same product never
+     * run at the same time, so it is safe to run several workers on this queue.
      */
     'queue' => env('SHOPIFY_JOB_QUEUE', 'default'),
 
     /**
      * What class should we use to parse metafields
      */
-    'metafields_parser' => \StatamicRadPack\Shopify\Actions\ParseMetafields::class,
+    'metafields_parser' => ParseMetafields::class,
 
     /**
      * If a new user is created by Shopify should the website create
@@ -105,7 +111,7 @@ return [
     /**
      * What job should we use to update users in Shopify
      */
-    'update_shopify_user_job' => \StatamicRadPack\Shopify\Jobs\CreateOrUpdateShopifyUser::class,
+    'update_shopify_user_job' => CreateOrUpdateShopifyUser::class,
 
     /**
      * In which collection should the Shopify products be created
@@ -153,7 +159,7 @@ return [
             //     'client_id' => env('SHOPIFY_STORE_UK_CLIENT_ID'),
             //     'client_secret' => env('SHOPIFY_STORE_UK_CLIENT_SECRET'),
             //     'admin_token' => env('SHOPIFY_STORE_UK_ADMIN_TOKEN'),
-            //     'api_version' => env('SHOPIFY_STORE_UK_API_VERSION', '2025-04'),
+            //     'api_version' => env('SHOPIFY_STORE_UK_API_VERSION', '2026-01'),
             //     'sales_channel' => 'Online Store',
             //     'currency' => '£',
             //     'site' => 'en', // only used in 'localized' mode

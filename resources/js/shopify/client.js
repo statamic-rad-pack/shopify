@@ -14,7 +14,7 @@ const client = {
         if (! instance) {
             instance = createStorefrontApiClient({
                 storeDomain: window.shopifyConfig.url,
-                apiVersion: window.shopifyConfig.apiVersion ?? '2024-07',
+                apiVersion: window.shopifyConfig.apiVersion ?? '2026-01',
                 publicAccessToken: window.shopifyConfig.token,
             });
         }

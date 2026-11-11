@@ -11,13 +11,13 @@ Route::get('/shopify', [DashboardController::class, 'index'])
     ->name('shopify.index');
 
 // Dashboard Imports
-Route::get('/shopify/import/collections/all', [ImportCollectionsController::class, 'fetchAll'])
+Route::post('/shopify/import/collections/all', [ImportCollectionsController::class, 'fetchAll'])
     ->name('shopify.collections.fetchAll');
 
-Route::get('/shopify/import/products/all', [ImportProductsController::class, 'fetchAll'])
+Route::post('/shopify/import/products/all', [ImportProductsController::class, 'fetchAll'])
     ->name('shopify.products.fetchAll');
 
-Route::get('/shopify/import/products/single', [ImportProductsController::class, 'fetchSingleProduct'])
+Route::post('/shopify/import/products/single', [ImportProductsController::class, 'fetchSingleProduct'])
     ->name('shopify.products.fetch');
 
 // Others

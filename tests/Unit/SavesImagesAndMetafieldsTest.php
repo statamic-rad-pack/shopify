@@ -76,4 +76,24 @@ class SavesImagesAndMetafieldsTest extends TestCase
             'configured path' => ['shopify'],
         ];
     }
+
+    #[Test]
+    public function downloads_each_image_to_its_own_temp_folder_and_cleans_it_up()
+    {
+        Http::fake(['cdn.shopify.com/*' => Http::response('fake-image-bytes')]);
+
+        $first = $this->uploadFakeFileFromUrl('shirt.jpg', 'https://cdn.shopify.com/s/files/1/products/shirt.jpg');
+        $second = $this->uploadFakeFileFromUrl('shirt.jpg', 'https://cdn.shopify.com/s/files/2/products/shirt.jpg');
+
+        $this->assertNotSame($first->getPathname(), $second->getPathname());
+        $this->assertSame('shirt.jpg', $first->getClientOriginalName());
+        $this->assertFileExists($first->getPathname());
+
+        $this->cleanupFakeFile($first);
+
+        $this->assertFileDoesNotExist($first->getPathname());
+        $this->assertFileExists($second->getPathname());
+
+        $this->cleanupFakeFile($second);
+    }
 }

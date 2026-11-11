@@ -7,6 +7,7 @@ use Statamic\Support\Arr;
 use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Enums\WebhookTopic;
 use StatamicRadPack\Shopify\Support\StoreConfig;
+use StatamicRadPack\Shopify\Support\WebhookSubscriptions;
 
 class ShopifyWebhooksRegister extends Command
 {
@@ -49,8 +50,8 @@ class ShopifyWebhooksRegister extends Command
 
     private function registerForStore(?array $storeConfig): void
     {
-        $graphql = $storeConfig ? StoreConfig::makeGraphqlClient($storeConfig) : app(Graphql::class);
-        $existing = $this->fetchExistingWebhooks($graphql);
+        $graphql = StoreConfig::clientFor($storeConfig['handle'] ?? null);
+        $existing = WebhookSubscriptions::fetch($graphql);
 
         $rows = [];
 
@@ -72,34 +73,6 @@ class ShopifyWebhooksRegister extends Command
         }
 
         $this->table(['Topic', 'Callback URL', 'Status'], $rows);
-    }
-
-    private function fetchExistingWebhooks(Graphql $graphql): array
-    {
-        $query = <<<'QUERY'
-        {
-          webhookSubscriptions(first: 100) {
-            nodes {
-              id
-              topic
-              endpoint {
-                ... on WebhookHttpEndpoint {
-                  callbackUrl
-                }
-              }
-            }
-          }
-        }
-        QUERY;
-
-        $response = $graphql->query(['query' => $query]);
-        $nodes = Arr::get($response->getDecodedBody(), 'data.webhookSubscriptions.nodes', []);
-
-        return collect($nodes)->map(fn ($node) => [
-            'id' => $node['id'],
-            'topic' => $node['topic'],
-            'callbackUrl' => Arr::get($node, 'endpoint.callbackUrl', ''),
-        ])->all();
     }
 
     private function createWebhook(Graphql $graphql, WebhookTopic $topic, string $callbackUrl): bool

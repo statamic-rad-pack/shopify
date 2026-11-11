@@ -23,9 +23,8 @@ class TagsTest extends TestCase
         config()->set('shopify.url', 'abcd');
         config()->set('shopify.storefront_token', '1234');
 
-        $this->assertEquals(str_replace(["\r", "\n"], '', "<script>
-window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04', currency: '£' };
-</script>"),
+        $this->assertEquals(
+            '<script>window.shopifyConfig = {"url":"abcd","token":"1234","apiVersion":"2026-01","currency":"£"};</script>',
             str_replace(["\r", "\n"], '', $this->tag('{{ shopify:tokens }}'))
         );
     }
@@ -1692,5 +1691,16 @@ window.shopifyConfig = { url: 'abcd', token: '1234', apiVersion: '2025-04', curr
         $this->assertCount(2, $sent);
         $this->assertSame(2, $sent[0]['variables']['numItems']);
         $this->assertStringContainsString('ordersCount', $sent[1]['query']);
+    }
+
+    #[Test]
+    public function escapes_values_in_shopify_tokens()
+    {
+        config()->set('shopify.url', "abcd'</script><script>alert(1)</script>");
+
+        $output = $this->tag('{{ shopify:tokens }}');
+
+        $this->assertStringNotContainsString('</script><script>', $output);
+        $this->assertStringContainsString('</script>', $output);
     }
 }

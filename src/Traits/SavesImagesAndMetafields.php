@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Statamic\Facades\Asset;
 use Statamic\Facades\Path;
+use Statamic\Support\Str;
 
 trait SavesImagesAndMetafields
 {
@@ -59,7 +60,7 @@ trait SavesImagesAndMetafields
 
         $asset->save();
 
-        $this->cleanupFakeFile($name);
+        $this->cleanupFakeFile($file);
 
         return $asset;
     }
@@ -95,9 +96,13 @@ trait SavesImagesAndMetafields
             $request = $request->withHeaders(['Accept' => $accept]);
         }
 
-        Storage::disk('local')->put($name, $request->get($url)->throw()->body());
+        // unique folder per download, so concurrent workers fetching an image with the
+        // same file name can't overwrite or delete each other's temp file
+        $path = 'shopify-tmp/'.Str::uuid().'/'.$name;
 
-        return new UploadedFile(Storage::disk('local')->path($name), $name);
+        Storage::disk('local')->put($path, $request->get($url)->throw()->body());
+
+        return new UploadedFile(Storage::disk('local')->path($path), $name);
     }
 
     /**
@@ -118,9 +123,15 @@ trait SavesImagesAndMetafields
     /**
      * Remove the fake file as we don't need it lingering around.
      */
-    private function cleanupFakeFile(string $name): void
+    private function cleanupFakeFile(UploadedFile $file): void
     {
-        Storage::disk('local')->delete($name);
+        $disk = Storage::disk('local');
+        $folder = dirname(Str::after($file->getPathname(), $disk->path('')));
+
+        // only ever remove the per-download folder created above
+        if (str_starts_with($folder, 'shopify-tmp/')) {
+            $disk->deleteDirectory($folder);
+        }
     }
 
     /**

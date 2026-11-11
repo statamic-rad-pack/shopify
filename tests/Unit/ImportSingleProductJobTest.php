@@ -2,6 +2,7 @@
 
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
 use Mockery\MockInterface;
@@ -894,5 +895,55 @@ class ImportSingleProductJobTest extends TestCase
 
         $this->assertSame('Produit', Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->firstWhere('locale', 'fr')->get('title'));
         $this->assertSame('Variante', Facades\Entry::whereCollection('variants')->firstWhere('locale', 'fr')->get('title'));
+    }
+
+    #[Test]
+    public function does_not_import_the_same_product_concurrently()
+    {
+        $middleware = (new Jobs\ImportSingleProductJob(123, [], 'uk'))->middleware();
+
+        $this->assertInstanceOf(WithoutOverlapping::class, $middleware[0]);
+        $this->assertSame('shopify-product-123-uk', $middleware[0]->key);
+    }
+
+    #[Test]
+    public function imports_variants_beyond_the_first_page()
+    {
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
+        Facades\Collection::make('variants')->save();
+        Facades\Taxonomy::make()->handle('collections')->save();
+        Facades\Taxonomy::make()->handle('tags')->save();
+        Facades\Taxonomy::make()->handle('type')->save();
+        Facades\Taxonomy::make()->handle('vendor')->save();
+
+        $firstPage = json_decode($this->getProductJson(), true);
+        $firstPage['data']['product']['variants']['pageInfo'] = ['hasNextPage' => true, 'endCursor' => 'cursor-1'];
+
+        $secondVariant = $firstPage['data']['product']['variants']['edges'][0];
+        $secondVariant['node']['id'] = 'gid://shopify/ProductVariant/2';
+        $secondVariant['node']['title'] = 'Second';
+
+        $cursors = [];
+
+        $this->mock(Graphql::class, function (MockInterface $mock) use ($firstPage, $secondVariant, &$cursors) {
+            $mock->shouldReceive('query')->andReturnUsing(function ($query) use ($firstPage, $secondVariant, &$cursors) {
+                if (str_contains($query['query'], 'after: $cursor')) {
+                    $cursors[] = $query['variables']['cursor'];
+
+                    return new HttpResponse(status: 200, body: json_encode(['data' => ['product' => ['variants' => [
+                        'edges' => [$secondVariant],
+                        'pageInfo' => ['hasNextPage' => false, 'endCursor' => null],
+                    ]]]]));
+                }
+
+                return new HttpResponse(status: 200, body: json_encode($firstPage));
+            });
+        });
+
+        Jobs\ImportSingleProductJob::dispatch(1);
+
+        $this->assertSame(['cursor-1'], $cursors);
+        $this->assertCount(2, Facades\Entry::whereCollection('variants'));
+        $this->assertNotNull(Facades\Entry::whereCollection('variants')->firstWhere('title', 'Second'));
     }
 }

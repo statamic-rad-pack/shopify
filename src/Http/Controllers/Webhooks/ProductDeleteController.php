@@ -26,7 +26,7 @@ class ProductDeleteController extends WebhooksController
 
         // Products live in the default site, except in localized multi-store mode
         // where each store maps to its own site
-        $site = $isMultiStore && StoreConfig::getMode() === 'localized'
+        $site = $isMultiStore && StoreConfig::isLocalizedMode()
             ? (StoreConfig::findByHandle($storeHandle)['site'] ?? null)
             : Site::default()->handle();
 
@@ -48,7 +48,7 @@ class ProductDeleteController extends WebhooksController
 
         // In unified multi-store mode the entries are shared between stores, so only
         // drop this store's data unless no other store still sells the product
-        if ($isMultiStore && StoreConfig::getMode() === 'unified' && $this->otherStoresRemain($variants, $storeHandle)) {
+        if ($isMultiStore && StoreConfig::isUnifiedMode() && $this->otherStoresRemain($variants, $storeHandle)) {
             return $this->deleted();
         }
 

@@ -11,6 +11,8 @@ use Shopify\App\ShopifyApp;
  */
 class Graphql
 {
+    public const DEFAULT_API_VERSION = '2026-01';
+
     protected string $apiVersion;
 
     protected ShopifyApp $app;
@@ -21,7 +23,7 @@ class Graphql
         ?string $apiVersion = null,
         ?ShopifyApp $app = null,
     ) {
-        $this->apiVersion = $apiVersion ?? config('shopify.api_version', '2025-04');
+        $this->apiVersion = $apiVersion ?? (config('shopify.api_version') ?: static::DEFAULT_API_VERSION);
         $this->app = $app ?? app(ShopifyApp::class);
     }
 
@@ -33,7 +35,8 @@ class Graphql
             accessToken: $this->token,
             apiVersion: $this->apiVersion,
             variables: $params['variables'] ?? null,
-            maxRetries: 0,
+            // retries 429 / 5xx responses (THROTTLED GraphQL errors are handled by ThrottlesShopifyRequests)
+            maxRetries: (int) config('shopify.api_max_retries', 2),
         );
 
         return new HttpResponse(

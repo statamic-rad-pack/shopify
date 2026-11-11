@@ -4,21 +4,22 @@ namespace StatamicRadPack\Shopify\Http\Controllers\Actions;
 
 use Illuminate\Http\Request;
 use Statamic\Facades\Entry;
-use Statamic\Http\Controllers\CP\CpController;
+use Statamic\Http\Controllers\Controller;
 
-class VariantsController extends CpController
+class VariantsController extends Controller
 {
     public function fetch(Request $request, string $product)
     {
-        return Entry::query()
-            ->where('collection', 'variants')
-            ->when($option = $request->get('option1'), fn ($query) => $query->where('option1', $option))
-            ->when($option = $request->get('option2'), fn ($query) => $query->where('option2', $option))
-            ->when($option = $request->get('option3'), fn ($query) => $query->where('option3', $option))
-            ->when($option = $request->get('option4'), fn ($query) => $query->where('option4', $option))
-            ->when($option = $request->get('option5'), fn ($query) => $query->where('option5', $option))
-            ->when($option = $request->get('option6'), fn ($query) => $query->where('option6', $option))
-            ->when($option = $request->get('option7'), fn ($query) => $query->where('option7', $option))
+        $query = Entry::query()->where('collection', 'variants');
+
+        // Shopify products have at most three options
+        foreach (range(1, 3) as $index) {
+            if ($option = $request->get('option'.$index)) {
+                $query->where('option'.$index, $option);
+            }
+        }
+
+        return $query
             ->where('product_slug', $product)
             ->get()
             ->map(function ($variant) {
@@ -28,6 +29,6 @@ class VariantsController extends CpController
                 $values['inventory_quantity'] = $variant->inventory_quantity;
 
                 return $values;
-            }) ?? [];
+            });
     }
 }

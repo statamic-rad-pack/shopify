@@ -28,6 +28,29 @@ class StoreConfig
         return static::isMultiStore() && static::getMode() === 'markets';
     }
 
+    public static function isUnifiedMode(): bool
+    {
+        return static::isMultiStore() && static::getMode() === 'unified';
+    }
+
+    public static function isLocalizedMode(): bool
+    {
+        return static::isMultiStore() && static::getMode() === 'localized';
+    }
+
+    /**
+     * The Graphql client for a store handle, or the default (single store) client when
+     * there is no handle, multi-store is off, or the handle isn't configured.
+     */
+    public static function clientFor(?string $handle): Graphql
+    {
+        if ($handle && static::isMultiStore() && ($store = static::findByHandle($handle))) {
+            return static::makeGraphqlClient($store);
+        }
+
+        return app(Graphql::class);
+    }
+
     public static function getMarkets(): array
     {
         return config('shopify.multi_store.markets', []);
@@ -95,7 +118,7 @@ class StoreConfig
             app()->bind($abstract, fn () => new Graphql(
                 $storeConfig['url'] ?? config('shopify.url'),
                 static::accessToken($storeConfig) ?? 'none',
-                $storeConfig['api_version'] ?? config('shopify.api_version', '2025-04'),
+                $storeConfig['api_version'] ?? (config('shopify.api_version') ?: Graphql::DEFAULT_API_VERSION),
             ));
         }
 

@@ -200,4 +200,25 @@ class ThrottleTest extends TestCase
 
         $this->assertSame('1', $response->getDecodedBody()['data']['product']['id']);
     }
+
+    #[Test]
+    public function uses_the_configured_throttle_threshold()
+    {
+        config()->set('shopify.throttle_threshold', 1000);
+
+        $subject = $this->makeSubject();
+
+        $body = json_encode([
+            'data' => [],
+            'extensions' => ['cost' => ['throttleStatus' => ['currentlyAvailable' => 800.0, 'restoreRate' => 100.0]]],
+        ]);
+
+        $mock = $this->mock(Graphql::class, function (MockInterface $mock) use ($body) {
+            $mock->shouldReceive('query')->once()->andReturn(new HttpResponse(status: 200, body: $body));
+        });
+
+        $subject->run($mock, ['query' => '{}']);
+
+        $this->assertSame(2, $subject->sleptSeconds);
+    }
 }

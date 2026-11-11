@@ -7,6 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Statamic\Facades\Entry;
@@ -34,6 +35,15 @@ class ImportSingleProductJob implements ShouldQueue
 
     public $data = [];
 
+    /**
+     * Attempts include being released while another import of the same product runs.
+     */
+    public $tries = 10;
+
+    public $maxExceptions = 3;
+
+    public $backoff = [10, 60, 300];
+
     public function __construct(
         public int $productId,
         public ?array $orderData = [],
@@ -44,9 +54,22 @@ class ImportSingleProductJob implements ShouldQueue
         }
     }
 
+    /**
+     * Never import the same product (for the same store) concurrently: webhook bursts
+     * would otherwise race on creating variants and updating purchase history.
+     */
+    public function middleware(): array
+    {
+        return [
+            (new WithoutOverlapping("shopify-product-{$this->productId}-{$this->storeHandle}"))
+                ->releaseAfter(15)
+                ->expireAfter(300),
+        ];
+    }
+
     public function handle()
     {
-        $graphql = $this->resolveGraphqlClient();
+        $graphql = StoreConfig::clientFor($this->storeHandle);
 
         $variantFields = $this->buildVariantFields();
 
@@ -74,7 +97,7 @@ class ImportSingleProductJob implements ShouldQueue
                 }
               }
             }
-            media(first: 20, sortKey: POSITION, query: "media_type:IMAGE") {
+            media(first: 50, sortKey: POSITION, query: "media_type:IMAGE") {
               edges {
                 node {
                   id
@@ -113,6 +136,10 @@ class ImportSingleProductJob implements ShouldQueue
                   {$variantFields}
                 }
               }
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
             }
             vendor
           }
@@ -132,6 +159,8 @@ class ImportSingleProductJob implements ShouldQueue
         }
 
         $this->data['id'] = Str::afterLast($this->data['id'], '/');
+
+        $this->fetchRemainingVariants($graphql, $variantFields);
 
         $productSite = $this->resolveSite();
 
@@ -232,74 +261,68 @@ class ImportSingleProductJob implements ShouldQueue
 
         $published = false;
 
-        // this is to make testing easier
-        // means we can just test individual parts of the job
+        // each part is isolated so a failure in one doesn't stop the product being saved
+
+        // collections (only those already imported as terms)
         try {
+            $handles = collect(Arr::get($this->data, 'collections.edges', []))
+                ->map(fn ($collection) => Arr::get($collection, 'node.handle'))
+                ->filter()
+                ->values();
 
-            // collections (only those already imported as terms)
-            try {
-                $handles = collect(Arr::get($this->data, 'collections.edges', []))
-                    ->map(fn ($collection) => Arr::get($collection, 'node.handle'))
-                    ->filter()
-                    ->values();
+            $existing = $handles->isEmpty() ? collect() : Term::query()
+                ->where('taxonomy', config('shopify.taxonomies.collections'))
+                ->whereIn('slug', $handles->all())
+                ->get()
+                ->map->slug();
 
-                $existing = $handles->isEmpty() ? collect() : Term::query()
-                    ->where('taxonomy', config('shopify.taxonomies.collections'))
-                    ->whereIn('slug', $handles->all())
-                    ->get()
-                    ->map->slug();
+            $entry->set(
+                config('shopify.taxonomies.collections'),
+                $handles->filter(fn ($handle) => $existing->contains($handle))->values()->all()
+            );
+        } catch (Throwable $e) {
+            Log::error('Could not retrieve collections for product '.$this->data['id']);
+            Log::error($e->getMessage());
+        }
 
-                $entry->set(
-                    config('shopify.taxonomies.collections'),
-                    $handles->filter(fn ($handle) => $existing->contains($handle))->values()->all()
-                );
-            } catch (Throwable $e) {
-                Log::error('Could not retrieve collections for product '.$this->data['id']);
-                Log::error($e->getMessage());
-            }
+        // meta fields
+        try {
+            $this->syncMetafields($entry, Arr::get($this->data, 'metafields.edges', []), 'product');
+        } catch (Throwable $e) {
+            Log::error('Could not retrieve metafields for product '.$this->data['id']);
+            Log::error($e->getMessage());
+        }
 
-            // meta fields
-            try {
-                $this->syncMetafields($entry, Arr::get($this->data, 'metafields.edges', []), 'product');
-            } catch (Throwable $e) {
-                Log::error('Could not retrieve metafields for product '.$this->data['id']);
-                Log::error($e->getMessage());
-            }
+        // publication state
+        try {
+            $publicationStatus = collect(Arr::get($this->data, 'resourcePublications.edges', []))
+                ->where('node.publication.name', config('shopify.sales_channel', 'Online Store'))
+                ->map(function ($channel) {
+                    if (! $node = $channel['node'] ?? []) {
+                        return [];
+                    }
 
-            // publication state
-            try {
-                $publicationStatus = collect(Arr::get($this->data, 'resourcePublications.edges', []))
-                    ->where('node.publication.name', config('shopify.sales_channel', 'Online Store'))
-                    ->map(function ($channel) {
-                        if (! $node = $channel['node'] ?? []) {
-                            return [];
-                        }
+                    return $node;
+                })
+                ->filter()
+                ->first();
 
-                        return $node;
-                    })
-                    ->filter()
-                    ->first();
+            if ($publicationStatus) {
+                $published = $publicationStatus['isPublished'] ?? false;
 
-                if ($publicationStatus) {
-                    $published = $publicationStatus['isPublished'] ?? false;
+                if ($entry->collection()->dated() && $publicationStatus['publishDate']) {
+                    $publishDate = Carbon::parse($publicationStatus['publishDate']);
 
-                    if ($entry->collection()->dated() && $publicationStatus['publishDate']) {
-                        $publishDate = Carbon::parse($publicationStatus['publishDate']);
+                    $entry->set('published_at', $publishDate->format('Y-m-d H:i:s'));
+                    $entry->date($publishDate);
 
-                        $entry->set('published_at', $publishDate->format('Y-m-d H:i:s'));
-                        $entry->date($publishDate);
-
-                        if (! $published && $publishDate->lt(now())) {
-                            $published = true;
-                        }
+                    if (! $published && $publishDate->lt(now())) {
+                        $published = true;
                     }
                 }
-            } catch (Throwable $e) {
-                Log::error('Could not manage publications status for product '.$this->data['id']);
-                Log::error($e->getMessage());
             }
-
         } catch (Throwable $e) {
+            Log::error('Could not manage publications status for product '.$this->data['id']);
             Log::error($e->getMessage());
         }
 
@@ -537,20 +560,41 @@ class ImportSingleProductJob implements ShouldQueue
     }
 
     /**
-     * Resolve the Graphql client for this job.
-     * In multi-store mode, uses the store-specific client.
+     * Products can have more than 100 variants (up to 2048), so page through the rest.
      */
-    private function resolveGraphqlClient(): Graphql
+    private function fetchRemainingVariants(Graphql $graphql, string $variantFields): void
     {
-        if ($this->storeHandle && StoreConfig::isMultiStore()) {
-            $storeConfig = StoreConfig::findByHandle($this->storeHandle);
-
-            if ($storeConfig) {
-                return StoreConfig::makeGraphqlClient($storeConfig);
+        $query = <<<QUERY
+            query (\$cursor: String) {
+              product(id: "gid://shopify/Product/{$this->productId}") {
+                variants(first: 100, after: \$cursor) {
+                  edges {
+                    node {
+                      {$variantFields}
+                    }
+                  }
+                  pageInfo {
+                    hasNextPage
+                    endCursor
+                  }
+                }
+              }
             }
-        }
+            QUERY;
 
-        return app(Graphql::class);
+        $pageInfo = Arr::get($this->data, 'variants.pageInfo', []);
+
+        while ($pageInfo['hasNextPage'] ?? false) {
+            $response = $this->queryWithThrottle($graphql, [
+                'query' => $query,
+                'variables' => ['cursor' => $pageInfo['endCursor']],
+            ]);
+
+            $variants = Arr::get($response->getDecodedBody(), 'data.product.variants', []);
+
+            $this->data['variants']['edges'] = array_merge($this->data['variants']['edges'] ?? [], $variants['edges'] ?? []);
+            $pageInfo = $variants['pageInfo'] ?? [];
+        }
     }
 
     /**
@@ -559,7 +603,7 @@ class ImportSingleProductJob implements ShouldQueue
      */
     private function resolveSite(): string
     {
-        if ($this->storeHandle && StoreConfig::isMultiStore() && StoreConfig::getMode() === 'localized') {
+        if ($this->storeHandle && StoreConfig::isLocalizedMode()) {
             $storeConfig = StoreConfig::findByHandle($this->storeHandle);
 
             return $storeConfig['site'] ?? Site::default()->handle();
@@ -655,7 +699,7 @@ class ImportSingleProductJob implements ShouldQueue
             }
 
             // Unified multi-store mode: write store-specific pricing to multi_store_data
-            if ($this->storeHandle && StoreConfig::isMultiStore() && StoreConfig::getMode() === 'unified') {
+            if ($this->storeHandle && StoreConfig::isUnifiedMode()) {
                 $storeData = [
                     'price' => $variant['price'],
                     'compare_at_price' => $variant['compareAtPrice'],
