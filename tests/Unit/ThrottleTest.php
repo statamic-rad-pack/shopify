@@ -6,6 +6,7 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Clients\HttpResponse;
+use StatamicRadPack\Shopify\Exceptions\GraphqlException;
 use StatamicRadPack\Shopify\Tests\TestCase;
 use StatamicRadPack\Shopify\Traits\ThrottlesShopifyRequests;
 
@@ -131,5 +132,72 @@ class ThrottleTest extends TestCase
         $subject->run($mock, ['query' => '{}']);
 
         $this->assertSame(1, $subject->sleptSeconds);
+    }
+
+    #[Test]
+    public function retries_a_throttled_query()
+    {
+        $subject = $this->makeSubject();
+
+        $throttled = json_encode([
+            'errors' => [['message' => 'Throttled', 'extensions' => ['code' => 'THROTTLED']]],
+            'extensions' => ['cost' => ['requestedQueryCost' => 300, 'throttleStatus' => ['currentlyAvailable' => 100.0, 'restoreRate' => 100.0]]],
+        ]);
+
+        $mock = $this->mock(Graphql::class, function (MockInterface $mock) use ($throttled) {
+            $mock->shouldReceive('query')->twice()->andReturn(
+                new HttpResponse(status: 200, body: $throttled),
+                new HttpResponse(status: 200, body: '{"data":{"product":{"id":"1"}}}'),
+            );
+        });
+
+        $response = $subject->run($mock, ['query' => '{}']);
+
+        $this->assertSame('1', $response->getDecodedBody()['data']['product']['id']);
+        $this->assertSame(2, $subject->sleptSeconds);
+    }
+
+    #[Test]
+    public function throws_when_a_query_fails()
+    {
+        $subject = $this->makeSubject();
+
+        $mock = $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock->shouldReceive('query')->once()->andReturn(new HttpResponse(status: 200, body: '{"errors":[{"message":"Query cost is 10200, which exceeds the single query max cost limit (1000)."}]}'));
+        });
+
+        $this->expectException(GraphqlException::class);
+        $this->expectExceptionMessage('exceeds the single query max cost limit');
+
+        $subject->run($mock, ['query' => '{}']);
+    }
+
+    #[Test]
+    public function throws_when_the_request_is_unauthorized()
+    {
+        $subject = $this->makeSubject();
+
+        $mock = $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock->shouldReceive('query')->once()->andReturn(new HttpResponse(status: 401, body: '{"errors":"[API] Invalid API key or access token"}'));
+        });
+
+        $this->expectException(GraphqlException::class);
+        $this->expectExceptionMessage('Invalid API key');
+
+        $subject->run($mock, ['query' => '{}']);
+    }
+
+    #[Test]
+    public function returns_partial_data_when_a_query_has_field_errors()
+    {
+        $subject = $this->makeSubject();
+
+        $mock = $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock->shouldReceive('query')->once()->andReturn(new HttpResponse(status: 200, body: '{"data":{"product":{"id":"1","resourcePublications":null}},"errors":[{"message":"Access denied for resourcePublications field."}]}'));
+        });
+
+        $response = $subject->run($mock, ['query' => '{}']);
+
+        $this->assertSame('1', $response->getDecodedBody()['data']['product']['id']);
     }
 }

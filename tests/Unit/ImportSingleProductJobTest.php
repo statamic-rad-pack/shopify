@@ -2,8 +2,10 @@
 
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
+use Illuminate\Support\Carbon;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Contracts\Entries\Entry;
 use Statamic\Facades;
 use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Clients\HttpResponse;
@@ -589,7 +591,7 @@ class ImportSingleProductJobTest extends TestCase
         $entry = Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->first();
 
         $this->assertSame('Hooked title', $entry->title);
-        $this->assertInstanceOf(\Statamic\Contracts\Entries\Entry::class, $seenEntry);
+        $this->assertInstanceOf(Entry::class, $seenEntry);
         $this->assertSame('108828309', $seenProduct['id']);
     }
 
@@ -772,5 +774,34 @@ class ImportSingleProductJobTest extends TestCase
                           }
                        }
                     }';
+    }
+
+    #[Test]
+    public function accumulates_purchase_history_across_orders()
+    {
+        Facades\Collection::make(config('shopify.collection_handle', 'products'))->save();
+        Facades\Collection::make('variants')->save();
+        Facades\Taxonomy::make()->handle('collections')->save();
+        Facades\Taxonomy::make()->handle('tags')->save();
+        Facades\Taxonomy::make()->handle('type')->save();
+        Facades\Taxonomy::make()->handle('vendor')->save();
+
+        $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock->shouldReceive('query')->andReturn(new HttpResponse(status: 200, body: $this->getProductJson()));
+        });
+
+        // variant 1 in the fixture has an empty SKU, so it must be matched by variant id
+        Jobs\ImportSingleProductJob::dispatch(1, ['quantity' => ['1' => 2], 'date' => Carbon::parse('2024-03-05')]);
+        Jobs\ImportSingleProductJob::dispatch(1, ['quantity' => ['1' => 3], 'date' => Carbon::parse('2024-04-01')]);
+
+        $variant = Facades\Entry::whereCollection('variants')->first();
+        $this->assertSame(5, $variant->get('total_purchased')['lifetime']);
+        $this->assertSame(5, $variant->get('total_purchased')[2024]['total']);
+        $this->assertSame(2, $variant->get('total_purchased')[2024]['03']);
+        $this->assertSame(3, $variant->get('total_purchased')[2024]['04']);
+        $this->assertSame('2024-04-01 00:00:00', $variant->get('last_purchased'));
+
+        $product = Facades\Entry::whereCollection(config('shopify.collection_handle', 'products'))->first();
+        $this->assertSame(5, $product->get('total_purchased')['lifetime']);
     }
 }

@@ -5,6 +5,7 @@ namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 use Illuminate\Http\Request;
 use Statamic\Facades\User;
 use StatamicRadPack\Shopify\Events;
+use StatamicRadPack\Shopify\Support\StoreConfig;
 
 class CustomerDeleteController extends WebhooksController
 {
@@ -13,17 +14,30 @@ class CustomerDeleteController extends WebhooksController
         // Decode data
         $data = json_decode($request->getContent());
 
-        if (! is_object($data) && ! $data->id) {
+        if (! is_object($data) || empty($data->id)) {
             return;
         }
 
         Events\CustomerDelete::dispatch($data);
 
-        $customerEntry = User::query()
-            ->where('shopify_id', $data->id)
-            ->first();
+        $storeHandle = $request->attributes->get('shopify_store_handle');
 
-        if ($customerEntry) {
+        if ($storeHandle && StoreConfig::isMultiStore()) {
+            $customerEntry = User::all()->first(
+                fn ($user) => ($user->get('shopify_ids', [])[$storeHandle] ?? null) == $data->id
+            );
+
+            if ($customerEntry) {
+                $shopifyIds = $customerEntry->get('shopify_ids', []);
+                unset($shopifyIds[$storeHandle]);
+
+                $shopifyIds
+                    ? $customerEntry->set('shopify_ids', $shopifyIds)
+                    : $customerEntry->remove('shopify_ids');
+
+                $customerEntry->save();
+            }
+        } elseif ($customerEntry = User::query()->where('shopify_id', $data->id)->first()) {
             $customerEntry->remove('shopify_id')->save();
         }
 

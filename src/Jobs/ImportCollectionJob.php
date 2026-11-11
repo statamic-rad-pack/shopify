@@ -13,6 +13,7 @@ use Statamic\Support\Str;
 use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
+use StatamicRadPack\Shopify\Traits\ThrottlesShopifyRequests;
 
 class ImportCollectionJob implements ShouldQueue
 {
@@ -20,6 +21,7 @@ class ImportCollectionJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SavesImagesAndMetafields;
+    use ThrottlesShopifyRequests;
 
     private array $collection = [];
 
@@ -58,7 +60,7 @@ class ImportCollectionJob implements ShouldQueue
             }
             QUERY;
 
-        $response = $graphql->query(['query' => $query]);
+        $response = $this->queryWithThrottle($graphql, ['query' => $query]);
 
         if (! $this->collection = Arr::get($response->getDecodedBody(), 'data.collection', [])) {
             return;
@@ -102,7 +104,7 @@ class ImportCollectionJob implements ShouldQueue
         if (! $this->storeHandle && Site::hasMultiple()) {
             $taxonomySites = $term->taxonomy()->sites();
 
-            Site::all()->each(function ($site) use ($taxonomySites, $term) {
+            Site::all()->each(function ($site) use ($taxonomySites, $term, $graphql) {
                 if (Site::default()->handle() == $site->handle()) {
                     return;
                 }
@@ -123,7 +125,7 @@ class ImportCollectionJob implements ShouldQueue
                   }
                 QUERY;
 
-                $response = app(Graphql::class)->query(['query' => $query]);
+                $response = $this->queryWithThrottle($graphql, ['query' => $query]);
 
                 $translations = Arr::get($response->getDecodedBody(), 'data.translatableResource.translations', []);
 

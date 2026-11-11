@@ -146,6 +146,7 @@ class ImportSingleProductJob implements ShouldQueue
             if (! $inSalesChannel) {
                 if ($entry) {
                     $this->removeOldVariants([], $this->data['handle']);
+                    $entry->deleteDescendants();
                     $entry->delete();
                 }
 
@@ -213,12 +214,7 @@ class ImportSingleProductJob implements ShouldQueue
         }
 
         if ($this->orderData && ($quantities = Arr::get($this->orderData, 'quantity'))) {
-            $qty = 0;
-            foreach ($quantities as $sku => $q) {
-                $qty += (int) $q;
-            }
-
-            $data = $this->updatePurchaseHistory($data, $qty);
+            $data = $this->updatePurchaseHistory($data, (int) array_sum($quantities), $entry);
         }
 
         $data = $this->runHooksWith('import-product-data', [
@@ -258,7 +254,7 @@ class ImportSingleProductJob implements ShouldQueue
                     ->all();
 
                 $entry->set(config('shopify.taxonomies.collections'), $collections)->save();
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 Log::error('Could not retrieve collections for product '.$this->data['id']);
                 Log::error($e->getMessage());
             }
@@ -266,7 +262,7 @@ class ImportSingleProductJob implements ShouldQueue
             // meta fields
             try {
                 $this->syncMetafields($entry, Arr::get($this->data, 'metafields.edges', []), 'product');
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 Log::error('Could not retrieve metafields for product '.$this->data['id']);
                 Log::error($e->getMessage());
             }
@@ -299,12 +295,12 @@ class ImportSingleProductJob implements ShouldQueue
                         }
                     }
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 Log::error('Could not manage publications status for product '.$this->data['id']);
                 Log::error($e->getMessage());
             }
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error($e->getMessage());
         }
 
@@ -634,15 +630,15 @@ class ImportSingleProductJob implements ShouldQueue
                 }
             }
 
-            if ($this->orderData && ($qty = Arr::get($this->orderData, 'quantity.'.$variant['sku']))) {
-                $data = $this->updatePurchaseHistory($data, (int) $qty);
+            if ($this->orderData && ($qty = $this->orderedQuantityFor($variant))) {
+                $data = $this->updatePurchaseHistory($data, $qty, $entry);
             }
 
             $entry->merge($data);
 
             try {
                 $this->syncMetafields($entry, Arr::get($variant, 'metafields.edges', []), 'product-variant');
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 Log::error('Could not retrieve metafields for variant '.$this->data['id']);
             }
 
@@ -703,16 +699,18 @@ class ImportSingleProductJob implements ShouldQueue
      */
     private function removeOldVariants(array $variants, string $productSlug)
     {
+        $keep = array_map('strval', array_column($variants, 'id'));
+
         Entry::query()
             ->where('collection', 'variants')
             ->where('product_slug', $productSlug)
+            ->where('site', $this->resolveSite())
             ->get()
-            ->each(function ($variant) use ($variants) {
-                $item = array_search($variant->slug(), array_column($variants, 'id'));
-
-                if ($item === false) {
-                    $variant->delete();
-                }
+            ->reject(fn ($variant) => in_array((string) $variant->slug(), $keep, true))
+            ->each(function ($variant) {
+                // Statamic refuses to delete an entry that still has localizations
+                $variant->deleteDescendants();
+                $variant->delete();
             });
     }
 
@@ -753,18 +751,41 @@ class ImportSingleProductJob implements ShouldQueue
     }
 
     /**
-     * Update the purchase history for this item
+     * The quantity ordered of the given variant. Quantities are keyed by variant id,
+     * or by SKU for line items without one (and for jobs queued before that change).
      */
-    private function updatePurchaseHistory(array $data, int $qty): array
+    private function orderedQuantityFor(array $variant): int
     {
-        $data['last_purchased'] = $this->orderData['date']->format('Y-m-d H:i:s');
+        $quantities = Arr::get($this->orderData, 'quantity', []);
 
-        $orderYearKey = 'total_purchased.'.$this->orderData['date']->format('Y').'.total';
-        $orderMonthKey = 'total_purchased.'.$this->orderData['date']->format('Y').'.'.$this->orderData['date']->format('m');
+        if (isset($quantities[$variant['id']])) {
+            return (int) $quantities[$variant['id']];
+        }
 
-        Arr::set($data, 'total_purchased.lifetime', Arr::get($data, 'total_purchased.lifetime', 0) + $qty);
-        Arr::set($data, $orderYearKey, Arr::get($data, $orderYearKey, 0) + $qty);
-        Arr::set($data, $orderMonthKey, Arr::get($data, $orderMonthKey, 0) + $qty);
+        if (($sku = $variant['sku'] ?? '') !== '' && isset($quantities[$sku])) {
+            return (int) $quantities[$sku];
+        }
+
+        return 0;
+    }
+
+    /**
+     * Add to the purchase history for this item, building on the totals already stored on the entry.
+     */
+    private function updatePurchaseHistory(array $data, int $qty, ?\Statamic\Contracts\Entries\Entry $entry): array
+    {
+        $date = $this->orderData['date'];
+
+        $totals = $entry?->get('total_purchased') ?? [];
+        $yearKey = $date->format('Y').'.total';
+        $monthKey = $date->format('Y').'.'.$date->format('m');
+
+        Arr::set($totals, 'lifetime', Arr::get($totals, 'lifetime', 0) + $qty);
+        Arr::set($totals, $yearKey, Arr::get($totals, $yearKey, 0) + $qty);
+        Arr::set($totals, $monthKey, Arr::get($totals, $monthKey, 0) + $qty);
+
+        $data['total_purchased'] = $totals;
+        $data['last_purchased'] = $date->format('Y-m-d H:i:s');
 
         return $data;
     }

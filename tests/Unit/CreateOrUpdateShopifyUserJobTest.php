@@ -104,4 +104,43 @@ class CreateOrUpdateShopifyUserJobTest extends TestCase
         $this->assertNotNull($user->fresh()->get('shopify_id'));
         $this->assertSame(1, $user->fresh()->get('shopify_id'));
     }
+
+    #[Test]
+    public function sends_the_customer_id_when_updating_a_shopify_user()
+    {
+        $user = tap(Facades\User::make()->email('test@test.com')->set('shopify_id', 123))->saveQuietly();
+
+        $captured = null;
+
+        $this->mock(Graphql::class, function (MockInterface $mock) use (&$captured) {
+            $mock
+                ->shouldReceive('query')
+                ->andReturnUsing(function ($args) use (&$captured) {
+                    $captured = $args;
+
+                    return new HttpResponse(status: 200, body: '{"data":{"customerUpdate":{"customer":{"id":"gid://shopify/Customer/123"},"userErrors":[]}}}');
+                });
+        });
+
+        Jobs\CreateOrUpdateShopifyUser::dispatch($user);
+
+        $this->assertStringContainsString('customerUpdate', $captured['query']);
+        $this->assertSame('gid://shopify/Customer/123', $captured['variables']['input']['id']);
+    }
+
+    #[Test]
+    public function throws_shopify_user_errors_when_updating_a_shopify_user()
+    {
+        $user = tap(Facades\User::make()->email('test@test.com')->set('shopify_id', 123))->saveQuietly();
+
+        $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock
+                ->shouldReceive('query')
+                ->andReturn(new HttpResponse(status: 200, body: '{"data":{"customerUpdate":{"customer":null,"userErrors":[{"field":["email"],"message":"Email has already been taken"}]}}}'));
+        });
+
+        $this->expectExceptionMessage('Email has already been taken');
+
+        (new Jobs\CreateOrUpdateShopifyUser($user))->handle();
+    }
 }

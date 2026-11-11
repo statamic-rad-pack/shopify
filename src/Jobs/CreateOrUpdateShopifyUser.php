@@ -89,17 +89,15 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
             ],
         ]);
 
-        $body = $response->getDecodedBody();
+        if ($message = $response->firstError('customerCreate')) {
+            throw new \Exception($message);
+        }
 
-        if ($id = Arr::get($body, 'data.customerCreate.customer.id', false)) {
+        if ($id = Arr::get($response->getDecodedBody(), 'data.customerCreate.customer.id')) {
             $this->user->set('shopify_id', (int) Str::afterLast($id, '/'));
             $this->user->saveQuietly();
 
             return;
-        }
-
-        if ($message = Arr::get($body, 'data.customerCreate.userErrors.message')) {
-            throw new \Exception($message);
         }
 
         throw new \Exception('Could not create user in Shopify');
@@ -124,13 +122,14 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
         $response = app(Graphql::class)->query([
             'query' => $query,
             'variables' => [
-                'input' => $this->generatePayloadBody(),
+                'input' => [
+                    'id' => str_starts_with((string) $id, 'gid://') ? $id : 'gid://shopify/Customer/'.$id,
+                    ...$this->generatePayloadBody(),
+                ],
             ],
         ]);
 
-        $body = $response->getDecodedBody();
-
-        if ($message = Arr::get($body, 'customerUpdate.userErrors.message')) {
+        if ($message = $response->firstError('customerUpdate')) {
             throw new \Exception($message);
         }
     }

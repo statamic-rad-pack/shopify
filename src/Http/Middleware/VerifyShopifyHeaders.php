@@ -67,6 +67,10 @@ class VerifyShopifyHeaders
             return true;
         }
 
+        if (! is_string($hmacHeader) || $hmacHeader === '') {
+            return false;
+        }
+
         $secret = config('shopify.webhook_secret');
 
         if (StoreConfig::isMultiStore() && $domain) {
@@ -74,6 +78,10 @@ class VerifyShopifyHeaders
             if ($store) {
                 $secret = $store['webhook_secret'] ?? $secret;
             }
+        }
+
+        if (! $secret) {
+            return false;
         }
 
         $calculatedHmac = base64_encode(hash_hmac('sha256', $data, $secret, true));
