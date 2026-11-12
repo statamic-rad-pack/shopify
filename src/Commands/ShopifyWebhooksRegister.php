@@ -20,7 +20,7 @@ class ShopifyWebhooksRegister extends Command
 
     public function handle(): int
     {
-        if (StoreConfig::isMultiStore() && ! StoreConfig::isMarketsMode()) {
+        if (StoreConfig::hasSeparateStores()) {
             $storeHandle = $this->option('store');
 
             if ($storeHandle) {

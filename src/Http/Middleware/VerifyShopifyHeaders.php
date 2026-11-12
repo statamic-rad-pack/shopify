@@ -18,8 +18,8 @@ class VerifyShopifyHeaders
     {
         $secret = config('shopify.webhook_secret');
 
-        // In multi-store mode, resolve the store by domain header and use its secret
-        if (StoreConfig::isMultiStore() && ($domain = $request->header('X-Shopify-Shop-Domain'))) {
+        // With several stores, resolve the store by domain header and use its secret (markets mode is one store)
+        if (StoreConfig::hasSeparateStores() && ($domain = $request->header('X-Shopify-Shop-Domain'))) {
             if (! $store = StoreConfig::findByDomain($domain)) {
                 return $this->reject($request, 'Unknown shop domain: '.$domain);
             }

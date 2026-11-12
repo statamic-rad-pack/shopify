@@ -22,7 +22,7 @@ class ShopifyImportProducts extends Command
         $this->info('================================================================');
 
         // markets mode is one store, so it imports like single-store mode
-        if (StoreConfig::isMultiStore() && ! StoreConfig::isMarketsMode()) {
+        if (StoreConfig::hasSeparateStores()) {
             $storeOption = $this->option('store');
 
             $stores = $storeOption
