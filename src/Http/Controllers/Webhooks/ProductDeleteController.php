@@ -5,6 +5,7 @@ namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 use Illuminate\Http\Request;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
+use StatamicRadPack\Shopify\Activity\ActivityStatus;
 use StatamicRadPack\Shopify\Events;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 
@@ -37,6 +38,8 @@ class ProductDeleteController extends WebhooksController
             ->first();
 
         if (! $productEntry || ! $productEntry->slug()) {
+            $this->recordOutcome($request, ActivityStatus::Skipped, ['message' => 'No matching product in Statamic']);
+
             return $this->deleted();
         }
 
@@ -49,6 +52,12 @@ class ProductDeleteController extends WebhooksController
         // In unified multi-store mode the entries are shared between stores, so only
         // drop this store's data unless no other store still sells the product
         if ($isMultiStore && StoreConfig::isUnifiedMode() && $this->otherStoresRemain($variants, $storeHandle)) {
+            $this->recordOutcome($request, ActivityStatus::Updated, [
+                'resource_title' => $productEntry->get('title'),
+                'entry_id' => $productEntry->id(),
+                'message' => "Removed the {$storeHandle} store's data; other stores still sell this product",
+            ]);
+
             return $this->deleted();
         }
 
@@ -59,6 +68,11 @@ class ProductDeleteController extends WebhooksController
 
         $productEntry->deleteDescendants();
         $productEntry->delete();
+
+        $this->recordOutcome($request, ActivityStatus::Deleted, [
+            'resource_title' => $productEntry->get('title'),
+            'changes' => ['removed' => $variants->count()],
+        ]);
 
         return $this->deleted();
     }

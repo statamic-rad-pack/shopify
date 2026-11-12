@@ -10,9 +10,12 @@ use Statamic\Facades\Site;
 use Statamic\Facades\Term;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use StatamicRadPack\Shopify\Activity\ActivityLog;
+use StatamicRadPack\Shopify\Activity\ActivityStatus;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
 use StatamicRadPack\Shopify\Traits\ThrottlesShopifyRequests;
+use Throwable;
 
 class ImportCollectionJob implements ShouldQueue
 {
@@ -28,8 +31,11 @@ class ImportCollectionJob implements ShouldQueue
 
     public $backoff = [10, 60];
 
-    public function __construct(public int $collectionId, public ?string $storeHandle = null)
-    {
+    public function __construct(
+        public int $collectionId,
+        public ?string $storeHandle = null,
+        public ?string $activityId = null,
+    ) {
         if ($queue = config('shopify.queue')) {
             $this->onQueue($queue);
         }
@@ -66,6 +72,11 @@ class ImportCollectionJob implements ShouldQueue
         $response = $this->queryWithThrottle($graphql, ['query' => $query]);
 
         if (! $this->collection = Arr::get($response->getDecodedBody(), 'data.collection', [])) {
+            ActivityLog::update($this->activityId, [
+                'status' => ActivityStatus::Skipped->value,
+                'message' => 'Collection not found in Shopify',
+            ]);
+
             return;
         }
 
@@ -141,5 +152,19 @@ class ImportCollectionJob implements ShouldQueue
         }
 
         $term->merge($data)->save();
+
+        ActivityLog::update($this->activityId, [
+            'status' => ActivityStatus::Updated->value,
+            'resource_title' => $this->collection['title'] ?? null,
+            'entry_id' => $term->id(),
+        ]);
+    }
+
+    public function failed(Throwable $exception): void
+    {
+        ActivityLog::update($this->activityId, [
+            'status' => ActivityStatus::Failed->value,
+            'message' => $exception->getMessage(),
+        ]);
     }
 }

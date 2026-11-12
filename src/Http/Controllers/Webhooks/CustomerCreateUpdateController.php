@@ -5,6 +5,7 @@ namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 use Closure;
 use Illuminate\Http\Request;
 use Statamic\Facades\User;
+use StatamicRadPack\Shopify\Activity\ActivityStatus;
 use StatamicRadPack\Shopify\Events;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 
@@ -42,6 +43,8 @@ class CustomerCreateUpdateController extends WebhooksController
         if (! $customerEntry) {
 
             if (! $data->email) {
+                $this->recordOutcome($request, ActivityStatus::Skipped, ['message' => 'No email address to match a Statamic user']);
+
                 return response()->json([
                     'message' => 'Customer cannot be created as no email was provided',
                 ], 200);
@@ -51,7 +54,11 @@ class CustomerCreateUpdateController extends WebhooksController
                 ->where('email', $data->email)
                 ->first();
 
+            $outcome = $customerEntry ? 'Linked to an existing Statamic user' : 'No matching Statamic user';
+
             if (! $customerEntry && config('shopify.create_users_from_shopify', false)) {
+                $outcome = 'Created a Statamic user';
+
                 $customerEntry = User::make();
                 $customerEntry->email($data->email);
 
@@ -84,6 +91,10 @@ class CustomerCreateUpdateController extends WebhooksController
                     $customerEntry->set('shopify_id', $data->id)->save();
                 }
             }
+
+            $this->recordOutcome($request, $customerEntry ? ActivityStatus::Updated : ActivityStatus::Skipped, ['message' => $outcome]);
+        } else {
+            $this->recordOutcome($request, ActivityStatus::Skipped, ['message' => 'Already linked to a Statamic user']);
         }
 
         $eventCallback($data);

@@ -2,6 +2,8 @@
 
 namespace StatamicRadPack\Shopify;
 
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Shopify\App\ShopifyApp;
@@ -9,13 +11,17 @@ use Statamic\Events;
 use Statamic\Facades;
 use Statamic\Providers\AddonServiceProvider;
 use Statamic\Statamic;
+use StatamicRadPack\Shopify\Activity\DatabaseActivityRepository;
+use StatamicRadPack\Shopify\Activity\FileActivityRepository;
 use StatamicRadPack\Shopify\Clients\Graphql;
+use StatamicRadPack\Shopify\Contracts\ActivityRepository;
 
 class ServiceProvider extends AddonServiceProvider
 {
     protected $publishAfterInstall = false;
 
     protected $commands = [
+        Commands\ShopifyActivityPrune::class,
         Commands\ShopifyImportCollections::class,
         Commands\ShopifyImportProducts::class,
         Commands\ShopifyImportSingleProduct::class,
@@ -62,6 +68,17 @@ class ServiceProvider extends AddonServiceProvider
         ],
     ];
 
+    public function register()
+    {
+        parent::register();
+
+        $this->app->singleton(ActivityRepository::class, function ($app) {
+            return config('shopify.activity.driver') === 'database'
+                ? new DatabaseActivityRepository($app['db'], config('shopify.activity.connection'), config('shopify.activity.table', 'shopify_activity'))
+                : new FileActivityRepository($app->make(Filesystem::class), config('shopify.activity.path') ?: storage_path('statamic/shopify/activity'));
+        });
+    }
+
     public function boot()
     {
         parent::boot();
@@ -70,6 +87,10 @@ class ServiceProvider extends AddonServiceProvider
 
         $this->loadViewsFrom(__DIR__.'/../resources/views/', 'shopify');
         $this->mergeConfigFrom(__DIR__.'/../config/shopify.php', 'shopify');
+
+        if (config('shopify.activity.driver') === 'database') {
+            $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        }
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'shopify');
 
         Statamic::booted(function () {
@@ -86,6 +107,10 @@ class ServiceProvider extends AddonServiceProvider
             $this->publishes([
                 __DIR__.'/../config/shopify.php' => config_path('shopify.php'),
             ], 'shopify-config');
+
+            $this->publishes([
+                __DIR__.'/../database/migrations' => database_path('migrations'),
+            ], 'shopify-migrations');
 
             $this->publishes([
                 __DIR__.'/../resources/views' => resource_path('views/vendor/shopify'),
@@ -162,12 +187,23 @@ class ServiceProvider extends AddonServiceProvider
                             ->route('taxonomies.show', config('shopify.taxonomies.vendor'))
                             ->can('view', Facades\Taxonomy::find(config('shopify.taxonomies.vendor'))),
 
+                        $nav->create(__('Activity'))
+                            ->route('shopify.activity.index')
+                            ->can('access shopify'),
+
                         $nav->create(__('Settings'))
                             ->route('shopify.index')
                             ->can('access shopify'),
                     ];
                 });
         });
+    }
+
+    protected function schedule(Schedule $schedule)
+    {
+        if (config('shopify.activity.enabled', true)) {
+            $schedule->command('shopify:activity:prune')->daily();
+        }
     }
 
     private function setShopifyApiConfig(): void
