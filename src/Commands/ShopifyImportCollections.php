@@ -24,7 +24,8 @@ class ShopifyImportCollections extends Command
         $this->info('================= IMPORT SHOPIFY COLLECTIONS ===================');
         $this->info('================================================================');
 
-        if (StoreConfig::isMultiStore()) {
+        // markets mode is one store, so it imports like single-store mode
+        if (StoreConfig::isMultiStore() && ! StoreConfig::isMarketsMode()) {
             $storeOption = $this->option('store');
 
             $stores = $storeOption

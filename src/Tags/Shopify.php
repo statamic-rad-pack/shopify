@@ -17,6 +17,7 @@ use Statamic\Tags\Concerns\QueriesConditions;
 use Statamic\Tags\Concerns\QueriesOrderBys;
 use Statamic\Tags\Concerns\RendersForms;
 use Statamic\Tags\Tags;
+use StatamicRadPack\Shopify\Support\Money;
 use StatamicRadPack\Shopify\Support\ProductSummary;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 
@@ -109,27 +110,35 @@ class Shopify extends Tags
     public function tokens()
     {
         $store = $this->params->get('store');
+        $currency = Money::currency($store);
 
         $config = [
             'url' => config('shopify.storefront_url') ?? config('shopify.url'),
             'token' => config('shopify.storefront_token'),
             'apiVersion' => config('shopify.api_version'),
-            'currency' => config('shopify.currency', '$'),
+            'currency' => $currency['symbol'],
         ];
 
         if ($store && StoreConfig::isMarketsMode()) {
-            // markets share the single store's storefront, with a market-specific currency
-            $config['currency'] = StoreConfig::getMarket($store)['currency'] ?? $config['currency'];
+            // markets share the single store's storefront; the cart prices in the market's country
             $config['market'] = $store;
+            $config['country'] = strtoupper($store);
         } elseif ($store && StoreConfig::isMultiStore()) {
             $storeConfig = StoreConfig::findByHandle($store) ?? [];
 
-            $config = [
+            $config = array_merge($config, [
                 'url' => $storeConfig['storefront_url'] ?? $storeConfig['url'] ?? config('shopify.url'),
                 'token' => $storeConfig['storefront_token'] ?? $config['token'],
                 'apiVersion' => $storeConfig['api_version'] ?? $config['apiVersion'],
-                'currency' => $storeConfig['currency'] ?? $config['currency'],
-            ];
+                // keeps each store's cart separate in the browser
+                'store' => $store,
+            ]);
+        }
+
+        if (Money::usesIntl()) {
+            $config['moneyFormat'] = 'intl';
+            $config['locale'] = Money::locale();
+            $config['currencyCode'] = $currency['code'];
         }
 
         $json = json_encode($config, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
@@ -728,9 +737,8 @@ class Shopify extends Tags
 
     protected function formatPrice($price)
     {
-        return $this->runHooksWith('product-price', [
-            'currency' => config('shopify.currency'),
-            'price' => $price,
-        ]);
+        // the store (or market) param's currency; with the 'intl' money format the
+        // formatted price is in `price` and `currency` is empty
+        return $this->runHooksWith('product-price', Money::parts($price, $this->params->get('store')));
     }
 }

@@ -261,4 +261,31 @@ class ActivityLogTest extends TestCase
         $this->assertNull($repository->find($old->id));
         $this->assertNotNull($repository->find($recent->id));
     }
+
+    #[Test]
+    public function records_a_missing_access_scope_as_a_failure_not_a_missing_product()
+    {
+        $this->mockShopify('{"data":{"product":null},"errors":[{"message":"Access denied for address field. Required access: `read_locations` access scope."}]}');
+
+        try {
+            ActivityLog::queueProductImport(10, source: Activity::SOURCE_CLI);
+        } catch (\Throwable) {
+            // the sync queue rethrows after marking the job failed
+        }
+
+        $activity = $this->activity()[0];
+        $this->assertSame('failed', $activity->status->value);
+        $this->assertStringContainsString('read_locations', $activity->message);
+    }
+
+    #[Test]
+    public function records_a_product_that_no_longer_exists_as_skipped()
+    {
+        $this->mockShopify('{"data":{"product":null}}');
+
+        ActivityLog::queueProductImport(10, source: Activity::SOURCE_CLI);
+
+        $this->assertSame('skipped', $this->activity()[0]->status->value);
+        $this->assertSame('Product not found in Shopify', $this->activity()[0]->message);
+    }
 }

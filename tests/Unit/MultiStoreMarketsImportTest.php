@@ -3,6 +3,8 @@
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
 use Mockery\MockInterface;
+use Illuminate\Support\Facades\Bus;
+use StatamicRadPack\Shopify\Jobs\ImportCollectionJob;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades;
 use StatamicRadPack\Shopify\Clients\Graphql;
@@ -185,5 +187,25 @@ class MultiStoreMarketsImportTest extends TestCase
                 }
             }
         }';
+    }
+
+    #[Test]
+    public function the_import_commands_import_from_the_store_in_markets_mode()
+    {
+        config()->set('shopify.multi_store', $this->marketsConfig());
+
+        $this->mock(Graphql::class, function (MockInterface $mock) {
+            $mock->shouldReceive('query')->andReturnUsing(fn ($query) => new HttpResponse(status: 200, body: str_contains($query['query'], 'products(')
+                ? '{"data":{"products":{"nodes":[{"id":"gid://shopify/Product/1"},{"id":"gid://shopify/Product/2"}],"pageInfo":{"hasNextPage":false,"endCursor":null}}}}'
+                : '{"data":{"collections":{"nodes":[{"id":"gid://shopify/Collection/5"}],"pageInfo":{"hasNextPage":false,"endCursor":null}}}}'));
+        });
+
+        Bus::fake();
+
+        $this->artisan('shopify:import:all')->assertSuccessful();
+        $this->artisan('shopify:import:collections')->assertSuccessful();
+
+        Bus::assertDispatchedTimes(ImportSingleProductJob::class, 2);
+        Bus::assertDispatched(ImportCollectionJob::class, fn ($job) => $job->collectionId === 5);
     }
 }

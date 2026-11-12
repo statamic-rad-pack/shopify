@@ -167,4 +167,31 @@ class MultiStoreTagsTest extends TestCase
         $this->assertSame('19.99', $ukVariants);
         $this->assertSame('10.00', $defaultVariants);
     }
+
+    #[Test]
+    public function tokens_include_the_store_so_each_store_keeps_its_own_cart()
+    {
+        config()->set('shopify.multi_store', $this->multiStoreConfig());
+
+        $this->assertStringContainsString('"store":"uk"', $this->tag('{{ shopify:tokens store="uk" }}'));
+        $this->assertStringNotContainsString('"store"', $this->tag('{{ shopify:tokens }}'));
+    }
+
+    #[Test]
+    public function product_prices_use_the_stores_currency()
+    {
+        config()->set('shopify.multi_store', $this->multiStoreConfig());
+
+        Facades\Entry::make()->collection(config('shopify.collection_handle', 'products'))->slug('obi-wan')->data(['title' => 'Obi wan', 'product_id' => 1])->save();
+        Facades\Entry::make()->collection('variants')->slug('1')->data([
+            'product_slug' => 'obi-wan',
+            'price' => '1234.5',
+            'inventory_quantity' => 1,
+            'inventory_policy' => 'deny',
+            'multi_store_data' => ['us' => ['price' => '20.00']],
+            'market_data' => ['IE' => ['price' => '30.00']],
+        ])->save();
+
+        $this->assertEquals('$20.00', $this->tag('{{ shopify:product_price slug="obi-wan" store="us" }}'));
+    }
 }

@@ -20,6 +20,7 @@ use StatamicRadPack\Shopify\Activity\ActivityLog;
 use StatamicRadPack\Shopify\Activity\ActivityStatus;
 use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Events\ProductImportFailed;
+use StatamicRadPack\Shopify\Exceptions\GraphqlException;
 use StatamicRadPack\Shopify\Support\ProductSummary;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 use StatamicRadPack\Shopify\Traits\SavesImagesAndMetafields;
@@ -168,6 +169,11 @@ class ImportSingleProductJob implements ShouldQueue
         $response = $this->queryWithThrottle($graphql, ['query' => $query]);
 
         if (! $this->data = Arr::get($response->getDecodedBody(), 'data.product', [])) {
+            // an empty product with errors is a failure (e.g. a missing access scope), not a missing product
+            if ($message = $response->firstError()) {
+                throw new GraphqlException($message);
+            }
+
             ActivityLog::update($this->activityId, [
                 'status' => ActivityStatus::Skipped->value,
                 'message' => 'Product not found in Shopify',
