@@ -138,4 +138,55 @@ tabs:
 
         $this->assertCount(19, $blueprint->fields()->all());
     }
+
+    #[Test]
+    public function adds_the_new_pricing_inventory_and_import_fields_to_existing_product_blueprints()
+    {
+        $blueprint = Facades\Collection::find(config('shopify.collection_handle', 'products'))->entryBlueprint();
+
+        // an existing (pre-upgrade) blueprint: no Details tab, product_id in the
+        // sidebar, and an in_stock field the site added itself
+        $contents = Facades\YAML::file(__DIR__.'/../../resources/blueprints/product.yaml')->parse();
+        unset($contents['tabs'][UpdateScripts\AddSyncFieldsToProductBlueprint::TAB]);
+        $contents['tabs']['sidebar']['sections'][0]['fields'][] = ['handle' => 'product_id', 'field' => ['type' => 'disabled_text']];
+        $contents['tabs']['main']['sections'][0]['fields'][] = ['handle' => 'in_stock', 'field' => ['type' => 'toggle', 'display' => 'Available']];
+        $blueprint->setContents($contents)->save();
+
+        (new UpdateScripts\AddSyncFieldsToProductBlueprint('statamic-rad-pack/shopify'))->update();
+
+        $blueprint = Facades\Collection::find(config('shopify.collection_handle', 'products'))->entryBlueprint();
+        $tab = $blueprint->contents()['tabs'][UpdateScripts\AddSyncFieldsToProductBlueprint::TAB];
+
+        $this->assertSame('Details', $tab['display']);
+        $this->assertSame(
+            ['Pricing and inventory' => ['on_sale', 'price_min', 'price_max'], 'Shopify record' => ['shopify_synced_at']],
+            collect($tab['sections'])->mapWithKeys(fn ($section) => [$section['display'] => array_column($section['fields'], 'handle')])->all(),
+            'Only the new fields the blueprint is missing are added, in their sections'
+        );
+
+        // the site's own fields stay where they were
+        $this->assertSame('Available', $blueprint->field('in_stock')->display());
+        $this->assertContains('product_id', array_column($blueprint->contents()['tabs']['sidebar']['sections'][0]['fields'], 'handle'));
+        $this->assertSame('read_only', $blueprint->field('price_min')->get('visibility'));
+
+        // running it again changes nothing
+        (new UpdateScripts\AddSyncFieldsToProductBlueprint('statamic-rad-pack/shopify'))->update();
+
+        $tab = Facades\Collection::find(config('shopify.collection_handle', 'products'))->entryBlueprint()->contents()['tabs'][UpdateScripts\AddSyncFieldsToProductBlueprint::TAB];
+        $this->assertCount(2, $tab['sections']);
+    }
+
+    #[Test]
+    public function the_default_product_blueprint_keeps_shopify_fields_out_of_the_sidebar()
+    {
+        $contents = Facades\YAML::file(__DIR__.'/../../resources/blueprints/product.yaml')->parse();
+
+        $this->assertSame(['slug'], array_column($contents['tabs']['sidebar']['sections'][0]['fields'], 'handle'));
+
+        $shopifyFields = collect($contents['tabs']['shopify']['sections'])->flatMap(fn ($section) => array_column($section['fields'], 'handle'))->all();
+
+        foreach (['product_id', 'published_at', 'vendor', 'type', 'tags', 'in_stock', 'on_sale', 'price_min', 'price_max', 'shopify_synced_at'] as $handle) {
+            $this->assertContains($handle, $shopifyFields);
+        }
+    }
 }

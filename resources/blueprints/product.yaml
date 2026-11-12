@@ -124,56 +124,31 @@ tabs:
               show_filename: true
               show_set_alt: true
               hide_display: false
-  sidebar:
-    display: Sidebar
+  shopify:
+    display: Details
     sections:
       -
+        display: Organization
         fields:
           -
-            handle: slug
+            handle: vendor
             field:
-              type: slug
-              localizable: true
-              validate:
-                - required
-              display: Slug
-              listable: hidden
-              generate: true
-          -
-            handle: published_at
-            field:
-              mode: single
-              time_enabled: true
-              time_required: true
-              earliest_date: '1900-01-01'
-              full_width: false
-              inline: false
-              columns: 1
-              rows: 1
-              display: 'Published At'
-              type: date
-              icon: date
-              listable: true
-              format: 'Y-m-d H:i:s'
+              width: 50
+              type: terms
+              taxonomies:
+                - vendor
+              display: Vendor
+              mode: select
               instructions_position: above
+              listable: hidden
               visibility: read_only
               replicator_preview: true
-              time_seconds_enabled: false
-              hide_display: false
-          -
-            handle: product_id
-            field:
-              display: 'Product ID'
-              type: disabled_text
-              icon: disabled_text
-              listable: hidden
-              instructions_position: above
-              visibility: read_only
-              replicator_preview: true
+              create: true
               hide_display: false
           -
             handle: type
             field:
+              width: 50
               type: terms
               taxonomies:
                 - type
@@ -199,17 +174,116 @@ tabs:
               replicator_preview: true
               create: true
               hide_display: false
+      -
+        display: 'Pricing and inventory'
+        instructions: 'Worked out from the variants on every import'
+        fields:
           -
-            handle: vendor
+            handle: in_stock
             field:
-              type: terms
-              taxonomies:
-                - vendor
-              display: Vendor
-              mode: select
-              instructions_position: above
+              width: 25
+              display: 'In stock'
+              instructions: 'At least one variant can be purchased'
+              type: toggle
+              icon: toggle
+              listable: true
+              visibility: read_only
+              hide_display: false
+          -
+            handle: on_sale
+            field:
+              width: 25
+              display: 'On sale'
+              instructions: 'At least one variant has a reduced price'
+              type: toggle
+              icon: toggle
               listable: hidden
               visibility: read_only
-              replicator_preview: true
-              create: true
               hide_display: false
+          -
+            handle: price_min
+            field:
+              width: 25
+              display: 'Lowest price'
+              type: float
+              icon: float
+              listable: true
+              visibility: read_only
+              hide_display: false
+          -
+            handle: price_max
+            field:
+              width: 25
+              display: 'Highest price'
+              type: float
+              icon: float
+              listable: hidden
+              visibility: read_only
+              hide_display: false
+      -
+        display: 'Shopify record'
+        instructions: 'Managed in Shopify and updated on every import'
+        fields:
+          -
+            handle: product_id
+            field:
+              width: 33
+              display: 'Product ID'
+              type: disabled_text
+              icon: disabled_text
+              listable: hidden
+              instructions_position: above
+              visibility: read_only
+              replicator_preview: true
+              hide_display: false
+          -
+            handle: published_at
+            field:
+              width: 33
+              mode: single
+              time_enabled: true
+              time_required: true
+              earliest_date: '1900-01-01'
+              full_width: false
+              inline: false
+              columns: 1
+              rows: 1
+              display: 'Published At'
+              type: date
+              icon: date
+              listable: true
+              format: 'Y-m-d H:i:s'
+              instructions_position: above
+              visibility: read_only
+              replicator_preview: true
+              time_seconds_enabled: false
+              hide_display: false
+          -
+            handle: shopify_synced_at
+            field:
+              width: 33
+              display: 'Last imported'
+              type: date
+              icon: date
+              mode: single
+              time_enabled: true
+              time_seconds_enabled: false
+              format: 'Y-m-d H:i:s'
+              listable: hidden
+              visibility: read_only
+              hide_display: false
+  sidebar:
+    display: Sidebar
+    sections:
+      -
+        fields:
+          -
+            handle: slug
+            field:
+              type: slug
+              localizable: true
+              validate:
+                - required
+              display: Slug
+              listable: hidden
+              generate: true
