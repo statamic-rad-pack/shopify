@@ -240,6 +240,22 @@ class SavesImagesAndMetafieldsTest extends TestCase
     }
 
     #[Test]
+    public function shows_the_shopify_id_read_only_on_assets_in_the_shopify_container()
+    {
+        $this->fakeAssets();
+        AssetContainer::make('other')->disk('assets')->save();
+
+        $field = Asset::make()->container('shopify')->path('shirt.png')->blueprint()->field('shopify_media_id');
+
+        $this->assertNotNull($field);
+        $this->assertSame('read_only', $field->visibility());
+        $this->assertSame(['shopify_media_id' => 'not empty'], $field->config()['if']);
+        $this->assertNotNull(Asset::make()->container('shopify')->path('shirt.png')->blueprint()->field('alt'), 'The default fields stay');
+
+        $this->assertNull(Asset::make()->container('other')->path('shirt.png')->blueprint()->field('shopify_media_id'));
+    }
+
+    #[Test]
     public function downloads_each_image_to_its_own_temp_folder_and_cleans_it_up()
     {
         Http::fake(['cdn.shopify.com/*' => Http::response('fake-image-bytes')]);
