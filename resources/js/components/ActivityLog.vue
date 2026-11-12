@@ -26,7 +26,7 @@
             <ui-table-rows>
                 <ui-table-row v-for="item in items" :key="item.id">
                     <ui-table-cell class="text-xs whitespace-nowrap" :title="item.created_at">{{ formatDate(item.created_at) }}</ui-table-cell>
-                    <ui-table-cell class="text-xs">
+                    <ui-table-cell class="text-xs whitespace-nowrap">
                         <div>{{ sourceLabel(item.source) }}</div>
                         <div v-if="item.topic" class="font-mono text-gray-500">{{ item.topic }}</div>
                         <div v-if="item.store" class="text-gray-500">{{ item.store }}</div>
