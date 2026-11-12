@@ -17,6 +17,7 @@ use Statamic\Tags\Concerns\QueriesConditions;
 use Statamic\Tags\Concerns\QueriesOrderBys;
 use Statamic\Tags\Concerns\RendersForms;
 use Statamic\Tags\Tags;
+use StatamicRadPack\Shopify\Support\Customers;
 use StatamicRadPack\Shopify\Support\Money;
 use StatamicRadPack\Shopify\Support\ProductSummary;
 use StatamicRadPack\Shopify\Support\StoreConfig;
@@ -347,7 +348,7 @@ class Shopify extends Tags
         // customer_id is still accepted as a param so it isn't rendered as a form
         // attribute, but it is deliberately ignored - the address endpoints scope
         // to the logged in user and no longer trust a client-supplied id.
-        $knownParams = ['redirect', 'error_redirect', 'address_id', 'customer_id'];
+        $knownParams = ['redirect', 'error_redirect', 'address_id', 'customer_id', 'store'];
 
         $html = $this->formOpen($endpoint, 'POST', $knownParams);
 
@@ -359,6 +360,11 @@ class Shopify extends Tags
 
         if ($errorRedirect = $this->getErrorRedirectUrl()) {
             $params['error_redirect'] = $this->parseRedirect($errorRedirect);
+        }
+
+        // on multi-store sites, which store's customer the address belongs to
+        if ($store = Customers::store($this->params->get('store'))) {
+            $params['store'] = $store;
         }
 
         if (! $this->parser) {
@@ -707,11 +713,9 @@ class Shopify extends Tags
      */
     protected function resolveCustomerGraphql($user, ?string $storeParam): array
     {
-        $customerId = $storeParam && StoreConfig::isMultiStore()
-            ? Arr::get($user->get('shopify_ids', []), $storeParam, 'none')
-            : ($user->get('shopify_id') ?? 'none');
+        $store = Customers::store($storeParam);
 
-        return [$customerId, StoreConfig::clientFor($storeParam)];
+        return [Customers::id($user, $store) ?? 'none', StoreConfig::clientFor($store)];
     }
 
     protected function paginatedOutput($paginator)

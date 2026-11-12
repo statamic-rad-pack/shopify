@@ -11,6 +11,8 @@ use Statamic\Contracts\Auth\User;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
 use StatamicRadPack\Shopify\Clients\Graphql;
+use StatamicRadPack\Shopify\Support\Customers;
+use StatamicRadPack\Shopify\Support\StoreConfig;
 use StatamicRadPack\Shopify\Traits\ThrottlesShopifyRequests;
 
 class CreateOrUpdateShopifyUser implements ShouldQueue
@@ -23,18 +25,26 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
 
     public function __construct(public User $user) {}
 
+    /**
+     * Create or update the customer in each store the user belongs to: on multi-store
+     * sites, the stores they're linked to (or the default customer store), see Customers.
+     */
     public function handle()
     {
-        if (! $id = $this->user->get('shopify_id')) {
-            $this->createOrAssociateUser();
+        foreach (Customers::syncStores($this->user) as $store) {
+            $graphql = StoreConfig::clientFor($store);
 
-            return;
+            if ($id = Customers::id($this->user, $store)) {
+                $this->updateUser($graphql, $id);
+
+                continue;
+            }
+
+            $this->createOrAssociateUser($graphql, $store);
         }
-
-        $this->updateUser($id);
     }
 
-    private function createOrAssociateUser()
+    private function createOrAssociateUser(Graphql $graphql, ?string $store)
     {
         $email = $this->user->email();
 
@@ -50,7 +60,7 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
             }
             QUERY;
 
-        $response = $this->queryWithThrottle(app(Graphql::class), [
+        $response = $this->queryWithThrottle($graphql, [
             'query' => $query,
             'variables' => [
                 'query' => "email:{$email}",
@@ -60,11 +70,10 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
         $id = Arr::get($response->getDecodedBody(), 'data.customers.edges.0.node.id');
 
         if ($id) {
-            $this->user->set('shopify_id', (int) Str::afterLast($id, '/'));
-            $this->user->saveQuietly();
+            Customers::setId($this->user, $store, Str::afterLast($id, '/'))->saveQuietly();
 
             if (config('shopify.update_users_in_shopify')) {
-                $this->updateUser($id);
+                $this->updateUser($graphql, $id);
             }
 
             return;
@@ -84,7 +93,7 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
             }
             QUERY;
 
-        $response = $this->queryWithThrottle(app(Graphql::class), [
+        $response = $this->queryWithThrottle($graphql, [
             'query' => $query,
             'variables' => [
                 'input' => $this->generatePayloadBody(),
@@ -96,8 +105,7 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
         }
 
         if ($id = Arr::get($response->getDecodedBody(), 'data.customerCreate.customer.id')) {
-            $this->user->set('shopify_id', (int) Str::afterLast($id, '/'));
-            $this->user->saveQuietly();
+            Customers::setId($this->user, $store, Str::afterLast($id, '/'))->saveQuietly();
 
             return;
         }
@@ -105,7 +113,7 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
         throw new \Exception('Could not create user in Shopify');
     }
 
-    private function updateUser($id)
+    private function updateUser(Graphql $graphql, $id)
     {
         $query = <<<'QUERY'
             mutation customerUpdate($input: CustomerInput!) {
@@ -121,7 +129,7 @@ class CreateOrUpdateShopifyUser implements ShouldQueue
             }
             QUERY;
 
-        $response = $this->queryWithThrottle(app(Graphql::class), [
+        $response = $this->queryWithThrottle($graphql, [
             'query' => $query,
             'variables' => [
                 'input' => [
