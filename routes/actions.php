@@ -57,6 +57,15 @@ Route::name('shopify.')
                 Route::post('order', Webhooks\OrderCreateController::class)
                     ->name('webhook.order.created');
 
+                Route::post('order/cancelled', Webhooks\OrderCancelledController::class)
+                    ->name('webhook.order.cancelled');
+
+                Route::post('refund/create', Webhooks\RefundCreateController::class)
+                    ->name('webhook.refund.create');
+
+                Route::post('inventory/update', Webhooks\InventoryLevelUpdateController::class)
+                    ->name('webhook.inventory.update');
+
                 Route::post('product/create', [Webhooks\ProductCreateUpdateController::class, 'create'])
                     ->name('webhook.product.create');
 

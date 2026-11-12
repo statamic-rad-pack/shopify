@@ -49,7 +49,7 @@ class ActivityController extends CpController
             'filters' => [
                 'statuses' => array_map(fn ($status) => $status->value, ActivityStatus::cases()),
                 'sources' => [Activity::SOURCE_WEBHOOK, Activity::SOURCE_CP, Activity::SOURCE_CLI],
-                'topics' => array_map(fn ($topic) => strtolower(str_replace('_', '/', $topic->value)), WebhookTopic::cases()),
+                'topics' => array_map(fn ($topic) => $topic->topic(), WebhookTopic::cases()),
                 'stores' => StoreConfig::isMultiStore() ? array_keys(config('shopify.multi_store.stores', [])) : [],
             ],
         ]);

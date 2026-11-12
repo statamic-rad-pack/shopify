@@ -6,6 +6,7 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Clients\HttpResponse;
+use StatamicRadPack\Shopify\Enums\WebhookTopic;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
 class WebhooksRegisterCommandTest extends TestCase
@@ -45,10 +46,10 @@ class WebhooksRegisterCommandTest extends TestCase
                 ->once()
                 ->andReturn(new HttpResponse(status: 200, body: $this->emptyWebhooksResponse()));
 
-            // Subsequent calls: create mutations (10 topics)
+            // Subsequent calls: a create mutation per topic
             $mock->shouldReceive('query')
                 ->withArgs(fn ($q) => str_contains($q['query'], 'webhookSubscriptionCreate'))
-                ->times(10)
+                ->times(count(WebhookTopic::cases()))
                 ->andReturn(new HttpResponse(status: 200, body: $this->webhookCreatedResponse()));
         });
 
@@ -81,10 +82,10 @@ class WebhooksRegisterCommandTest extends TestCase
                 ->once()
                 ->andReturn(new HttpResponse(status: 200, body: $existingResponse));
 
-            // Only 9 remaining topics should be created
+            // Only the remaining topics should be created
             $mock->shouldReceive('query')
                 ->withArgs(fn ($q) => str_contains($q['query'], 'webhookSubscriptionCreate'))
-                ->times(9)
+                ->times(count(WebhookTopic::cases()) - 1)
                 ->andReturn(new HttpResponse(status: 200, body: $this->webhookCreatedResponse()));
         });
 
@@ -114,7 +115,7 @@ class WebhooksRegisterCommandTest extends TestCase
 
             $mock->shouldReceive('query')
                 ->withArgs(fn ($q) => str_contains($q['query'], 'webhookSubscriptionCreate'))
-                ->times(10)
+                ->times(count(WebhookTopic::cases()))
                 ->andReturn(new HttpResponse(status: 200, body: $errorResponse));
         });
 
