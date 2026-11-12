@@ -10,6 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
 use Statamic\Facades\Term;
@@ -209,7 +210,7 @@ class ImportSingleProductJob implements ShouldQueue
                     'status' => ($entry ? ActivityStatus::Deleted : ActivityStatus::Skipped)->value,
                     'resource_title' => $this->data['title'] ?? null,
                     'message' => 'Not available on the '.config('shopify.sales_channel', 'Online Store').' sales channel',
-                    'changes' => $this->variantChanges,
+                    'changes' => $this->changes(),
                 ]);
 
                 return;
@@ -266,12 +267,14 @@ class ImportSingleProductJob implements ShouldQueue
         $data = array_merge($data, ProductSummary::fromVariants($variantEntries));
 
         // Import Images
+        $previousImages = $this->previousImagePaths($entry, 'featured_image');
+
         foreach (Arr::get($this->data, 'media.edges', []) as $index => $edge) {
             if (! $image = Arr::get($edge, 'node.image', [])) {
                 continue;
             }
 
-            if ($asset = $this->importImages($image)) {
+            if ($asset = $this->importImages($image, Arr::get($edge, 'node.id'), $previousImages)) {
                 $data['gallery'][] = $asset->path();
 
                 if ($index == 0) {
@@ -366,7 +369,7 @@ class ImportSingleProductJob implements ShouldQueue
             'status' => ActivityStatus::Updated->value,
             'resource_title' => $this->data['title'] ?? null,
             'entry_id' => $entry->id(),
-            'changes' => $this->variantChanges,
+            'changes' => $this->changes(),
         ]);
 
         // Skip multi-site translation loop when handling a multi-store job
@@ -730,7 +733,29 @@ class ImportSingleProductJob implements ShouldQueue
     }
 
     /**
-     * @return Collection<int, \Statamic\Contracts\Entries\Entry> the saved variant entries
+     * Variant and image changes for the activity log.
+     */
+    protected function changes(): array
+    {
+        return $this->updatedImages
+            ? [...$this->variantChanges, 'images_updated' => $this->updatedImages]
+            : $this->variantChanges;
+    }
+
+    /**
+     * The asset paths an entry's image fields held before this import.
+     */
+    private function previousImagePaths(?EntryContract $entry, string $imageField): array
+    {
+        if (! $entry) {
+            return [];
+        }
+
+        return array_merge(Arr::wrap($entry->get($imageField)), Arr::wrap($entry->get('gallery')));
+    }
+
+    /**
+     * @return Collection<int, EntryContract> the saved variant entries
      */
     private function importVariants(array $returnedVariants, string $product_slug)
     {
@@ -805,12 +830,14 @@ class ImportSingleProductJob implements ShouldQueue
                 }
             }
 
+            $previousImages = $this->previousImagePaths($entry, 'image');
+
             foreach (Arr::get($variant, 'media.edges', []) as $index => $edge) {
                 if (! $image = Arr::get($edge, 'node.image', [])) {
                     continue;
                 }
 
-                if ($asset = $this->importImages($image)) {
+                if ($asset = $this->importImages($image, Arr::get($edge, 'node.id'), $previousImages)) {
                     $data['gallery'][] = $asset->path();
 
                     if ($index == 0) {
@@ -885,7 +912,7 @@ class ImportSingleProductJob implements ShouldQueue
      * Sync metafields onto an entry, clearing any keys that were previously set
      * but are no longer returned by Shopify (i.e. the metafield was deleted).
      */
-    private function syncMetafields(\Statamic\Contracts\Entries\Entry $entry, array $edges, string $context): void
+    private function syncMetafields(EntryContract $entry, array $edges, string $context): void
     {
         $raw = collect($edges)->map(fn ($m) => $m['node'] ?? [])->filter()->all();
         $parsed = $this->parseMetafields($raw, $context);
@@ -924,7 +951,7 @@ class ImportSingleProductJob implements ShouldQueue
     /**
      * Add to the purchase history for this item, building on the totals already stored on the entry.
      */
-    private function updatePurchaseHistory(array $data, int $qty, ?\Statamic\Contracts\Entries\Entry $entry): array
+    private function updatePurchaseHistory(array $data, int $qty, ?EntryContract $entry): array
     {
         $date = $this->orderData['date'];
 

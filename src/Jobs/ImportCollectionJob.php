@@ -52,6 +52,7 @@ class ImportCollectionJob implements ShouldQueue
                 handle
                 id
                 image {
+                  id
                   url
                 }
                 metafields(first: 100) {
@@ -99,7 +100,7 @@ class ImportCollectionJob implements ShouldQueue
 
         // Import Images
         if (isset($this->collection['image'])) {
-            if ($asset = $this->importImages($this->collection['image'])) {
+            if ($asset = $this->importImages($this->collection['image'], Arr::get($this->collection, 'image.id'), Arr::wrap($term->get('featured_image')))) {
                 $data['featured_image'] = $asset->path();
             }
         }

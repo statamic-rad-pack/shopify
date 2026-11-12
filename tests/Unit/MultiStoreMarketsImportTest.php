@@ -2,13 +2,13 @@
 
 namespace StatamicRadPack\Shopify\Tests\Unit;
 
-use Mockery\MockInterface;
 use Illuminate\Support\Facades\Bus;
-use StatamicRadPack\Shopify\Jobs\ImportCollectionJob;
+use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades;
 use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Clients\HttpResponse;
+use StatamicRadPack\Shopify\Jobs\ImportCollectionJob;
 use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 use StatamicRadPack\Shopify\Tests\TestCase;
 

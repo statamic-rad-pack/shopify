@@ -89,6 +89,13 @@ return [
     'asset' => [
         'path' => env('SHOPIFY_ASSET_PATH', ''),
         'container' => env('SHOPIFY_ASSET_CONTAINER', 'shopify'),
+
+        /**
+         * When Shopify serves a product image under a new file name, the new
+         * asset replaces the old one everywhere it's used. Set this to delete
+         * the old asset too (like Statamic's "Replace" action's option).
+         */
+        'delete_replaced' => env('SHOPIFY_ASSET_DELETE_REPLACED', false),
     ],
 
     /**

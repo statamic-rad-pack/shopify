@@ -190,6 +190,10 @@ export default {
                 .filter(key => changes[key])
                 .map(key => `${changes[key]} variant${changes[key] === 1 ? '' : 's'} ${key}`);
 
+            if (changes.images_updated) {
+                parts.push(`${changes.images_updated} image${changes.images_updated === 1 ? '' : 's'} updated`);
+            }
+
             return parts.length ? parts.join(', ') : null;
         },
     },
