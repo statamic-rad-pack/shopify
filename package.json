@@ -1,7 +1,9 @@
 {
     "scripts": {
         "dev": "vite build --watch",
-        "build": "vite build"
+        "build": "vite build",
+        "test:js": "node --test tests/js/",
+        "test:js:live": "node --test tests/js/cart.live.mjs"
     },
     "dependencies": {
         "@statamic/cms": "file:./vendor/statamic/cms/resources/dist-package",

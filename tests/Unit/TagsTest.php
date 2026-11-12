@@ -1703,4 +1703,45 @@ class TagsTest extends TestCase
         $this->assertStringNotContainsString('</script><script>', $output);
         $this->assertStringContainsString('</script>', $output);
     }
+
+    #[Test]
+    public function tokens_include_the_money_format_settings_only_when_using_intl()
+    {
+        config()->set('shopify.currency_code', 'GBP');
+
+        $this->assertStringNotContainsString('moneyFormat', $this->tag('{{ shopify:tokens }}'));
+
+        config()->set('shopify.money_format', 'intl');
+
+        $output = $this->tag('{{ shopify:tokens }}');
+        $this->assertStringContainsString('"moneyFormat":"intl"', $output);
+        $this->assertStringContainsString('"locale":"'.str_replace('_', '-', Facades\Site::current()->locale()).'"', $output);
+        $this->assertStringContainsString('"currencyCode":"GBP"', $output);
+    }
+
+    #[Test]
+    public function formats_product_prices_for_the_locale_with_the_intl_money_format()
+    {
+
+        Facades\Entry::make()->collection(config('shopify.collection_handle', 'products'))->slug('obi-wan')->data(['title' => 'Obi wan', 'product_id' => 1])->save();
+        Facades\Entry::make()->collection('variants')->slug('1')->data([
+            'product_slug' => 'obi-wan',
+            'price' => '1234.5',
+            'inventory_quantity' => 1,
+            'inventory_policy' => 'deny',
+            'multi_store_data' => ['us' => ['price' => '20.00']],
+            'market_data' => ['IE' => ['price' => '30.00']],
+        ])->save();
+
+        $this->assertEquals('£1234.5', $this->tag('{{ shopify:product_price slug="obi-wan" }}'));
+
+        config()->set('shopify.money_format', 'intl');
+        config()->set('shopify.currency_code', 'GBP');
+
+        $this->assertEquals('£1,234.50', $this->tag('{{ shopify:product_price slug="obi-wan" }}'));
+
+        // without a currency code it keeps the symbol format
+        config()->set('shopify.currency_code', null);
+        $this->assertEquals('£1234.5', $this->tag('{{ shopify:product_price slug="obi-wan" }}'));
+    }
 }

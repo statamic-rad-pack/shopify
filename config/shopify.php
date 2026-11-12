@@ -68,9 +68,20 @@ return [
     'throttle_threshold' => env('SHOPIFY_THROTTLE_THRESHOLD', 500),
 
     /**
-     * Shop Currency
+     * Shop currency: `currency` is the symbol used by the default 'symbol' money
+     * format, and `currency_code` the ISO 4217 code (e.g. GBP) used by 'intl'.
      */
     'currency' => '£',
+    'currency_code' => env('SHOPIFY_CURRENCY_CODE'),
+
+    /**
+     * How {{ shopify:product_price }} and the bundled cart JS format prices.
+     *
+     * 'symbol' (default): the currency symbol and the amount to 2 decimal places, e.g. £1234.50
+     * 'intl': formatted for the site's locale and currency, e.g. £1,234.50, 1.234,50 €, ¥1,235
+     *         (needs `currency_code`; server side it also needs PHP's intl extension)
+     */
+    'money_format' => env('SHOPIFY_MONEY_FORMAT', 'symbol'),
 
     /**
      * Asset Container to Store the imported Assets
@@ -167,9 +178,9 @@ return [
         'mode' => env('SHOPIFY_MULTI_STORE_MODE', 'unified'), // 'unified' | 'localized' | 'markets'
         'markets' => [
             // Country-code keys used in 'markets' mode.
-            // 'GB' => ['currency' => '£'],
-            // 'IE' => ['currency' => '€'],
-            // 'US' => ['currency' => '$'],
+            // 'GB' => ['currency' => '£', 'currency_code' => 'GBP'],
+            // 'IE' => ['currency' => '€', 'currency_code' => 'EUR'],
+            // 'US' => ['currency' => '$', 'currency_code' => 'USD'],
         ],
         'primary_store' => env('SHOPIFY_MULTI_STORE_PRIMARY'), // handle of the primary store
         'stores' => [
@@ -184,6 +195,7 @@ return [
             //     'api_version' => env('SHOPIFY_STORE_UK_API_VERSION', '2026-01'),
             //     'sales_channel' => 'Online Store',
             //     'currency' => '£',
+            //     'currency_code' => 'GBP',
             //     'site' => 'en', // only used in 'localized' mode
             // ],
         ],
