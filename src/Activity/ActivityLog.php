@@ -27,6 +27,14 @@ class ActivityLog
         return static::attempt(fn (ActivityRepository $activity) => $activity->create($attributes)->id);
     }
 
+    /**
+     * Where an activity came from (webhook, cli, cp), for work it leads to.
+     */
+    public static function sourceOf(?string $id, string $default = Activity::SOURCE_CLI): string
+    {
+        return ($id ? static::attempt(fn (ActivityRepository $activity) => $activity->find($id)?->source) : null) ?? $default;
+    }
+
     public static function update(?string $id, array $attributes): void
     {
         if ($id) {
