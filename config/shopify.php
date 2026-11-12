@@ -57,6 +57,11 @@ return [
     'api_max_retries' => env('SHOPIFY_API_MAX_RETRIES', 2),
 
     /**
+     * Seconds to wait for an Admin API response before giving up (and retrying)
+     */
+    'api_timeout' => env('SHOPIFY_API_TIMEOUT', 30),
+
+    /**
      * Imports pause when the available GraphQL query cost budget drops below this
      * many points, giving the bucket time to refill
      */
