@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Statamic\Contracts\Entries\Entry as EntryContract;
 use Statamic\Facades\Entry;
@@ -299,23 +300,34 @@ class ImportSingleProductJob implements ShouldQueue
 
         // each part is isolated so a failure in one doesn't stop the product being saved
 
-        // collections (only those already imported as terms)
+        // collections
         try {
-            $handles = collect(Arr::get($this->data, 'collections.edges', []))
-                ->map(fn ($collection) => Arr::get($collection, 'node.handle'))
-                ->filter()
-                ->values();
+            $collections = collect(Arr::get($this->data, 'collections.edges', []))
+                ->map(fn ($collection) => $collection['node'] ?? [])
+                ->filter(fn ($collection) => ! empty($collection['handle']))
+                ->keyBy('handle');
 
-            $existing = $handles->isEmpty() ? collect() : Term::query()
+            $terms = $collections->isEmpty() ? collect() : Term::query()
                 ->where('taxonomy', config('shopify.taxonomies.collections'))
-                ->whereIn('slug', $handles->all())
-                ->get()
-                ->map->slug();
+                ->whereIn('slug', $collections->keys()->all())
+                ->get();
 
-            $entry->set(
-                config('shopify.taxonomies.collections'),
-                $handles->filter(fn ($handle) => $existing->contains($handle))->values()->all()
-            );
+            $existing = $terms->map->slug();
+
+            // terms Statamic only knows from entries using them have no Shopify data yet
+            $imported = $terms->filter(fn ($term) => $term->get('collection_id'))->map->slug();
+            $missing = $collections->reject(fn ($collection, $handle) => $imported->contains($handle));
+
+            if (config('shopify.import_missing_collections', true)) {
+                // the product keeps all its collections; the missing ones are imported,
+                // which fills in the terms Statamic shows for them in the meantime
+                $this->queueMissingCollections($missing);
+                $handles = $collections->keys();
+            } else {
+                $handles = $collections->keys()->filter(fn ($handle) => $existing->contains($handle));
+            }
+
+            $entry->set(config('shopify.taxonomies.collections'), $handles->values()->all());
         } catch (Throwable $e) {
             Log::error('Could not retrieve collections for product '.$this->data['id']);
             Log::error($e->getMessage());
@@ -730,6 +742,30 @@ class ImportSingleProductJob implements ShouldQueue
                 ->save());
 
         return $tags->keys()->all();
+    }
+
+    /**
+     * Queue imports for collections the product is in that haven't been imported yet.
+     * Products in the same new collection are often imported together (a full import,
+     * a burst of webhooks), so each collection is only queued once every few minutes.
+     */
+    private function queueMissingCollections(Collection $missing): void
+    {
+        foreach ($missing as $handle => $collection) {
+            if (! $id = (int) Str::afterLast($collection['id'] ?? '', '/')) {
+                continue;
+            }
+
+            if (! Cache::add("shopify::collection-import-queued::{$this->storeHandle}::{$id}", true, now()->addMinutes(5))) {
+                continue;
+            }
+
+            ActivityLog::queueCollectionImport($id, $this->storeHandle, ActivityLog::sourceOf($this->activityId), attributes: [
+                'parent_id' => $this->activityId,
+                'resource_title' => $handle,
+                'message' => 'New collection found on product '.($this->data['title'] ?? $this->data['id']),
+            ]);
+        }
     }
 
     /**

@@ -155,6 +155,13 @@ return [
     'import_all_products' => true,
 
     /**
+     * When a product is in a Shopify collection that hasn't been imported yet, queue an
+     * import for that collection (default). When false, products only get collections
+     * that have already been imported (run shopify:import:collections).
+     */
+    'import_missing_collections' => env('SHOPIFY_IMPORT_MISSING_COLLECTIONS', true),
+
+    /**
      * The activity log records every webhook received and every import run (from
      * webhooks, the control panel or the command line), shown under Shopify > Activity.
      *
