@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Statamic\Facades\User;
 use StatamicRadPack\Shopify\Activity\ActivityStatus;
 use StatamicRadPack\Shopify\Events;
+use StatamicRadPack\Shopify\Support\Customers;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 
 class CustomerCreateUpdateController extends WebhooksController
@@ -83,13 +84,7 @@ class CustomerCreateUpdateController extends WebhooksController
             }
 
             if ($customerEntry) {
-                if ($isMultiStore) {
-                    $shopifyIds = $customerEntry->get('shopify_ids', []);
-                    $shopifyIds[$storeHandle] = $data->id;
-                    $customerEntry->set('shopify_ids', $shopifyIds)->save();
-                } else {
-                    $customerEntry->set('shopify_id', $data->id)->save();
-                }
+                Customers::setId($customerEntry, $isMultiStore ? $storeHandle : null, $data->id)->save();
             }
 
             $this->recordOutcome($request, $customerEntry ? ActivityStatus::Updated : ActivityStatus::Skipped, ['message' => $outcome]);

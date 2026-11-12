@@ -13,6 +13,16 @@ class StoreConfig
         return (bool) config('shopify.multi_store.enabled', false);
     }
 
+    /**
+     * Whether there are several Shopify stores (unified or localized multi-store),
+     * each with its own credentials, customers and webhooks. Markets mode is one
+     * Shopify store, so this is false there.
+     */
+    public static function hasSeparateStores(): bool
+    {
+        return static::isMultiStore() && ! static::isMarketsMode();
+    }
+
     public static function getMode(): string
     {
         return config('shopify.multi_store.mode', 'unified');

@@ -6,8 +6,9 @@ use Illuminate\Http\Request;
 use Statamic\Facades\User;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
-use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Http\Requests;
+use StatamicRadPack\Shopify\Support\Customers;
+use StatamicRadPack\Shopify\Support\StoreConfig;
 
 class AddressController extends BaseActionController
 {
@@ -28,14 +29,14 @@ class AddressController extends BaseActionController
 
     public function create(Requests\CreateOrUpdateAddressRequest $request)
     {
-        if (! $customerId = $this->customerId()) {
+        if (! $customerId = $this->customerId($request)) {
             return $this->withErrors($request, __('No Shopify customer is associated with the current user'));
         }
 
         $fields = self::ADDRESS_FIELDS;
 
         try {
-            $address = $this->mutate('customerAddressCreate', <<<QUERY
+            $address = $this->mutate($request, 'customerAddressCreate', <<<QUERY
                 mutation customerAddressCreate(\$address: MailingAddressInput!, \$customerId: ID!, \$setAsDefault: Boolean) {
                   customerAddressCreate(address: \$address, customerId: \$customerId, setAsDefault: \$setAsDefault) {
                     address {
@@ -64,12 +65,12 @@ class AddressController extends BaseActionController
 
     public function destroy(Request $request, $id)
     {
-        if (! $customerId = $this->customerId()) {
+        if (! $customerId = $this->customerId($request)) {
             return $this->withErrors($request, __('No Shopify customer is associated with the current user'));
         }
 
         try {
-            $this->mutate('customerAddressDelete', <<<'QUERY'
+            $this->mutate($request, 'customerAddressDelete', <<<'QUERY'
                 mutation customerAddressDelete($addressId: ID!, $customerId: ID!) {
                   customerAddressDelete(addressId: $addressId, customerId: $customerId) {
                     deletedAddressId
@@ -94,14 +95,14 @@ class AddressController extends BaseActionController
 
     public function store(Requests\CreateOrUpdateAddressRequest $request, $id)
     {
-        if (! $customerId = $this->customerId()) {
+        if (! $customerId = $this->customerId($request)) {
             return $this->withErrors($request, __('No Shopify customer is associated with the current user'));
         }
 
         $fields = self::ADDRESS_FIELDS;
 
         try {
-            $address = $this->mutate('customerAddressUpdate', <<<QUERY
+            $address = $this->mutate($request, 'customerAddressUpdate', <<<QUERY
                 mutation customerAddressUpdate(\$address: MailingAddressInput!, \$addressId: ID!, \$customerId: ID!, \$setAsDefault: Boolean) {
                   customerAddressUpdate(address: \$address, addressId: \$addressId, customerId: \$customerId, setAsDefault: \$setAsDefault) {
                     address {
@@ -129,17 +130,25 @@ class AddressController extends BaseActionController
         }
     }
 
-    private function customerId(): mixed
+    /**
+     * The logged in user's customer ID, in the store the form was for (`_store`) on multi-store sites.
+     */
+    private function customerId(Request $request): ?string
     {
-        return User::current()?->get('shopify_id') ?: null;
+        return ($user = User::current()) ? Customers::id($user, $this->customerStore($request)) : null;
+    }
+
+    private function customerStore(Request $request): ?string
+    {
+        return Customers::store($request->input('_store'));
     }
 
     /**
      * Run a mutation and return its payload key, throwing on any GraphQL or user error.
      */
-    private function mutate(string $operation, string $query, array $variables, string $resultKey = 'address'): mixed
+    private function mutate(Request $request, string $operation, string $query, array $variables, string $resultKey = 'address'): mixed
     {
-        $response = app(Graphql::class)->query([
+        $response = StoreConfig::clientFor($this->customerStore($request))->query([
             'query' => $query,
             'variables' => $variables,
         ]);

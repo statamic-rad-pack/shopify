@@ -190,6 +190,11 @@ return [
             // 'US' => ['currency' => '$', 'currency_code' => 'USD'],
         ],
         'primary_store' => env('SHOPIFY_MULTI_STORE_PRIMARY'), // handle of the primary store
+
+        // With update_users_in_shopify, a user saved in Statamic is updated in each store
+        // they're linked to. Someone not linked to any store yet is created in this store
+        // (defaults to the primary store). Not used in markets mode, which has one store.
+        'customer_store' => env('SHOPIFY_MULTI_STORE_CUSTOMER_STORE'),
         'stores' => [
             // Each key is the store handle used throughout the system.
             // 'uk' => [
