@@ -6,22 +6,40 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Statamic\Contracts\Assets\Asset as AssetContract;
 use Statamic\Facades\Asset;
 use Statamic\Facades\Path;
 use Statamic\Support\Str;
+use StatamicRadPack\Shopify\Support\DownloadedReplacementFile;
 
 trait SavesImagesAndMetafields
 {
     /**
+     * Images re-downloaded or replaced because they changed in Shopify.
+     */
+    protected int $updatedImages = 0;
+
+    /**
+     * Import an image, or update the asset already imported for it.
+     *
+     * A new version of an image with the same file name is re-uploaded over the
+     * existing asset (Statamic's "Reupload"). An image Shopify now serves under
+     * a new file name replaces the asset previously imported for the same media
+     * ID (Statamic's "Replace"), which also updates references to it elsewhere.
+     *
+     * @param  string|null  $mediaId  the Shopify media / image ID
+     * @param  array  $previousPaths  asset paths the entry used before this import
      * @return mixed
      */
-    private function importImages(array $image)
+    private function importImages(array $image, ?string $mediaId = null, array $previousPaths = [])
     {
         if (! $url = $this->cleanImageURL($image['url'])) {
             return;
         }
 
         $name = $this->getImageNameFromUrl($url);
+        $version = $this->getImageVersion($image['url']);
+        $altText = $image['altText'] ?? null;
 
         // Check if it exists first - no point double importing.
         $asset = Asset::query()
@@ -29,12 +47,15 @@ trait SavesImagesAndMetafields
             ->where('path', $this->getAssetPath($name))
             ->first();
 
-        $altText = $image['altText'] ?? null;
-
         if ($asset) {
-            if ($altText && $asset->get('alt') !== $altText) {
-                $asset->set('alt', $altText)->save();
+            // assets imported before versions were recorded just record it, rather than downloading again
+            $stored = $asset->get('shopify_image_version');
+
+            if ($version && $stored && $stored !== $version && ! $this->reuploadImage($asset, $name, $url)) {
+                $version = $stored; // try again on the next import
             }
+
+            $this->saveShopifyImageData($asset, $mediaId, $version, $altText);
 
             return $asset;
         }
@@ -47,6 +68,8 @@ trait SavesImagesAndMetafields
             return null;
         }
 
+        $previous = $mediaId ? $this->findPreviousImage($mediaId, $previousPaths) : null;
+
         // If it doesn't exists, let's make it exist.
         $asset = Asset::make()
             ->container(config('shopify.asset.container'))
@@ -54,15 +77,94 @@ trait SavesImagesAndMetafields
 
         $asset = $asset->upload($file);
 
-        if ($altText) {
-            $asset->set('alt', $altText);
-        }
-
-        $asset->save();
-
         $this->cleanupFakeFile($file);
 
+        // keep what editors added to the old asset (captions, focus point...)
+        if ($previous) {
+            $asset->merge($previous->data()->all());
+        }
+
+        $this->saveShopifyImageData($asset, $mediaId, $version, $altText, force: (bool) $previous);
+
+        if ($previous) {
+            $asset->replace($previous, (bool) config('shopify.asset.delete_replaced', false));
+            $this->updatedImages++;
+        }
+
         return $asset;
+    }
+
+    /**
+     * Download a new version of an image over its existing asset.
+     */
+    private function reuploadImage(AssetContract $asset, string $name, string $url): bool
+    {
+        try {
+            $file = $this->uploadFakeFileFromUrl($name, $url);
+        } catch (\Throwable $e) {
+            Log::warning('Shopify: could not download the new version of '.$url.': '.$e->getMessage());
+
+            return false;
+        }
+
+        try {
+            $asset->reupload(new DownloadedReplacementFile($this->localPath($file)));
+            $this->updatedImages++;
+
+            return true;
+        } catch (\Throwable $e) {
+            Log::warning('Shopify: could not replace '.$asset->path().' with the new version of '.$url.': '.$e->getMessage());
+
+            return false;
+        } finally {
+            $this->cleanupFakeFile($file);
+        }
+    }
+
+    /**
+     * The asset previously imported for a Shopify image, among the paths an entry used.
+     */
+    private function findPreviousImage(string $mediaId, array $paths): ?AssetContract
+    {
+        foreach (array_unique(array_filter($paths, 'is_string')) as $path) {
+            $asset = Asset::find(config('shopify.asset.container').'::'.$path);
+
+            if ($asset && $asset->get('shopify_media_id') === $mediaId) {
+                return $asset;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Record where an image came from (and its alt text), saving only when something changed.
+     */
+    private function saveShopifyImageData(AssetContract $asset, ?string $mediaId, ?string $version, ?string $altText, bool $force = false): void
+    {
+        $changes = array_filter([
+            'alt' => $altText,
+            'shopify_media_id' => $mediaId,
+            'shopify_image_version' => $version,
+        ], fn ($value, $key) => $value !== null && $value !== '' && $asset->get($key) !== $value, ARRAY_FILTER_USE_BOTH);
+
+        foreach ($changes as $key => $value) {
+            $asset->set($key, $value);
+        }
+
+        if ($changes || $force) {
+            $asset->save();
+        }
+    }
+
+    /**
+     * Shopify's CDN URLs carry the file's version, e.g. ?v=1700000000, which changes when the file does.
+     */
+    private function getImageVersion(string $url): ?string
+    {
+        parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+
+        return isset($query['v']) && is_string($query['v']) && $query['v'] !== '' ? $query['v'] : null;
     }
 
     /**
@@ -125,13 +227,20 @@ trait SavesImagesAndMetafields
      */
     private function cleanupFakeFile(UploadedFile $file): void
     {
-        $disk = Storage::disk('local');
-        $folder = dirname(Str::after($file->getPathname(), $disk->path('')));
+        $folder = dirname($this->localPath($file));
 
         // only ever remove the per-download folder created above
         if (str_starts_with($folder, 'shopify-tmp/')) {
-            $disk->deleteDirectory($folder);
+            Storage::disk('local')->deleteDirectory($folder);
         }
+    }
+
+    /**
+     * A downloaded file's path on the local disk.
+     */
+    private function localPath(UploadedFile $file): string
+    {
+        return Str::after($file->getPathname(), Storage::disk('local')->path(''));
     }
 
     /**

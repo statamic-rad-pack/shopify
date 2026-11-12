@@ -4,6 +4,8 @@ namespace StatamicRadPack\Shopify\Tests\Unit;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
@@ -276,6 +278,42 @@ class ActivityLogTest extends TestCase
         $activity = $this->activity()[0];
         $this->assertSame('failed', $activity->status->value);
         $this->assertStringContainsString('read_locations', $activity->message);
+    }
+
+    #[Test]
+    public function records_images_replaced_in_shopify_and_points_the_product_at_the_new_asset()
+    {
+        Storage::fake('local');
+        Storage::fake('assets');
+        Facades\AssetContainer::make('shopify')->disk('assets')->save();
+
+        $image = imagecreatetruecolor(1, 1);
+        ob_start();
+        imagepng($image);
+        Http::fake(['cdn.shopify.com/*' => Http::response(ob_get_clean())]);
+
+        $withImage = function (string $file) {
+            $json = json_decode($this->productJson(), true);
+            $json['data']['product']['media']['edges'] = [['node' => [
+                'id' => 'gid://shopify/MediaImage/5',
+                'image' => ['altText' => null, 'url' => "https://cdn.shopify.com/s/files/1/products/{$file}?v=1"],
+            ]]];
+
+            return json_encode($json);
+        };
+
+        $this->mockShopify($withImage('shirt.png'));
+        ActivityLog::queueProductImport(10, source: Activity::SOURCE_CLI);
+
+        $this->mockShopify($withImage('shirt_new.png'));
+        ActivityLog::queueProductImport(10, source: Activity::SOURCE_CLI);
+
+        $entry = Facades\Entry::query()->where('collection', 'products')->where('product_id', '10')->first();
+
+        $this->assertSame('shirt_new.png', $entry->get('featured_image'));
+        $this->assertSame(['shirt_new.png'], $entry->get('gallery'));
+        $this->assertSame(1, $this->activity()[0]->changes['images_updated']);
+        $this->assertArrayNotHasKey('images_updated', $this->activity()[1]->changes);
     }
 
     #[Test]
