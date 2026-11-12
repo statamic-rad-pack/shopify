@@ -225,7 +225,8 @@ class ImportSingleProductJob implements ShouldQueue
 
         $data = [
             'product_id' => $this->data['id'],
-            'shopify_synced_at' => now()->toIso8601String(),
+            // same format as the blueprint's date field
+            'shopify_synced_at' => now()->format('Y-m-d H:i:s'),
             'title' => (! $entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
             'content' => (! $entry || config('shopify.overwrite.content')) ? $this->data['descriptionHtml'] : $entry->content,
             'options' => $options,
