@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Queue;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades;
 use StatamicRadPack\Shopify\Actions\ReimportProduct;
+use StatamicRadPack\Shopify\Contracts\ActivityRepository;
 use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
@@ -50,9 +51,18 @@ class ReimportProductActionTest extends TestCase
     }
 
     #[Test]
-    public function is_not_visible_on_list_view()
+    public function is_visible_on_product_entries_in_the_listing()
     {
         $entry = $this->makeProductEntry();
+
+        $this->assertTrue($this->actionWithContext('list')->visibleTo($entry));
+    }
+
+    #[Test]
+    public function is_not_visible_on_products_without_a_shopify_id()
+    {
+        $entry = Facades\Entry::make()->collection(config('shopify.collection_handle', 'products'))->slug('manual')->data(['title' => 'Manual']);
+        $entry->save();
 
         $this->assertFalse($this->actionWithContext('list')->visibleTo($entry));
     }
@@ -66,9 +76,68 @@ class ReimportProductActionTest extends TestCase
     }
 
     #[Test]
-    public function is_not_visible_in_bulk()
+    public function is_visible_in_bulk_only_when_every_item_is_a_product()
     {
-        $this->assertFalse($this->actionWithContext()->visibleToBulk(collect()));
+        $product = $this->makeProductEntry();
+        $other = $this->makeProductEntry(456);
+        $variant = $this->makeVariantEntry();
+
+        $this->assertTrue($this->actionWithContext('list')->visibleToBulk(collect([$product, $other])));
+        $this->assertFalse($this->actionWithContext('list')->visibleToBulk(collect([$product, $variant])));
+        $this->assertFalse($this->actionWithContext('list')->visibleToBulk(collect()));
+    }
+
+    #[Test]
+    public function reimports_several_products_and_reports_how_many_were_queued()
+    {
+        Queue::fake();
+
+        $entries = collect([123, 456, 789])->map(fn ($id) => $this->makeProductEntry($id));
+
+        $message = $this->actionWithContext('list')->run($entries, []);
+
+        Queue::assertPushed(ImportSingleProductJob::class, 3);
+        $this->assertSame('3 products queued for reimport. You can follow them under Shopify > Activity.', $message);
+
+        $activity = app(ActivityRepository::class)->paginate(['source' => 'cp'])->items();
+        $this->assertSame(['123', '456', '789'], collect($activity)->pluck('resourceId')->sort()->values()->all());
+    }
+
+    #[Test]
+    public function reimports_each_product_once_and_skips_entries_without_a_shopify_id()
+    {
+        Queue::fake();
+
+        $product = $this->makeProductEntry(123);
+        $sameProduct = $this->makeProductEntry(123);
+        $manual = Facades\Entry::make()->collection(config('shopify.collection_handle', 'products'))->slug('manual')->data(['title' => 'Manual']);
+        $manual->save();
+
+        $message = $this->actionWithContext('list')->run(collect([$product, $sameProduct, $manual]), []);
+
+        Queue::assertPushed(ImportSingleProductJob::class, 1);
+        $this->assertSame('1 product queued for reimport. You can follow it under Shopify > Activity.', $message);
+    }
+
+    #[Test]
+    public function can_be_run_in_bulk_from_the_entries_listing()
+    {
+        Queue::fake();
+
+        $this->actingAs(tap(Facades\User::make()->email('admin@example.com')->makeSuper())->save());
+
+        $ids = collect([123, 456])->map(fn ($id) => $this->makeProductEntry($id)->id())->all();
+
+        $this->postJson(cp_route('collections.entries.actions.run', config('shopify.collection_handle', 'products')), [
+            'action' => 'reimport_product',
+            'selections' => $ids,
+            'values' => [],
+            'context' => ['view' => 'list'],
+        ])
+            ->assertOk()
+            ->assertJsonPath('message', '2 products queued for reimport. You can follow them under Shopify > Activity.');
+
+        Queue::assertPushed(ImportSingleProductJob::class, 2);
     }
 
     #[Test]

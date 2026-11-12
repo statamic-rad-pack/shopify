@@ -8,6 +8,10 @@ use StatamicRadPack\Shopify\Activity\Activity;
 use StatamicRadPack\Shopify\Activity\ActivityLog;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 
+/**
+ * Reimport one or more products from Shopify, from the entry form or the listing
+ * (including bulk selections). Each import is queued and shows in the activity log.
+ */
 class ReimportProduct extends Action
 {
     public string $icon = 'arrow-down';
@@ -19,14 +23,12 @@ class ReimportProduct extends Action
 
     public function visibleTo($item)
     {
-        return $this->context['view'] === 'form'
-            && $item instanceof Entry
-            && $item->collectionHandle() === config('shopify.collection_handle', 'products');
+        return $this->isProduct($item);
     }
 
     public function visibleToBulk($items)
     {
-        return false;
+        return $items->isNotEmpty() && $items->every(fn ($item) => $this->isProduct($item));
     }
 
     public function authorize($user, $item)
@@ -34,18 +36,44 @@ class ReimportProduct extends Action
         return $user->can('access shopify');
     }
 
+    public function buttonText()
+    {
+        return __('shopify::messages.reimport_button');
+    }
+
+    public function confirmationText()
+    {
+        return __('shopify::messages.reimport_confirmation');
+    }
+
     public function run($entries, $values)
     {
-        $entries->each(function (Entry $entry) {
-            $storeHandle = null;
+        $queued = $entries
+            ->filter(fn (Entry $entry) => $entry->get('product_id'))
+            // selecting several localizations of a product only imports it once per store
+            ->unique(fn (Entry $entry) => $entry->get('product_id').'|'.$this->storeHandle($entry))
+            ->each(fn (Entry $entry) => ActivityLog::queueProductImport(
+                (int) $entry->get('product_id'),
+                $this->storeHandle($entry),
+                Activity::SOURCE_CP,
+                attributes: ['resource_title' => $entry->get('title')],
+            ))
+            ->count();
 
-            if (StoreConfig::isLocalizedMode()) {
-                $storeHandle = StoreConfig::findBySite($entry->locale())['handle'] ?? null;
-            }
+        return trans_choice('shopify::messages.reimport_queued', $queued, ['count' => $queued]);
+    }
 
-            ActivityLog::queueProductImport((int) $entry->get('product_id'), $storeHandle, Activity::SOURCE_CP, attributes: [
-                'resource_title' => $entry->get('title'),
-            ]);
-        });
+    protected function isProduct($item): bool
+    {
+        return $item instanceof Entry
+            && $item->collectionHandle() === config('shopify.collection_handle', 'products')
+            && filled($item->get('product_id'));
+    }
+
+    protected function storeHandle(Entry $entry): ?string
+    {
+        return StoreConfig::isLocalizedMode()
+            ? (StoreConfig::findBySite($entry->locale())['handle'] ?? null)
+            : null;
     }
 }
