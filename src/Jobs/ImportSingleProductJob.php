@@ -950,6 +950,7 @@ class ImportSingleProductJob implements ShouldQueue
 
     /**
      * Add to the purchase history for this item, building on the totals already stored on the entry.
+     * Cancellations and refunds pass a negative quantity, removed on the date they happened.
      */
     private function updatePurchaseHistory(array $data, int $qty, ?EntryContract $entry): array
     {
@@ -964,7 +965,10 @@ class ImportSingleProductJob implements ShouldQueue
         Arr::set($totals, $monthKey, Arr::get($totals, $monthKey, 0) + $qty);
 
         $data['total_purchased'] = $totals;
-        $data['last_purchased'] = $date->format('Y-m-d H:i:s');
+
+        if ($qty > 0) {
+            $data['last_purchased'] = $date->format('Y-m-d H:i:s');
+        }
 
         return $data;
     }

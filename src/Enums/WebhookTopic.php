@@ -11,6 +11,9 @@ enum WebhookTopic: string
     case CustomersUpdate = 'CUSTOMERS_UPDATE';
     case CustomersDelete = 'CUSTOMERS_DELETE';
     case OrdersCreate = 'ORDERS_CREATE';
+    case OrdersCancelled = 'ORDERS_CANCELLED';
+    case RefundsCreate = 'REFUNDS_CREATE';
+    case InventoryLevelsUpdate = 'INVENTORY_LEVELS_UPDATE';
     case CollectionsCreate = 'COLLECTIONS_CREATE';
     case CollectionsUpdate = 'COLLECTIONS_UPDATE';
     case CollectionsDelete = 'COLLECTIONS_DELETE';
@@ -25,10 +28,21 @@ enum WebhookTopic: string
             self::CustomersUpdate => 'statamic.shopify.webhook.customer.update',
             self::CustomersDelete => 'statamic.shopify.webhook.customer.delete',
             self::OrdersCreate => 'statamic.shopify.webhook.order.created',
+            self::OrdersCancelled => 'statamic.shopify.webhook.order.cancelled',
+            self::RefundsCreate => 'statamic.shopify.webhook.refund.create',
+            self::InventoryLevelsUpdate => 'statamic.shopify.webhook.inventory.update',
             self::CollectionsCreate => 'statamic.shopify.webhook.collection.create',
             self::CollectionsUpdate => 'statamic.shopify.webhook.collection.update',
             self::CollectionsDelete => 'statamic.shopify.webhook.collection.delete',
         };
+    }
+
+    /**
+     * The topic as Shopify sends it in the X-Shopify-Topic header, e.g. products/update, inventory_levels/update.
+     */
+    public function topic(): string
+    {
+        return strtolower(preg_replace('/_(?=[^_]*$)/', '/', $this->value));
     }
 
     public function callbackUrl(): string

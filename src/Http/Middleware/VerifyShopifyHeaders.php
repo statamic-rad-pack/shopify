@@ -114,7 +114,7 @@ class VerifyShopifyHeaders
 
         foreach (WebhookTopic::cases() as $case) {
             if ($case->routeName() === $routeName) {
-                return strtolower(str_replace('_', '/', $case->value));
+                return $case->topic();
             }
         }
 

@@ -7,6 +7,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Statamic\Facades\User;
 use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Clients\HttpResponse;
+use StatamicRadPack\Shopify\Enums\WebhookTopic;
 use StatamicRadPack\Shopify\Tests\TestCase;
 
 class WebhooksStatusControllerTest extends TestCase
@@ -102,7 +103,7 @@ class WebhooksStatusControllerTest extends TestCase
     }
 
     #[Test]
-    public function expected_map_contains_all_ten_topics()
+    public function expected_map_contains_every_topic()
     {
         $this->mock(Graphql::class, function (MockInterface $mock) {
             $mock->shouldReceive('query')
@@ -115,17 +116,10 @@ class WebhooksStatusControllerTest extends TestCase
 
         $expected = $response->json('expected');
 
-        $this->assertCount(10, $expected);
-        $this->assertArrayHasKey('PRODUCTS_CREATE', $expected);
-        $this->assertArrayHasKey('PRODUCTS_UPDATE', $expected);
-        $this->assertArrayHasKey('PRODUCTS_DELETE', $expected);
-        $this->assertArrayHasKey('CUSTOMERS_CREATE', $expected);
-        $this->assertArrayHasKey('CUSTOMERS_UPDATE', $expected);
-        $this->assertArrayHasKey('CUSTOMERS_DELETE', $expected);
-        $this->assertArrayHasKey('ORDERS_CREATE', $expected);
-        $this->assertArrayHasKey('COLLECTIONS_CREATE', $expected);
-        $this->assertArrayHasKey('COLLECTIONS_UPDATE', $expected);
-        $this->assertArrayHasKey('COLLECTIONS_DELETE', $expected);
+        $this->assertSame(array_map(fn ($topic) => $topic->value, WebhookTopic::cases()), array_keys($expected));
+        $this->assertArrayHasKey('ORDERS_CANCELLED', $expected);
+        $this->assertArrayHasKey('REFUNDS_CREATE', $expected);
+        $this->assertArrayHasKey('INVENTORY_LEVELS_UPDATE', $expected);
     }
 
     #[Test]
