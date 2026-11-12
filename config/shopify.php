@@ -1,5 +1,8 @@
 <?php
 
+use StatamicRadPack\Shopify\Actions\ParseMetafields;
+use StatamicRadPack\Shopify\Jobs\CreateOrUpdateShopifyUser;
+
 return [
     /**
      * Site URL
@@ -21,6 +24,12 @@ return [
      * Client Secret
      */
     'client_secret' => env('SHOPIFY_CLIENT_SECRET'),
+
+    /**
+     * Admin API access token for legacy custom apps created in the Shopify admin.
+     * Used instead of the client ID / secret when set.
+     */
+    'admin_token' => env('SHOPIFY_ADMIN_TOKEN'),
 
     /**
      * Front-end storefront token
@@ -89,7 +98,7 @@ return [
     /**
      * What class should we use to parse metafields
      */
-    'metafields_parser' => \StatamicRadPack\Shopify\Actions\ParseMetafields::class,
+    'metafields_parser' => ParseMetafields::class,
 
     /**
      * If a new user is created by Shopify should the website create
@@ -105,7 +114,7 @@ return [
     /**
      * What job should we use to update users in Shopify
      */
-    'update_shopify_user_job' => \StatamicRadPack\Shopify\Jobs\CreateOrUpdateShopifyUser::class,
+    'update_shopify_user_job' => CreateOrUpdateShopifyUser::class,
 
     /**
      * In which collection should the Shopify products be created
