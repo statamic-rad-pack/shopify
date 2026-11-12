@@ -4,7 +4,8 @@ namespace StatamicRadPack\Shopify\Commands;
 
 use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
-use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
+use StatamicRadPack\Shopify\Activity\Activity;
+use StatamicRadPack\Shopify\Activity\ActivityLog;
 
 class ShopifyImportSingleProduct extends Command
 {
@@ -21,7 +22,7 @@ class ShopifyImportSingleProduct extends Command
         $this->info('================================================================');
 
         // Pass to import Job.
-        ImportSingleProductJob::dispatch($this->argument('productId'), [], $this->option('store'));
+        ActivityLog::queueProductImport((int) $this->argument('productId'), $this->option('store'), Activity::SOURCE_CLI);
 
         $this->info('Product has been dispatched for import');
     }

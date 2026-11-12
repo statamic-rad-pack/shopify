@@ -4,8 +4,9 @@ namespace StatamicRadPack\Shopify\Traits;
 
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
+use StatamicRadPack\Shopify\Activity\Activity;
+use StatamicRadPack\Shopify\Activity\ActivityLog;
 use StatamicRadPack\Shopify\Clients\Graphql;
-use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 
 trait FetchAllProducts
 {
@@ -55,8 +56,8 @@ trait FetchAllProducts
         return $items;
     }
 
-    private function callJob(int $productId, ?string $storeHandle = null)
+    private function callJob(int $productId, ?string $storeHandle = null, string $source = Activity::SOURCE_CLI)
     {
-        ImportSingleProductJob::dispatch($productId, [], $storeHandle);
+        ActivityLog::queueProductImport($productId, $storeHandle, $source);
     }
 }

@@ -4,7 +4,8 @@ namespace StatamicRadPack\Shopify\Actions;
 
 use Statamic\Actions\Action;
 use Statamic\Contracts\Entries\Entry;
-use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
+use StatamicRadPack\Shopify\Activity\Activity;
+use StatamicRadPack\Shopify\Activity\ActivityLog;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 
 class ReimportProduct extends Action
@@ -42,7 +43,9 @@ class ReimportProduct extends Action
                 $storeHandle = StoreConfig::findBySite($entry->locale())['handle'] ?? null;
             }
 
-            ImportSingleProductJob::dispatch((int) $entry->get('product_id'), [], $storeHandle);
+            ActivityLog::queueProductImport((int) $entry->get('product_id'), $storeHandle, Activity::SOURCE_CP, attributes: [
+                'resource_title' => $entry->get('title'),
+            ]);
         });
     }
 }

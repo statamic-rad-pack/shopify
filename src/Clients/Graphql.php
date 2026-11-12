@@ -2,6 +2,7 @@
 
 namespace StatamicRadPack\Shopify\Clients;
 
+use GuzzleHttp\Client;
 use Shopify\App\ShopifyApp;
 
 /**
@@ -37,6 +38,11 @@ class Graphql
             variables: $params['variables'] ?? null,
             // retries 429 / 5xx responses (THROTTLED GraphQL errors are handled by ThrottlesShopifyRequests)
             maxRetries: (int) config('shopify.api_max_retries', 2),
+            // without a timeout one stalled connection would block a queue worker indefinitely
+            httpClient: new Client([
+                'connect_timeout' => 10,
+                'timeout' => (int) config('shopify.api_timeout', 30),
+            ]),
         );
 
         return new HttpResponse(

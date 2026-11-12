@@ -57,6 +57,11 @@ return [
     'api_max_retries' => env('SHOPIFY_API_MAX_RETRIES', 2),
 
     /**
+     * Seconds to wait for an Admin API response before giving up (and retrying)
+     */
+    'api_timeout' => env('SHOPIFY_API_TIMEOUT', 30),
+
+    /**
      * Imports pause when the available GraphQL query cost budget drops below this
      * many points, giving the bucket time to refill
      */
@@ -130,6 +135,23 @@ return [
      * Products previously imported that are no longer on the sales channel will be deleted.
      */
     'import_all_products' => true,
+
+    /**
+     * The activity log records every webhook received and every import run (from
+     * webhooks, the control panel or the command line), shown under Shopify > Activity.
+     *
+     * driver: 'file' stores entries under storage/statamic/shopify/activity (single server).
+     *         'database' stores them in a table (run `php artisan migrate`), which you'll
+     *         need when several servers or queue workers write to the log.
+     */
+    'activity' => [
+        'enabled' => env('SHOPIFY_ACTIVITY_ENABLED', true),
+        'driver' => env('SHOPIFY_ACTIVITY_DRIVER', 'file'),
+        'connection' => env('SHOPIFY_ACTIVITY_DB_CONNECTION'),
+        'table' => env('SHOPIFY_ACTIVITY_TABLE', 'shopify_activity'),
+        'path' => storage_path('statamic/shopify/activity'),
+        'retention_days' => env('SHOPIFY_ACTIVITY_RETENTION_DAYS', 30),
+    ],
 
     /**
      * Multi-store configuration.

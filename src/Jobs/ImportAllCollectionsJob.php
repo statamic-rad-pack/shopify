@@ -6,6 +6,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use StatamicRadPack\Shopify\Activity\Activity;
+use StatamicRadPack\Shopify\Activity\ActivityLog;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 use StatamicRadPack\Shopify\Traits\FetchCollections;
 
@@ -20,7 +22,7 @@ class ImportAllCollectionsJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
 
-    public function __construct(public ?string $storeHandle = null)
+    public function __construct(public ?string $storeHandle = null, public string $source = Activity::SOURCE_CP)
     {
         if ($queue = config('shopify.queue')) {
             $this->onQueue($queue);
@@ -33,6 +35,6 @@ class ImportAllCollectionsJob implements ShouldQueue
 
         collect($this->getManualCollections($client))
             ->merge($this->getSmartCollections($client))
-            ->each(fn ($collectionId) => ImportCollectionJob::dispatch($collectionId, $this->storeHandle));
+            ->each(fn ($collectionId) => ActivityLog::queueCollectionImport($collectionId, $this->storeHandle, $this->source));
     }
 }

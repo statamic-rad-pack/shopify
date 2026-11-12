@@ -4,6 +4,7 @@ namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 
 use Illuminate\Http\Request;
 use Statamic\Facades\User;
+use StatamicRadPack\Shopify\Activity\ActivityStatus;
 use StatamicRadPack\Shopify\Events;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 
@@ -40,6 +41,10 @@ class CustomerDeleteController extends WebhooksController
         } elseif ($customerEntry = User::query()->where('shopify_id', $data->id)->first()) {
             $customerEntry->remove('shopify_id')->save();
         }
+
+        $this->recordOutcome($request, $customerEntry ? ActivityStatus::Updated : ActivityStatus::Skipped, [
+            'message' => $customerEntry ? 'Unlinked from the Statamic user' : 'No linked Statamic user',
+        ]);
 
         return response()->json([
             'message' => 'Customer has been deleted',

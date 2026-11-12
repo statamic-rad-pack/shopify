@@ -16,6 +16,8 @@ use Statamic\Facades\Term;
 use Statamic\Support\Arr;
 use Statamic\Support\Str;
 use Statamic\Support\Traits\Hookable;
+use StatamicRadPack\Shopify\Activity\ActivityLog;
+use StatamicRadPack\Shopify\Activity\ActivityStatus;
 use StatamicRadPack\Shopify\Clients\Graphql;
 use StatamicRadPack\Shopify\Events\ProductImportFailed;
 use StatamicRadPack\Shopify\Support\ProductSummary;
@@ -44,10 +46,16 @@ class ImportSingleProductJob implements ShouldQueue
 
     public $backoff = [10, 60, 300];
 
+    /**
+     * Variant changes made by this import, recorded in the activity log.
+     */
+    protected array $variantChanges = ['added' => 0, 'updated' => 0, 'removed' => 0];
+
     public function __construct(
         public int $productId,
         public ?array $orderData = [],
         public ?string $storeHandle = null,
+        public ?string $activityId = null,
     ) {
         if ($queue = config('shopify.queue')) {
             $this->onQueue($queue);
@@ -160,6 +168,11 @@ class ImportSingleProductJob implements ShouldQueue
         $response = $this->queryWithThrottle($graphql, ['query' => $query]);
 
         if (! $this->data = Arr::get($response->getDecodedBody(), 'data.product', [])) {
+            ActivityLog::update($this->activityId, [
+                'status' => ActivityStatus::Skipped->value,
+                'message' => 'Product not found in Shopify',
+            ]);
+
             return;
         }
 
@@ -186,6 +199,13 @@ class ImportSingleProductJob implements ShouldQueue
                     $entry->delete();
                 }
 
+                ActivityLog::update($this->activityId, [
+                    'status' => ($entry ? ActivityStatus::Deleted : ActivityStatus::Skipped)->value,
+                    'resource_title' => $this->data['title'] ?? null,
+                    'message' => 'Not available on the '.config('shopify.sales_channel', 'Online Store').' sales channel',
+                    'changes' => $this->variantChanges,
+                ]);
+
                 return;
             }
         }
@@ -205,6 +225,7 @@ class ImportSingleProductJob implements ShouldQueue
 
         $data = [
             'product_id' => $this->data['id'],
+            'shopify_synced_at' => now()->toIso8601String(),
             'title' => (! $entry || config('shopify.overwrite.title')) ? $this->data['title'] : $entry->title,
             'content' => (! $entry || config('shopify.overwrite.content')) ? $this->data['descriptionHtml'] : $entry->content,
             'options' => $options,
@@ -333,6 +354,13 @@ class ImportSingleProductJob implements ShouldQueue
 
         $entry->published($published);
         $entry->save();
+
+        ActivityLog::update($this->activityId, [
+            'status' => ActivityStatus::Updated->value,
+            'resource_title' => $this->data['title'] ?? null,
+            'entry_id' => $entry->id(),
+            'changes' => $this->variantChanges,
+        ]);
 
         // Skip multi-site translation loop when handling a multi-store job
         // (localized mode uses one store per site; unified mode keeps a single shared entry)
@@ -721,6 +749,9 @@ class ImportSingleProductJob implements ShouldQueue
         $saved = collect();
 
         foreach ($variants as $variant) {
+            $isNew = ! $existing->has((string) $variant['id']);
+            $this->variantChanges[$isNew ? 'added' : 'updated']++;
+
             if (! $entry = $existing->get((string) $variant['id'])) {
                 $entry = Entry::make()
                     ->collection('variants')
@@ -818,6 +849,8 @@ class ImportSingleProductJob implements ShouldQueue
                 // Statamic refuses to delete an entry that still has localizations
                 $variant->deleteDescendants();
                 $variant->delete();
+
+                $this->variantChanges['removed']++;
             });
     }
 
@@ -832,6 +865,11 @@ class ImportSingleProductJob implements ShouldQueue
         ]);
 
         Log::error('Shopify: ImportSingleProductJob failed for product '.$this->productId.': '.$exception->getMessage(), $context);
+
+        ActivityLog::update($this->activityId, [
+            'status' => ActivityStatus::Failed->value,
+            'message' => $exception->getMessage(),
+        ]);
 
         ProductImportFailed::dispatch($this->productId, $this->storeHandle, $exception);
     }

@@ -4,6 +4,7 @@ namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 
 use Illuminate\Http\Request;
 use Statamic\Facades\Term;
+use StatamicRadPack\Shopify\Activity\ActivityStatus;
 use StatamicRadPack\Shopify\Events;
 
 class CollectionDeleteController extends WebhooksController
@@ -27,6 +28,11 @@ class CollectionDeleteController extends WebhooksController
         if ($term) {
             $term->delete();
         }
+
+        $this->recordOutcome($request, $term ? ActivityStatus::Deleted : ActivityStatus::Skipped, [
+            'resource_title' => $term?->title() ?? $data->handle,
+            'message' => $term ? null : 'No matching collection in Statamic',
+        ]);
 
         return response()->json([
             'message' => 'Collection has been deleted',

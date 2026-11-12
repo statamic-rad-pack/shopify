@@ -4,8 +4,9 @@ namespace StatamicRadPack\Shopify\Http\Controllers\Webhooks;
 
 use Closure;
 use Illuminate\Http\Request;
+use StatamicRadPack\Shopify\Activity\Activity;
+use StatamicRadPack\Shopify\Activity\ActivityLog;
 use StatamicRadPack\Shopify\Events;
-use StatamicRadPack\Shopify\Jobs\ImportSingleProductJob;
 
 class ProductCreateUpdateController extends WebhooksController
 {
@@ -23,8 +24,8 @@ class ProductCreateUpdateController extends WebhooksController
     {
         $data = json_decode($request->getContent());
 
-        // Dispatch job, passing the resolved store handle (null in single-store mode)
-        ImportSingleProductJob::dispatch($data->id, [], $request->attributes->get('shopify_store_handle'));
+        // Queue the import against this delivery's activity, passing the resolved store handle (null in single-store mode)
+        ActivityLog::queueProductImport((int) $data->id, $this->storeHandle($request), Activity::SOURCE_WEBHOOK, $this->activityId($request));
 
         $eventCallback($data);
 

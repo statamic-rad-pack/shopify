@@ -29,6 +29,9 @@ class TestCase extends AddonTestCase
 
         $app['config']->set('statamic.system.multisite', true);
 
+        // the fake stache folder is cleared after every test
+        $app['config']->set('shopify.activity.path', __DIR__.'/__fixtures__/dev-null/activity');
+
         Statamic::booted(function () {
             $blueprintContents = Facades\YAML::parse(file_get_contents(__DIR__.'/../resources/blueprints/product.yaml'));
 

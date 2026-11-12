@@ -1,5 +1,6 @@
 <?php
 
+use StatamicRadPack\Shopify\Http\Controllers\CP\ActivityController;
 use StatamicRadPack\Shopify\Http\Controllers\CP\DashboardController;
 use StatamicRadPack\Shopify\Http\Controllers\CP\ImportCollectionsController;
 use StatamicRadPack\Shopify\Http\Controllers\CP\ImportProductsController;
@@ -35,3 +36,13 @@ Route::patch('/shopify/variants/{id}', [VariantsController::class, 'update'])
 
 Route::get('/shopify/webhooks/status', [WebhooksStatusController::class, 'index'])
     ->name('shopify.webhooks.status');
+
+// Activity log
+Route::get('/shopify/activity', [ActivityController::class, 'index'])
+    ->name('shopify.activity.index');
+
+Route::get('/shopify/activity/data', [ActivityController::class, 'data'])
+    ->name('shopify.activity.data');
+
+Route::post('/shopify/activity/{id}/retry', [ActivityController::class, 'retry'])
+    ->name('shopify.activity.retry');

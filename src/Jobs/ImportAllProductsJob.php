@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use StatamicRadPack\Shopify\Activity\Activity;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 use StatamicRadPack\Shopify\Traits\FetchAllProducts;
 
@@ -20,7 +21,7 @@ class ImportAllProductsJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
 
-    public function __construct(public ?string $storeHandle = null)
+    public function __construct(public ?string $storeHandle = null, public string $source = Activity::SOURCE_CP)
     {
         if ($queue = config('shopify.queue')) {
             $this->onQueue($queue);
@@ -32,7 +33,7 @@ class ImportAllProductsJob implements ShouldQueue
         $client = StoreConfig::clientFor($this->storeHandle);
 
         foreach ($this->fetchProducts($client) as $productId) {
-            $this->callJob($productId, $this->storeHandle);
+            $this->callJob($productId, $this->storeHandle, $this->source);
         }
     }
 }

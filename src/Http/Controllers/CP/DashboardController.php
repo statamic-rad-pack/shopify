@@ -25,6 +25,8 @@ class DashboardController extends CpController
             'importCollectionsUrl' => cp_route('shopify.collections.fetchAll'),
             'productsUrl' => cp_route('shopify.products'),
             'webhookStatusUrl' => cp_route('shopify.webhooks.status'),
+            'activityUrl' => cp_route('shopify.activity.data'),
+            'activityPageUrl' => cp_route('shopify.activity.index'),
         ]);
     }
 }

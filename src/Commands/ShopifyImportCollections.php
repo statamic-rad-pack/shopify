@@ -4,7 +4,8 @@ namespace StatamicRadPack\Shopify\Commands;
 
 use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
-use StatamicRadPack\Shopify\Jobs\ImportCollectionJob;
+use StatamicRadPack\Shopify\Activity\Activity;
+use StatamicRadPack\Shopify\Activity\ActivityLog;
 use StatamicRadPack\Shopify\Support\StoreConfig;
 use StatamicRadPack\Shopify\Traits\FetchCollections;
 
@@ -39,14 +40,14 @@ class ShopifyImportCollections extends Command
                 collect($this->getManualCollections($client))
                     ->merge($this->getSmartCollections($client))
                     ->each(function ($collectionId) use ($handle) {
-                        ImportCollectionJob::dispatch($collectionId, $handle);
+                        ActivityLog::queueCollectionImport($collectionId, $handle, Activity::SOURCE_CLI);
                     });
             }
         } else {
             collect($this->getManualCollections())
                 ->merge($this->getSmartCollections())
                 ->each(function ($collectionId) {
-                    ImportCollectionJob::dispatch($collectionId);
+                    ActivityLog::queueCollectionImport($collectionId, source: Activity::SOURCE_CLI);
                 });
         }
 
