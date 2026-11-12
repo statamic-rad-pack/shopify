@@ -34,6 +34,102 @@ class WebhooksRegisterCommandTest extends TestCase
         ]);
     }
 
+    /**
+     * Every supported topic registered at its expected URL, plus the given extra subscriptions.
+     */
+    private function existingWebhooksResponse(array $extra = []): string
+    {
+        $nodes = collect(WebhookTopic::cases())->map(fn ($topic) => [
+            'id' => 'gid://shopify/WebhookSubscription/'.$topic->value,
+            'topic' => $topic->value,
+            'endpoint' => ['callbackUrl' => $topic->callbackUrl()],
+        ])->all();
+
+        foreach ($extra as $id => [$topic, $url]) {
+            $nodes[] = ['id' => $id, 'topic' => $topic, 'endpoint' => ['callbackUrl' => $url]];
+        }
+
+        return json_encode(['data' => ['webhookSubscriptions' => ['nodes' => $nodes]]]);
+    }
+
+    private function staleWebhooks(): array
+    {
+        return [
+            'gid://shopify/WebhookSubscription/old-domain' => ['PRODUCTS_UPDATE', 'https://old-site.test/!/shopify/webhook/product/update'],
+            'gid://shopify/WebhookSubscription/removed-topic' => ['CARTS_UPDATE', WebhookTopic::ProductsUpdate->callbackUrl()],
+            'gid://shopify/WebhookSubscription/duplicate' => ['ORDERS_CREATE', WebhookTopic::OrdersCreate->callbackUrl()],
+            'gid://shopify/WebhookSubscription/custom' => ['ORDERS_PAID', url('/my-own-webhooks/orders-paid')],
+        ];
+    }
+
+    private function mockPrune(string $existing, array &$deleted): void
+    {
+        $this->mock(Graphql::class, function (MockInterface $mock) use ($existing, &$deleted) {
+            $mock->shouldReceive('query')
+                ->withArgs(fn ($q) => str_contains($q['query'], 'webhookSubscriptions'))
+                ->andReturn(new HttpResponse(status: 200, body: $existing));
+
+            $mock->shouldReceive('query')
+                ->withArgs(fn ($q) => str_contains($q['query'], 'webhookSubscriptionDelete'))
+                ->andReturnUsing(function ($q) use (&$deleted) {
+                    $deleted[] = $q['variables']['id'];
+
+                    return new HttpResponse(status: 200, body: json_encode(['data' => ['webhookSubscriptionDelete' => [
+                        'deletedWebhookSubscriptionId' => $q['variables']['id'],
+                        'userErrors' => [],
+                    ]]]));
+                });
+        });
+    }
+
+    #[Test]
+    public function prunes_old_urls_removed_topics_and_duplicates_but_not_other_webhooks()
+    {
+        $deleted = [];
+        $this->mockPrune($this->existingWebhooksResponse($this->staleWebhooks()), $deleted);
+
+        $this->artisan('shopify:webhooks:register', ['--prune' => true, '--force' => true])
+            ->expectsOutputToContain('Another site (old-site.test)')
+            ->expectsOutputToContain('Topic no longer used')
+            ->expectsOutputToContain('Duplicate')
+            ->expectsOutputToContain('Deleted 3 webhook subscription(s).')
+            ->assertSuccessful();
+
+        $this->assertEqualsCanonicalizing([
+            'gid://shopify/WebhookSubscription/old-domain',
+            'gid://shopify/WebhookSubscription/removed-topic',
+            'gid://shopify/WebhookSubscription/duplicate',
+        ], $deleted);
+    }
+
+    #[Test]
+    public function asks_before_pruning_and_deletes_nothing_when_declined()
+    {
+        $deleted = [];
+        $this->mockPrune($this->existingWebhooksResponse($this->staleWebhooks()), $deleted);
+
+        $this->artisan('shopify:webhooks:register', ['--prune' => true])
+            ->expectsOutputToContain('it will stop receiving webhooks')
+            ->expectsConfirmation('Delete these 3 webhook subscription(s)?', 'no')
+            ->expectsOutput('Nothing was deleted.')
+            ->assertSuccessful();
+
+        $this->assertSame([], $deleted);
+    }
+
+    #[Test]
+    public function reports_when_there_is_nothing_to_prune()
+    {
+        $deleted = [];
+        $this->mockPrune($this->existingWebhooksResponse(), $deleted);
+
+        $this->artisan('shopify:webhooks:register', ['--prune' => true])
+            ->expectsOutput('No webhook subscriptions to prune.')
+            ->assertSuccessful();
+
+        $this->assertSame([], $deleted);
+    }
+
     #[Test]
     public function registers_all_webhooks_when_none_exist()
     {

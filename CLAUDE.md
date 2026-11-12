@@ -29,6 +29,7 @@ php artisan shopify:import:single        # Import a single product
 php artisan shopify:import:collections   # Import all collections
 php artisan shopify:webhooks:register    # Register all webhook subscriptions in Shopify
 php artisan shopify:webhooks:register --store=uk  # Register for a specific store (multi-store)
+php artisan shopify:webhooks:register --prune     # Also remove stale subscriptions to the addon's webhook URLs (asks first; --force skips)
 ```
 
 ## Architecture
